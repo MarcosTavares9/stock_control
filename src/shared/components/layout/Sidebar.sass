@@ -1,0 +1,194 @@
+@use '../../styles/variables' as *
+@use '../../styles/mixins' as *
+
+.sidebar
+  position: fixed
+  top: 0
+  left: 0
+  height: 100vh
+  width: $sidebar-width-collapsed
+  background-color: $white
+  border-right: 1px solid $gray-200
+  transition: width $transition-slow
+  z-index: 20
+  display: flex
+  flex-direction: column
+  overflow: hidden
+  box-shadow: $shadow-sm
+
+  &--expanded
+    width: $sidebar-width-expanded
+
+  &__header
+    height: $header-height
+    display: flex
+    align-items: center
+    justify-content: center
+    padding: 0 $spacing-md
+    border-bottom: 1px solid $gray-200
+    flex-shrink: 0
+    background-color: $white
+
+  &__logo-container
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+
+  &__logo-img
+    height: auto
+    width: 100%
+    max-width: 200px
+    object-fit: contain
+
+    &--collapsed
+      height: 48px
+      width: auto
+      max-width: none
+
+  &__logo
+    @include text-lg
+    font-weight: $font-weight-semibold
+    margin: 0
+    color: $primary-900
+    white-space: nowrap
+    letter-spacing: -0.02em
+
+  &__symbol
+    @include text-xl
+    font-weight: $font-weight-bold
+    color: $primary-500
+    letter-spacing: -0.02em
+
+  &__nav
+    flex: 1
+    overflow-y: auto
+    overflow-x: hidden
+    padding: $spacing-sm
+    display: flex
+    flex-direction: column
+    gap: $spacing-xs
+
+    // Scrollbar styling
+    &::-webkit-scrollbar
+      width: 4px
+
+    &::-webkit-scrollbar-track
+      background: transparent
+
+    &::-webkit-scrollbar-thumb
+      background: $primary-300
+      border-radius: $radius-full
+
+      &:hover
+        background: $primary-400
+
+  &__menu-group
+    position: relative
+
+  &__menu-item
+    display: flex
+    align-items: center
+    height: 44px
+    padding: 0 $spacing-md
+    border-radius: $radius-lg
+    cursor: pointer
+    transition: all $transition-base
+    color: $primary-700
+    gap: $spacing-md
+    font-family: $font-family
+    @include text-sm
+    font-weight: $font-weight-medium
+    position: relative
+
+    &:hover
+      background-color: $primary-100
+      color: $primary-700
+
+    &--active
+      background-color: $primary-100
+      color: $primary-600
+      font-weight: $font-weight-semibold
+
+      &::before
+        content: ''
+        position: absolute
+        left: 0
+        top: 50%
+        transform: translateY(-50%)
+        width: 4px
+        height: 32px
+        background-color: $white
+        border-radius: 0 $radius-sm $radius-sm 0
+
+  &__menu-icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 20px
+    height: 20px
+    flex-shrink: 0
+    font-size: 20px
+    line-height: 1
+
+  &__menu-label
+    flex: 1
+    @include text-sm
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
+
+  &__menu-chevron
+    @include text-sm
+    font-weight: $font-weight-bold
+    transition: transform $transition-base
+    color: $primary-500
+    flex-shrink: 0
+
+    &--open
+      transform: rotate(90deg)
+      color: $primary-600
+
+  &__submenu
+    margin-left: $spacing-md
+    margin-top: $spacing-xs
+    padding-left: $spacing-md
+    border-left: 2px solid $gray-200
+    display: flex
+    flex-direction: column
+    gap: $spacing-xs
+
+  &__submenu-item
+    display: flex
+    align-items: center
+    height: 40px
+    padding: 0 $spacing-md
+    border-radius: $radius-md
+    cursor: pointer
+    transition: all $transition-base
+    color: $primary-600
+    gap: $spacing-sm
+    @include text-sm
+    font-weight: $font-weight-normal
+
+    &:hover
+      background-color: $primary-100
+      color: $primary-800
+
+    &--active
+      background-color: $primary-100
+      color: $primary-600
+      font-weight: $font-weight-medium
+
+  &__submenu-icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 18px
+    height: 18px
+    flex-shrink: 0
+    font-size: 18px
+    line-height: 1
+
+  &__submenu-label
+    @include text-sm
+    white-space: nowrap

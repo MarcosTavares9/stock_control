@@ -1,0 +1,16 @@
+@use '../../styles/variables' as *
+
+.layout
+  min-height: 100vh
+  background-color: $primary-50
+
+  &__main
+    margin-left: $sidebar-width-collapsed
+    margin-top: $header-height
+    padding: 0
+    min-height: calc(100vh - #{$header-height})
+    transition: margin-left $transition-slow
+
+    &--sidebar-expanded
+      margin-left: $sidebar-width-expanded
+

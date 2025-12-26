@@ -1,0 +1,84 @@
+@use './variables' as *
+
+// Typography Mixins
+@mixin text-xs
+  font-size: $font-size-xs
+  line-height: $line-height-normal
+  font-weight: $font-weight-normal
+
+@mixin text-sm
+  font-size: $font-size-sm
+  line-height: $line-height-normal
+  font-weight: $font-weight-normal
+
+@mixin text-base
+  font-size: $font-size-base
+  line-height: $line-height-normal
+  font-weight: $font-weight-normal
+
+@mixin text-lg
+  font-size: $font-size-lg
+  line-height: $line-height-normal
+  font-weight: $font-weight-normal
+
+@mixin text-xl
+  font-size: $font-size-xl
+  line-height: $line-height-tight
+  font-weight: $font-weight-semibold
+
+@mixin text-2xl
+  font-size: $font-size-2xl
+  line-height: $line-height-tight
+  font-weight: $font-weight-semibold
+
+@mixin text-3xl
+  font-size: $font-size-3xl
+  line-height: $line-height-tight
+  font-weight: $font-weight-bold
+
+// Button Mixins
+@mixin button-base
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  border-radius: $radius-md
+  font-family: $font-family
+  font-weight: $font-weight-medium
+  transition: all $transition-base
+  cursor: pointer
+  border: none
+  outline: none
+
+@mixin button-primary
+  @include button-base
+  background-color: $primary-500
+  color: $white
+  
+  &:hover
+    background-color: $primary-600
+  
+  &:active
+    background-color: $primary-700
+
+@mixin button-secondary
+  @include button-base
+  background-color: $gray-100
+  color: $gray-700
+  
+  &:hover
+    background-color: $gray-200
+  
+  &:active
+    background-color: $gray-300
+
+// Card Mixins
+@mixin card
+  background-color: $white
+  border-radius: $radius-lg
+  box-shadow: $shadow-sm
+  padding: $spacing-lg
+
+@mixin card-elevated
+  @include card
+  box-shadow: $shadow-md
+

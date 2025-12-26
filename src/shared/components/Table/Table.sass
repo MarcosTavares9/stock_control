@@ -1,0 +1,101 @@
+@use '../../styles/variables' as *
+@use '../../styles/mixins' as *
+
+.table-container
+  background-color: $white
+  border-radius: $radius-md
+  border: 1px solid $gray-400
+  overflow: hidden
+
+.table-wrapper
+  overflow-x: auto
+
+.table
+  width: 100%
+  border-collapse: separate
+  border-spacing: 0
+
+.table-header
+  @include text-sm
+  font-weight: $font-weight-semibold
+  color: $gray-800
+  text-align: left
+  padding: $spacing-md $spacing-lg
+  background-color: $white
+  border-bottom: 1px solid $gray-400
+  white-space: nowrap
+
+  &--left
+    text-align: left
+
+  &--center
+    text-align: center
+
+  &--right
+    text-align: right
+
+.table-row
+  border-bottom: 1px solid $gray-400
+  transition: background-color $transition-base
+
+  &--odd
+    background-color: $secondary-50
+
+  &--even
+    background-color: $white
+
+  &:hover
+    background-color: $secondary-100
+
+  &:last-child
+    border-bottom: none
+
+.table-cell
+  @include text-sm
+  color: $gray-700
+  padding: $spacing-md $spacing-lg
+  text-align: left
+
+  &--left
+    text-align: left
+
+  &--center
+    text-align: center
+
+  &--right
+    text-align: right
+
+.table-empty
+  text-align: center
+  padding: $spacing-2xl
+  color: $gray-500
+  @include text-sm
+
+.table-actions
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: $spacing-sm
+
+// Status badges
+.table-status
+  display: inline-flex
+  align-items: center
+  padding: $spacing-xs $spacing-sm
+  border-radius: $radius-full
+  @include text-xs
+  font-weight: $font-weight-medium
+  white-space: nowrap
+
+  &--ok
+    background-color: rgba(16, 185, 129, 0.1)
+    color: #059669
+
+  &--baixo
+    background-color: rgba(245, 158, 11, 0.1)
+    color: #D97706
+
+  &--vazio
+    background-color: rgba(239, 68, 68, 0.1)
+    color: #DC2626
+

@@ -1,0 +1,14 @@
+# Shared Components
+
+Esta pasta contém APENAS componentes genéricos e reutilizáveis,
+sem qualquer regra de negócio ou conhecimento de domínio.
+
+Exemplos permitidos:
+- Button
+- Modal
+- DataTable (apenas visual)
+- Input
+- Loader
+- Hooks genéricos (useDebounce)
+- Utils (formatDate, maskCPF)
+

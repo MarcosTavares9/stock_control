@@ -9,7 +9,7 @@
   line-height: 1.5;
   font-weight: 400;
   color: #1F2937;
-  background-color: #F9FAFB;
+  background-color: #EFF6FF;
   
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,6 +21,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background-color: #EFF6FF;
 }
 
 h1, h2, h3, h4, h5, h6 {

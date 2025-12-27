@@ -47,6 +47,12 @@
   &:hover
     background-color: $secondary-100
 
+  &--selected
+    background-color: $primary-50 !important
+
+    &:hover
+      background-color: $primary-100 !important
+
   &:last-child
     border-bottom: none
 
@@ -64,6 +70,11 @@
 
   &--right
     text-align: right
+
+  // Células com imagens devem ter largura fixa
+  &.table-cell--image
+    width: 100px
+    padding: $spacing-sm $spacing-md
 
 .table-empty
   text-align: center
@@ -98,4 +109,12 @@
   &--vazio
     background-color: rgba(239, 68, 68, 0.1)
     color: #DC2626
+
+// Checkbox styles
+.table-checkbox
+  width: 18px
+  height: 18px
+  cursor: pointer
+  accent-color: $primary-500
+  border-radius: $radius-sm
 

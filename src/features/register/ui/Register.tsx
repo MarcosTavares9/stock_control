@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { FaLock, FaEnvelope, FaUser, FaPhone } from 'react-icons/fa'
+import { RegisterFormData, RegisterErrors, validateRegisterForm, formatPhone, formatRegisterRequest } from '../domain'
+import { registerUser } from '../infra'
 import './Register.sass'
 
 interface RegisterProps {
@@ -7,7 +9,7 @@ interface RegisterProps {
 }
 
 function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegisterFormData>({
     name: '',
     lastName: '',
     email: '',
@@ -16,7 +18,7 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
     confirmPassword: '',
     termsAccepted: false
   })
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [errors, setErrors] = useState<RegisterErrors>({})
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,73 +28,12 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
       [name]: type === 'checkbox' ? checked : value
     }))
     // Limpar erro do campo quando o usuário começar a digitar
-    if (errors[name]) {
+    if (errors[name as keyof RegisterErrors]) {
       setErrors(prev => {
         const newErrors = { ...prev }
-        delete newErrors[name]
+        delete newErrors[name as keyof RegisterErrors]
         return newErrors
       })
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.name.trim()) {
-      newErrors.name = 'Nome é obrigatório'
-    } else if (formData.name.trim().length < 3) {
-      newErrors.name = 'Nome deve ter pelo menos 3 caracteres'
-    }
-
-    if (!formData.lastName.trim()) {
-      newErrors.lastName = 'Sobrenome é obrigatório'
-    } else if (formData.lastName.trim().length < 3) {
-      newErrors.lastName = 'Sobrenome deve ter pelo menos 3 caracteres'
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email é obrigatório'
-    } else if (!/^\S+@\S+$/.test(formData.email)) {
-      newErrors.email = 'Email inválido'
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Telefone é obrigatório'
-    } else {
-      const phoneDigits = formData.phone.replace(/\D/g, '')
-      if (phoneDigits.length !== 11) {
-        newErrors.phone = 'Telefone inválido'
-      }
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Senha é obrigatória'
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Senha deve ter pelo menos 6 caracteres'
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = 'Confirmação de senha é obrigatória'
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'As senhas não coincidem'
-    }
-
-    if (!formData.termsAccepted) {
-      newErrors.termsAccepted = 'Você precisa aceitar os termos de uso'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const formatPhone = (value: string) => {
-    const digits = value.replace(/\D/g, '')
-    if (digits.length <= 2) {
-      return digits ? `(${digits}` : ''
-    } else if (digits.length <= 7) {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2)}`
-    } else {
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`
     }
   }
 
@@ -111,23 +52,16 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!validateForm()) {
+    const validationErrors = validateRegisterForm(formData)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
       return
     }
 
     setLoading(true)
     try {
-      // Simulação de chamada à API
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      
-      // Em produção, aqui seria a chamada real à API
-      console.log('Dados do cadastro:', {
-        name: formData.name,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone.replace(/\D/g, ''),
-        password: formData.password
-      })
+      const registerData = formatRegisterRequest(formData)
+      await registerUser(registerData)
 
       // Redirecionar para página de confirmação (em produção, seria enviado por email)
       // Por enquanto, apenas redireciona para login com mensagem

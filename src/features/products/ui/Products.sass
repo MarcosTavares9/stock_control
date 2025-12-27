@@ -2,8 +2,66 @@
 @use '../../../shared/styles/mixins' as *
 
 .products
-  padding: 0
+  padding: $spacing-xl
   margin: 0
+  min-height: 100%
+  background-color: transparent
+
+  &__header
+    display: flex
+    align-items: flex-start
+    gap: $spacing-xl
+    margin-bottom: $spacing-2xl
+
+  &__create-button
+    display: inline-flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-md $spacing-xl
+    background-color: $primary-500
+    color: $white
+    border: none
+    border-radius: $radius-lg
+    @include text-base
+    font-weight: $font-weight-semibold
+    cursor: pointer
+    transition: all $transition-base
+    box-shadow: $shadow-sm
+    white-space: nowrap
+    flex-shrink: 0
+
+    &:hover
+      background-color: $primary-600
+      box-shadow: $shadow-md
+      transform: translateY(-1px)
+
+    &:active
+      transform: translateY(0)
+      box-shadow: $shadow-sm
+
+  &__header-content
+    flex: 1
+
+  &__header-actions
+    display: flex
+    align-items: center
+    gap: $spacing-md
+    flex-shrink: 0
+
+  &__title
+    @include text-3xl
+    font-weight: $font-weight-bold
+    color: $black
+    margin: 0
+    margin-bottom: $spacing-sm
+    text-align: left
+
+  &__description
+    @include text-base
+    color: $gray-600
+    line-height: $line-height-relaxed
+    margin: 0
+    text-align: left
 
   &__filters
     background-color: $white
@@ -94,6 +152,29 @@
       box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
       outline: none
 
+  &__edit-button
+    display: inline-flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-md $spacing-xl
+    background-color: $primary-500
+    color: $white
+    border: none
+    border-radius: $radius-lg
+    @include text-base
+    font-weight: $font-weight-semibold
+    cursor: pointer
+    transition: all $transition-base
+    box-shadow: $shadow-sm
+
+    &:hover
+      background-color: $primary-600
+      box-shadow: $shadow-md
+
+    &:active
+      transform: scale(0.98)
+      box-shadow: $shadow-sm
+
 .table-action-button
   display: inline-flex
   align-items: center
@@ -124,3 +205,44 @@
 
     &:active
       background-color: rgba(239, 68, 68, 0.2)
+
+// Product image styles
+.product-image
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 100%
+  height: 100%
+
+  &__img
+    width: 60px
+    height: 60px
+    object-fit: cover
+    border-radius: $radius-md
+    border: 1px solid $gray-300
+    background-color: $gray-100
+    transition: transform $transition-base, box-shadow $transition-base
+
+    &:hover
+      transform: scale(1.05)
+      box-shadow: $shadow-md
+      border-color: $primary-300
+
+  &__icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 60px
+    height: 60px
+    border-radius: $radius-md
+    border: 1px solid $gray-300
+    background-color: $gray-50
+    color: $primary-600
+    transition: all $transition-base
+
+    &:hover
+      transform: scale(1.05)
+      box-shadow: $shadow-md
+      border-color: $primary-300
+      background-color: $primary-50
+      color: $primary-700

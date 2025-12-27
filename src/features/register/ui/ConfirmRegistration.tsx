@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
+import { confirmRegistration } from '../infra'
 import './ConfirmRegistration.sass'
 
 interface ConfirmRegistrationProps {
@@ -15,7 +16,7 @@ function ConfirmRegistration({ token }: ConfirmRegistrationProps) {
     const controller = new AbortController()
     const signal = controller.signal
 
-    const confirmRegistration = async () => {
+    const handleConfirmRegistration = async () => {
       if (!token) {
         setError('Token de confirmação inválido ou ausente.')
         setIsLoading(false)
@@ -27,13 +28,8 @@ function ConfirmRegistration({ token }: ConfirmRegistrationProps) {
       setSuccess(false)
 
       try {
-        // Simular delay da API
-        await new Promise(resolve => setTimeout(resolve, 2000))
-
-        // Simulação de chamada à API
-        // Em produção, seria: await api.get(`/confirm-registration/${token}`, { signal })
+        await confirmRegistration(token, signal)
         
-        // Mock de sucesso
         if (!signal.aborted) {
           setSuccess(true)
         }
@@ -43,7 +39,7 @@ function ConfirmRegistration({ token }: ConfirmRegistrationProps) {
         }
         console.error('Erro ao confirmar registro:', err)
         if (!signal.aborted) {
-          setError(err.response?.data?.message || 'Ocorreu um erro ao confirmar seu registro. O link pode ter expirado ou ser inválido.')
+          setError(err.message || 'Ocorreu um erro ao confirmar seu registro. O link pode ter expirado ou ser inválido.')
           setSuccess(false)
         }
       } finally {
@@ -53,7 +49,7 @@ function ConfirmRegistration({ token }: ConfirmRegistrationProps) {
       }
     }
 
-    confirmRegistration()
+    handleConfirmRegistration()
 
     return () => {
       controller.abort()
@@ -111,5 +107,6 @@ function ConfirmRegistration({ token }: ConfirmRegistrationProps) {
 }
 
 export default ConfirmRegistration
+
 
 

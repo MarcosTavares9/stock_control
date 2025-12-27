@@ -95,9 +95,6 @@ function Login({ onNavigate }: LoginProps = {}) {
           </form>
 
           <div className="login-footer">
-            <p className="login-hint">
-              Use: <strong>admin@teste.com.br</strong> / <strong>senha123</strong>
-            </p>
             <p className="login-register">
               Não tem uma conta?{' '}
               <button 

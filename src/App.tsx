@@ -46,7 +46,9 @@ function App() {
       case '/register':
         return <Register />
       case '/settings':
-        return <Settings />
+      case '/settings/profile':
+      case '/settings/users':
+        return <Settings currentPath={currentPath} onNavigate={handleNavigate} />
       case '/categories':
         return <Categories />
       default:
@@ -55,8 +57,33 @@ function App() {
   }
 
   const getPageTitle = () => {
+    // Verifica se é uma sub-rota de settings
+    if (currentPath.startsWith('/settings')) {
+      if (currentPath === '/settings/users') {
+        return 'Usuários'
+      }
+      if (currentPath === '/settings/profile') {
+        return 'Meu Perfil'
+      }
+      return 'Configurações'
+    }
+    
     const currentItem = menuItems.find(item => item.path === currentPath)
-    return currentItem?.label || 'Dashboard Control'
+    if (currentItem) {
+      return currentItem.label
+    }
+    
+    // Verifica se é um submenu
+    for (const item of menuItems) {
+      if (item.children) {
+        const child = item.children.find(child => child.path === currentPath)
+        if (child) {
+          return child.label
+        }
+      }
+    }
+    
+    return 'Dashboard Control'
   }
 
   // Mostrar loading enquanto verifica autenticação

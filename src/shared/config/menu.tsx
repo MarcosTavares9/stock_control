@@ -5,7 +5,9 @@ import {
   FaHistory, 
   FaFileAlt, 
   FaCog,
-  FaTags
+  FaTags,
+  FaUser,
+  FaUsers
 } from 'react-icons/fa'
 
 export const menuItems: MenuItem[] = [
@@ -37,7 +39,19 @@ export const menuItems: MenuItem[] = [
   {
     path: '/settings',
     label: 'Configurações',
-    icon: <FaCog size={20} />
+    icon: <FaCog size={20} />,
+    children: [
+      {
+        path: '/settings/profile',
+        label: 'Meu Perfil',
+        icon: <FaUser size={18} />
+      },
+      {
+        path: '/settings/users',
+        label: 'Usuários',
+        icon: <FaUsers size={18} />
+      }
+    ]
   }
 ]
 

@@ -1,0 +1,89 @@
+@use '../../../shared/styles/variables' as *
+@use '../../../shared/styles/mixins' as *
+
+.meu-perfil
+  padding: 2rem
+
+  &__header
+    margin-bottom: 2rem
+
+  &__subtitle
+    margin: 0.5rem 0 0 0
+    color: $gray-600
+    @include text-sm
+
+  &__loading
+    display: flex
+    justify-content: center
+    align-items: center
+    padding: 4rem 2rem
+    color: $gray-600
+    @include text-sm
+
+  &__content
+    max-width: 600px
+
+  &__form
+    display: flex
+    flex-direction: column
+    gap: $spacing-lg
+
+  &__form-group
+    display: flex
+    flex-direction: column
+    gap: $spacing-xs
+
+  &__label
+    @include text-sm
+    font-weight: $font-weight-medium
+    color: $gray-700
+
+  &__input
+    padding: $spacing-md
+    border: 1px solid $gray-300
+    border-radius: $radius-md
+    @include text-sm
+    font-family: $font-family
+    transition: all $transition-base
+
+    &:focus
+      outline: none
+      border-color: $primary-500
+      box-shadow: 0 0 0 3px rgba($primary-500, 0.1)
+
+    &::placeholder
+      color: $gray-400
+
+  &__actions
+    display: flex
+    gap: $spacing-md
+    margin-top: $spacing-md
+
+  &__button
+    padding: $spacing-md $spacing-lg
+    border: none
+    border-radius: $radius-md
+    @include text-sm
+    font-weight: $font-weight-medium
+    font-family: $font-family
+    cursor: pointer
+    transition: all $transition-base
+
+    &:disabled
+      opacity: 0.5
+      cursor: not-allowed
+
+    &--primary
+      background-color: $primary-600
+      color: $white
+
+      &:hover:not(:disabled)
+        background-color: $primary-700
+
+    &--secondary
+      background-color: $gray-200
+      color: $gray-700
+
+      &:hover:not(:disabled)
+        background-color: $gray-300
+

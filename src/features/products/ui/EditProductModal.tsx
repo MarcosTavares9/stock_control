@@ -103,18 +103,6 @@ export function EditProductModal({
     onPrevious(updatedProduct)
   }
 
-  const handleSave = () => {
-    const updatedProduct = {
-      ...editedProduct,
-      quantidade: quantidadeInput === '' ? 0 : parseInt(quantidadeInput) || 0,
-      estoqueMinimo: estoqueMinimoInput === '' ? 0 : parseInt(estoqueMinimoInput) || 0
-    }
-    
-    const updatedProducts = [...products]
-    updatedProducts[currentIndex] = updatedProduct
-    onSave(updatedProducts)
-  }
-
   const handleDelete = () => {
     if (editedProduct && window.confirm(`Tem certeza que deseja deletar o produto "${editedProduct.nome}"?`)) {
       onDelete(editedProduct.id)

@@ -6,7 +6,7 @@ interface RegisterProps {
   onNavigate?: (path: string) => void
 }
 
-function Register({ onNavigate }: RegisterProps = {}) {
+function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
   const [formData, setFormData] = useState({
     name: '',
     lastName: '',

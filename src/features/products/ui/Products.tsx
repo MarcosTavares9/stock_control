@@ -13,19 +13,6 @@ interface Product {
   status: 'ok' | 'baixo' | 'vazio'
 }
 
-const categorias = [
-  'Eletrônicos',
-  'Periféricos',
-  'Áudio',
-  'Armazenamento',
-  'Componentes',
-  'Móveis',
-  'Escritório',
-  'Limpeza',
-  'Alimentação',
-  'Vestuário'
-]
-
 const produtosBase = [
   { nome: 'Notebook Dell Inspiron', categoria: 'Eletrônicos' },
   { nome: 'Mouse Logitech', categoria: 'Periféricos' },
@@ -183,7 +170,7 @@ function Products() {
     }
   ]
 
-  const renderActions = (item: Product) => (
+  const renderActions = (_item: Product) => (
     <>
       <button className="table-action-button table-action-button--edit" title="Editar">
         <FaEdit size={16} />

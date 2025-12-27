@@ -12,6 +12,7 @@ import Register from './features/register/ui/Register'
 import ConfirmRegistration from './features/register/ui/ConfirmRegistration'
 import Settings from './features/settings/ui/Settings'
 import Categories from './features/categories/ui/Categories'
+import Localizacao from './features/location/ui/Localizacao'
 
 function App() {
   const { isAuthenticated, loading } = useAuth()
@@ -51,6 +52,8 @@ function App() {
         return <Settings currentPath={currentPath} onNavigate={handleNavigate} />
       case '/categories':
         return <Categories />
+      case '/location':
+        return <Localizacao />
       default:
         return <Dashboard />
     }

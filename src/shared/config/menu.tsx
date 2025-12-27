@@ -7,7 +7,8 @@ import {
   FaCog,
   FaTags,
   FaUser,
-  FaUsers
+  FaUsers,
+  FaMapMarkerAlt
 } from 'react-icons/fa'
 
 export const menuItems: MenuItem[] = [
@@ -25,6 +26,11 @@ export const menuItems: MenuItem[] = [
     path: '/categories',
     label: 'Categorias',
     icon: <FaTags size={20} />
+  },
+  {
+    path: '/location',
+    label: 'Localização',
+    icon: <FaMapMarkerAlt size={20} />
   },
   {
     path: '/history',

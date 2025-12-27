@@ -170,7 +170,7 @@ const formatarData = (data: Date): string => {
 }
 
 function History() {
-  const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>(gerarHistoricoMock())
+  const [historyEntries] = useState<HistoryEntry[]>(gerarHistoricoMock())
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTipo, setSelectedTipo] = useState<string>('')
   const [selectedCategoria, setSelectedCategoria] = useState<string>('')

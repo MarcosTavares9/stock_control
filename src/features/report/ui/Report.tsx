@@ -105,14 +105,6 @@ const gerarHistoricoMock = (): HistoryEntry[] => {
   return historico
 }
 
-const formatarData = (data: Date): string => {
-  return new Intl.DateTimeFormat('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  }).format(data)
-}
-
 const formatarDataHora = (data: Date): string => {
   return new Intl.DateTimeFormat('pt-BR', {
     day: '2-digit',
@@ -437,8 +429,8 @@ function Report() {
         produtosData.push([
           produto.nome,
           produto.categoria,
-          produto.quantidade,
-          produto.estoqueMinimo,
+          produto.quantidade.toString(),
+          produto.estoqueMinimo.toString(),
           statusLabels[produto.status]
         ])
       })
@@ -452,10 +444,10 @@ function Report() {
       estatisticasPorCategoria.forEach(estat => {
         categoriaData.push([
           estat.categoria,
-          estat.totalProdutos,
-          estat.totalEstoque,
-          estat.estoqueMedio,
-          estat.produtosBaixo
+          estat.totalProdutos.toString(),
+          estat.totalEstoque.toString(),
+          estat.estoqueMedio.toString(),
+          estat.produtosBaixo.toString()
         ])
       })
       const categoriaSheet = XLSX.utils.aoa_to_sheet(categoriaData)
@@ -573,7 +565,7 @@ function Report() {
       yPos = addText('ESTATÍSTICAS POR CATEGORIA', margin, yPos, { fontSize: 12, isBold: true })
       yPos += 5
       
-      estatisticasPorCategoria.forEach((estat, index) => {
+      estatisticasPorCategoria.forEach((estat) => {
         if (yPos > 270) {
           doc.addPage()
           yPos = 20

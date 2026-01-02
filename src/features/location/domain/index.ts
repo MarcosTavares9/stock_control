@@ -18,3 +18,7 @@ export interface UpdateLocalizacaoRequest {
   ativo?: boolean
 }
 
+
+
+
+

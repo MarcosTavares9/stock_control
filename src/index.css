@@ -4,6 +4,24 @@
   box-sizing: border-box;
 }
 
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  position: relative;
+}
+
+#root {
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
 :root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.5;
@@ -19,9 +37,19 @@
 
 body {
   margin: 0;
+  padding: 0;
   min-width: 320px;
   min-height: 100vh;
   background-color: #EFF6FF;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -33,5 +61,28 @@ h1, h2, h3, h4, h5, h6 {
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+/* Fixes para mobile - garantir responsividade */
+@media (max-width: 767px) {
+  * {
+    max-width: 100vw;
+  }
+  
+  body, html, #root {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Garantir que containers mobile sejam responsivos */
+  .layout-mobile,
+  .layout-mobile__main,
+  .header-mobile,
+  .header-mobile__content {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
 }
 

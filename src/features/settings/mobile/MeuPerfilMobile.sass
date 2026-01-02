@@ -1,0 +1,168 @@
+@use '../../../shared/styles/variables' as *
+@use '../../../shared/styles/mixins' as *
+
+.meu-perfil-mobile
+  display: flex
+  flex-direction: column
+  gap: $spacing-lg
+
+  &__loading
+    text-align: center
+    padding: $spacing-2xl
+    @include text-base
+    color: $gray-600
+
+  &__photo-section
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: $spacing-md
+    padding: $spacing-lg
+    background: $gray-50
+    border-radius: $radius-lg
+    position: relative
+
+  &__upload-overlay
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background: rgba($white, 0.9)
+    display: flex
+    align-items: center
+    justify-content: center
+    border-radius: $radius-lg
+    z-index: 1
+
+  &__spinner
+    width: 40px
+    height: 40px
+    border: 3px solid $gray-200
+    border-top-color: $primary-500
+    border-radius: 50%
+    animation: spin 1s linear infinite
+
+@keyframes spin
+  to
+    transform: rotate(360deg)
+
+.meu-perfil-mobile
+  &__photo-wrapper
+    width: 120px
+    height: 120px
+    border-radius: $radius-full
+    overflow: hidden
+    border: 4px solid $white
+    box-shadow: $shadow-md
+
+  &__photo
+    width: 100%
+    height: 100%
+    object-fit: cover
+
+  &__photo-placeholder
+    width: 100%
+    height: 100%
+    background: $primary-500
+    color: $white
+    display: flex
+    align-items: center
+    justify-content: center
+    @include text-3xl
+    font-weight: $font-weight-bold
+
+  &__photo-actions
+    display: flex
+    gap: $spacing-sm
+
+  &__file-input
+    display: none
+
+  &__photo-button
+    @include button-base
+    padding: $spacing-sm $spacing-md
+    @include text-xs
+    display: flex
+    align-items: center
+    gap: $spacing-xs
+    background: $white
+    color: $gray-700
+    border: 1px solid $gray-300
+
+    &:hover
+      background: $gray-50
+
+    &--delete
+      color: $error
+      border-color: rgba($error, 0.3)
+
+      &:hover
+        background: rgba($error, 0.1)
+
+  &__form
+    display: flex
+    flex-direction: column
+    gap: $spacing-md
+
+  &__form-group
+    display: flex
+    flex-direction: column
+    gap: $spacing-xs
+
+  &__label
+    @include text-sm
+    color: $gray-700
+    font-weight: $font-weight-medium
+
+  &__input-wrapper
+    position: relative
+    display: flex
+    align-items: center
+
+  &__input-icon
+    position: absolute
+    left: $spacing-md
+    color: $gray-400
+    z-index: 1
+
+  &__input
+    width: 100%
+    padding: $spacing-md $spacing-md $spacing-md 44px
+    border: 1px solid $gray-300
+    border-radius: $radius-md
+    @include text-base
+    font-family: $font-family
+    transition: all $transition-base
+
+    &:focus
+      outline: none
+      border-color: $primary-500
+      box-shadow: 0 0 0 3px rgba($primary-500, 0.1)
+
+    &:read-only
+      background: $gray-50
+      cursor: not-allowed
+
+  &__actions
+    display: flex
+    flex-direction: column
+    gap: $spacing-sm
+    margin-top: $spacing-md
+
+  &__button
+    @include button-base
+    width: 100%
+    padding: $spacing-md
+    @include text-base
+
+    &--primary
+      @include button-primary
+
+    &--secondary
+      @include button-secondary
+
+    &:disabled
+      opacity: 0.5
+      cursor: not-allowed
+

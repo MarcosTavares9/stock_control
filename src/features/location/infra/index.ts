@@ -172,3 +172,7 @@ export async function deleteLocalizacao(id: string): Promise<void> {
   localStorage.setItem('localizacoes_list', JSON.stringify(filtered))
 }
 
+
+
+
+

@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import { Layout } from './shared/components/layout'
+import { Layout, LayoutMobile } from './shared/components/layout'
 import { menuItems } from './shared/config/menu'
 import { useAuth } from './shared/contexts/AuthContext'
+import { useIsMobile } from './shared/utils/useIsMobile'
 import Dashboard from './features/dashboard/ui/Dashboard'
 import Products from './features/products/ui/Products'
+import ProductsMobile from './features/products/mobile/ProductsMobile'
 import History from './features/history/ui/History'
+import HistoryMobile from './features/history/mobile/HistoryMobile'
 import Report from './features/report/ui/Report'
+import ReportMobile from './features/report/mobile/ReportMobile'
 import Login from './features/login/ui/Login'
+import LoginMobile from './features/login/mobile/LoginMobile'
 import Register from './features/register/ui/Register'
 import ConfirmRegistration from './features/register/ui/ConfirmRegistration'
 import Settings from './features/settings/ui/Settings'
+import SettingsMobile from './features/settings/mobile/SettingsMobile'
 import Categories from './features/categories/ui/Categories'
+import CategoriesMobile from './features/categories/mobile/CategoriesMobile'
 import Localizacao from './features/location/ui/Localizacao'
+import LocalizacaoMobile from './features/location/mobile/LocalizacaoMobile'
 
 function App() {
   const { isAuthenticated, loading } = useAuth()
   const [currentPath, setCurrentPath] = useState('/dashboard')
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     // Se não estiver autenticado, redirecionar para login (exceto se já estiver em /register ou /confirm-registration)
@@ -33,6 +42,35 @@ function App() {
   }
 
   const renderPage = () => {
+    // Se for mobile, usar versões mobile das páginas
+    if (isMobile) {
+      switch (currentPath) {
+        case '/dashboard':
+          return <Dashboard />
+        case '/products':
+          return <ProductsMobile />
+        case '/history':
+          return <HistoryMobile />
+        case '/report':
+          return <ReportMobile />
+        case '/login':
+          return <LoginMobile onNavigate={handleNavigate} />
+        case '/register':
+          return <Register onNavigate={handleNavigate} />
+        case '/settings':
+        case '/settings/profile':
+        case '/settings/users':
+          return <SettingsMobile currentPath={currentPath} onNavigate={handleNavigate} />
+        case '/categories':
+          return <CategoriesMobile />
+        case '/location':
+          return <LocalizacaoMobile />
+        default:
+          return <Dashboard />
+      }
+    }
+    
+    // Versões desktop
     switch (currentPath) {
       case '/dashboard':
         return <Dashboard />
@@ -43,9 +81,9 @@ function App() {
       case '/report':
         return <Report />
       case '/login':
-        return <Login />
+        return <Login onNavigate={handleNavigate} />
       case '/register':
-        return <Register />
+        return <Register onNavigate={handleNavigate} />
       case '/settings':
       case '/settings/profile':
       case '/settings/users':
@@ -114,10 +152,27 @@ function App() {
       const token = urlParams.get('token') || undefined
       return <ConfirmRegistration token={token} />
     }
+    // Usar LoginMobile se for mobile, senão usar Login
+    if (isMobile) {
+      return <LoginMobile onNavigate={handleNavigate} />
+    }
     return <Login onNavigate={handleNavigate} />
   }
 
-  // Se estiver autenticado, mostrar o layout completo
+  // Se estiver autenticado, mostrar o layout completo (mobile ou desktop)
+  if (isMobile) {
+    return (
+      <LayoutMobile
+        menuItems={menuItems}
+        currentPath={currentPath}
+        headerTitle={getPageTitle()}
+        onNavigate={handleNavigate}
+      >
+        {renderPage()}
+      </LayoutMobile>
+    )
+  }
+
   return (
     <Layout
       menuItems={menuItems}

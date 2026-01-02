@@ -1,0 +1,294 @@
+@use '../../styles/variables' as *
+@use '../../styles/mixins' as *
+
+.sidebar-mobile
+  position: fixed
+  top: 0
+  left: 0
+  height: 100vh
+  width: 280px
+  max-width: 85vw
+  background-color: $white
+  z-index: 1000
+  display: flex
+  flex-direction: column
+  transform: translateX(-100%)
+  transition: transform $transition-slow
+  box-shadow: $shadow-xl
+
+  &--open
+    transform: translateX(0)
+
+  &--dark
+    background-color: $gray-900
+
+  &__overlay
+    position: fixed
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background-color: rgba($black, 0.5)
+    z-index: 999
+    backdrop-filter: blur(4px)
+
+  &__header
+    display: flex
+    justify-content: flex-end
+    padding: $spacing-md
+    border-bottom: 1px solid $gray-200
+
+    .sidebar-mobile--dark &
+      border-bottom-color: $gray-700
+
+  &__close-button
+    @include button-base
+    width: 36px
+    height: 36px
+    padding: 0
+    background: transparent
+    color: $gray-600
+    display: flex
+    align-items: center
+    justify-content: center
+    border-radius: $radius-md
+    transition: all $transition-base
+
+    .sidebar-mobile--dark &
+      color: $gray-300
+
+    &:hover
+      background: $gray-100
+      color: $gray-900
+
+      .sidebar-mobile--dark &
+        background: $gray-800
+        color: $white
+
+  &__profile
+    display: flex
+    align-items: center
+    gap: $spacing-md
+    padding: $spacing-lg $spacing-md
+    border-bottom: 1px solid $gray-200
+
+    .sidebar-mobile--dark &
+      border-bottom-color: $gray-700
+
+  &__profile-picture
+    width: 56px
+    height: 56px
+    border-radius: $radius-full
+    overflow: hidden
+    flex-shrink: 0
+    background: $primary-500
+    display: flex
+    align-items: center
+    justify-content: center
+
+    img
+      width: 100%
+      height: 100%
+      object-fit: cover
+
+  &__profile-initial
+    width: 100%
+    height: 100%
+    display: flex
+    align-items: center
+    justify-content: center
+    @include text-xl
+    font-weight: $font-weight-bold
+    color: $white
+
+  &__profile-info
+    flex: 1
+    min-width: 0
+
+  &__profile-greeting
+    @include text-sm
+    color: $gray-600
+    margin-bottom: $spacing-xs
+
+    .sidebar-mobile--dark &
+      color: $gray-400
+
+  &__profile-name
+    @include text-base
+    font-weight: $font-weight-semibold
+    color: $gray-900
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+    .sidebar-mobile--dark &
+      color: $white
+
+  &__theme-section
+    padding: $spacing-md
+    border-bottom: 1px solid $gray-200
+
+    .sidebar-mobile--dark &
+      border-bottom-color: $gray-700
+
+  &__theme-label
+    @include text-sm
+    color: $gray-600
+    margin-bottom: $spacing-sm
+
+    .sidebar-mobile--dark &
+      color: $gray-400
+
+  &__theme-switcher
+    display: flex
+    gap: $spacing-xs
+    background: $gray-100
+    padding: $spacing-xs
+    border-radius: $radius-md
+
+    .sidebar-mobile--dark &
+      background: $gray-800
+
+  &__theme-option
+    @include button-base
+    flex: 1
+    padding: $spacing-sm $spacing-md
+    @include text-sm
+    font-weight: $font-weight-medium
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: $spacing-xs
+    background: transparent
+    color: $gray-600
+    border-radius: $radius-sm
+    transition: all $transition-base
+
+    .sidebar-mobile--dark &
+      color: $gray-400
+
+    &--active
+      background: $white
+      color: $gray-900
+      box-shadow: $shadow-sm
+
+      .sidebar-mobile--dark &
+        background: $gray-700
+        color: $white
+
+    &:not(&--active):hover
+      background: rgba($white, 0.5)
+
+      .sidebar-mobile--dark &
+        background: rgba($gray-700, 0.5)
+
+  &__nav
+    flex: 1
+    overflow-y: auto
+    padding: $spacing-md
+    display: flex
+    flex-direction: column
+    gap: $spacing-xs
+
+    &::-webkit-scrollbar
+      width: 4px
+
+    &::-webkit-scrollbar-track
+      background: transparent
+
+    &::-webkit-scrollbar-thumb
+      background: $gray-300
+      border-radius: $radius-full
+
+      .sidebar-mobile--dark &
+        background: $gray-600
+
+      &:hover
+        background: $gray-400
+
+        .sidebar-mobile--dark &
+          background: $gray-500
+
+  &__menu-item
+    @include button-base
+    width: 100%
+    padding: $spacing-md
+    @include text-base
+    font-weight: $font-weight-medium
+    display: flex
+    align-items: center
+    gap: $spacing-md
+    background: transparent
+    color: $gray-700
+    border-radius: $radius-md
+    text-align: left
+    transition: all $transition-base
+
+    .sidebar-mobile--dark &
+      color: $gray-300
+
+    &:hover
+      background: $gray-100
+      color: $gray-900
+
+      .sidebar-mobile--dark &
+        background: $gray-800
+        color: $white
+
+    &--active
+      background: rgba($primary-500, 0.1)
+      color: $primary-600
+      font-weight: $font-weight-semibold
+
+      .sidebar-mobile--dark &
+        background: rgba($primary-500, 0.2)
+        color: $primary-400
+
+  &__menu-icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 20px
+    height: 20px
+    flex-shrink: 0
+
+  &__menu-label
+    flex: 1
+
+  &__footer
+    padding: $spacing-md
+    border-top: 1px solid $gray-200
+
+    .sidebar-mobile--dark &
+      border-top-color: $gray-700
+
+  &__logout-button
+    @include button-base
+    width: 100%
+    padding: $spacing-md
+    @include text-base
+    font-weight: $font-weight-medium
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: $spacing-sm
+    background: transparent
+    color: $gray-700
+    border-radius: $radius-md
+    transition: all $transition-base
+
+    .sidebar-mobile--dark &
+      color: $gray-300
+
+    &:hover
+      background: rgba($error, 0.1)
+      color: $error
+
+      .sidebar-mobile--dark &
+        background: rgba($error, 0.2)
+        color: $error
+
+// Estilos globais para tema escuro
+:root.dark-theme
+  // Variáveis de tema escuro podem ser adicionadas aqui se necessário
+

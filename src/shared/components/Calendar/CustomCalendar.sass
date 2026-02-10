@@ -1,0 +1,176 @@
+@use '../../styles/variables' as *
+
+.custom-calendar
+  width: 320px
+  padding: 16px
+  border-radius: $radius-lg
+  box-shadow: $shadow-lg
+  background: $white
+  display: flex
+  flex-direction: column
+  gap: 16px
+
+  .calendar-weekdays
+    display: grid
+    grid-template-columns: repeat(7, 1fr)
+    gap: 4px
+    padding-bottom: 8px
+    border-bottom: 1px solid $gray-300
+
+    .calendar-weekday
+      text-align: center
+      font-size: $font-size-xs
+      font-weight: $font-weight-semibold
+      text-transform: uppercase
+      color: $gray-600
+      padding: 8px 0
+
+  .calendar-header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    padding: 0 8px
+
+    .calendar-header-month,
+    .calendar-header-year
+      font-size: $font-size-base
+      font-weight: $font-weight-semibold
+      color: $gray-900
+      cursor: pointer
+      transition: color $transition-base
+      padding: 4px 8px
+      border-radius: $radius-sm
+
+      &:hover
+        color: $primary
+        background: $primary-50
+
+  .calendar-days
+    display: grid
+    grid-template-columns: repeat(7, 1fr)
+    gap: 4px
+
+    .calendar-day
+      width: 36px
+      height: 36px
+      display: flex
+      align-items: center
+      justify-content: center
+      border-radius: 50%
+      cursor: pointer
+      font-size: $font-size-sm
+      font-weight: $font-weight-medium
+      color: $gray-900
+      transition: all $transition-base
+      position: relative
+
+      &:hover:not(.empty)
+        background: $primary-100
+        color: $primary
+
+      &.empty
+        cursor: default
+        visibility: hidden
+
+      &.range
+        background: $primary-200
+        color: $primary-700
+        border-radius: 0
+
+      &.start
+        background: $primary
+        color: $white
+        border-top-left-radius: 18px
+        border-bottom-left-radius: 18px
+        border-top-right-radius: 0
+        border-bottom-right-radius: 0
+        font-weight: $font-weight-semibold
+
+      &.end
+        background: $primary
+        color: $white
+        border-top-right-radius: 18px
+        border-bottom-right-radius: 18px
+        border-top-left-radius: 0
+        border-bottom-left-radius: 0
+        font-weight: $font-weight-semibold
+
+      &.only,
+      &.start.end
+        background: $primary
+        color: $white
+        border-radius: 50%
+        font-weight: $font-weight-semibold
+
+  .month-picker,
+  .year-picker
+    display: grid
+    grid-template-columns: repeat(3, 1fr)
+    gap: 8px
+    padding: 8px 0
+
+    .month-option,
+    .year-option
+      text-align: center
+      padding: 8px
+      border-radius: $radius-md
+      cursor: pointer
+      font-size: $font-size-sm
+      font-weight: $font-weight-medium
+      color: $gray-700
+      background: $gray-100
+      transition: all $transition-base
+
+      &:hover
+        background: $primary-100
+        color: $primary
+
+      &.active
+        background: $primary
+        color: $white
+        font-weight: $font-weight-semibold
+
+  .calendar-footer
+    border-top: 1px solid $gray-300
+    padding-top: 16px
+
+    .calendar-footer-actions
+      display: flex
+      justify-content: space-between
+      gap: 16px
+
+      .footer-button
+        flex: 1
+        padding: 8px 16px
+        border: none
+        border-radius: $radius-md
+        font-size: $font-size-sm
+        font-weight: $font-weight-medium
+        cursor: pointer
+        transition: all $transition-base
+
+        &.cancel
+          background: $gray-100
+          color: $gray-700
+
+          &:hover
+            background: $gray-200
+
+        &.apply
+          background: $primary
+          color: $white
+
+          &:hover:not(.disabled)
+            background: $primary-600
+
+          &.disabled
+            background: $gray-300
+            color: $gray-500
+            cursor: not-allowed
+            opacity: 0.6
+
+@media (max-width: 600px)
+  .custom-calendar
+    width: calc(100% - 32px)
+    max-width: 360px
+

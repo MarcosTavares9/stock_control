@@ -1,10 +1,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { api } from '../utils/api'
+import { endpoints } from '../config/endpoints'
+import { getRoute } from '../config/base-path'
+import { STORAGE_KEYS } from '../config/app.config'
 
 interface User {
   id: string
   name: string
   email: string
   photo?: string
+  role?: string | null // Role do usuário (ex: '1', '6', '7', etc.)
+  roleId?: number | null // ID numérico do role
+  applicationId?: number | null // ID da aplicação atual
+  companyId?: string | null // ID da empresa (multi-tenant)
 }
 
 interface AuthContextType {
@@ -15,6 +23,10 @@ interface AuthContextType {
   logout: () => void
   updateUser: (userData: Partial<User>) => void
   loading: boolean
+  // Novos campos para controle de acesso
+  userRole: string | null
+  userApplicationId: number | null
+  userCompanyId: string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -25,18 +37,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Verificar se há token salvo no localStorage
-    const savedToken = localStorage.getItem('auth_token')
-    const savedUser = localStorage.getItem('auth_user')
+    const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH_USER) || sessionStorage.getItem(STORAGE_KEYS.AUTH_USER)
+    
+    const roleId = sessionStorage.getItem(STORAGE_KEYS.ROLE_ID)
+    const applicationId = sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID)
+    const companyId = sessionStorage.getItem(STORAGE_KEYS.COMPANY_ID)
 
     if (savedToken && savedUser) {
       try {
+        const userData = JSON.parse(savedUser)
         setToken(savedToken)
-        setUser(JSON.parse(savedUser))
+        setUser({
+          ...userData,
+          role: roleId || userData.role || null,
+          roleId: roleId ? Number(roleId) : userData.roleId || null,
+          applicationId: applicationId ? Number(applicationId) : userData.applicationId || null,
+          companyId: companyId || userData.companyId || null,
+        })
       } catch (error) {
-        console.error('Erro ao recuperar dados do usuário:', error)
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('auth_user')
+        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+        localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
+        sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+        sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER)
       }
     }
     setLoading(false)
@@ -45,33 +68,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     setLoading(true)
     try {
-      // Simulação de chamada à API
-      // Em produção, isso seria uma chamada real à API
-      if (email === 'admin@teste.com.br' && password === 'senha123') {
-        // Simular delay da API
-        await new Promise(resolve => setTimeout(resolve, 1000))
+      // Chamada real à API de login
+      const response = await api.post(endpoints.auth.login(), {
+        email,
+        password
+      })
 
-        // Mock de resposta da API com JWT
-        const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkFkbWluIFVzZXIiLCJlbWFpbCI6ImFkbWluQHRlc3RlLmNvbS5iciIsImlhdCI6MTUxNjIzOTAyMn0.mock_jwt_token'
-        
-        const mockUser: User = {
-          id: '1',
-          name: 'Admin User',
-          email: 'admin@teste.com.br'
-        }
+      const { token, user: userData } = response.data
 
-        setToken(mockToken)
-        setUser(mockUser)
-        
-        // Salvar no localStorage
-        localStorage.setItem('auth_token', mockToken)
-        localStorage.setItem('auth_user', JSON.stringify(mockUser))
-      } else {
-        throw new Error('Email ou senha inválidos')
+      // Formatar dados do usuário
+      const user: User = {
+        id: userData.id,
+        name: `${userData.firstName} ${userData.lastName}`,
+        email: userData.email,
+        photo: userData.photo || undefined,
+        role: null, // Será definido pela API se necessário
+        roleId: null,
+        applicationId: null,
+        companyId: null
       }
-    } catch (error) {
+
+      setToken(token)
+      setUser(user)
+      
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token)
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(user))
+    } catch (error: any) {
       setLoading(false)
-      throw error
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Email ou senha inválidos'
+      throw new Error(errorMessage)
     }
     setLoading(false)
   }
@@ -79,15 +106,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setToken(null)
     setUser(null)
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('auth_user')
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+    localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+    sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER)
+    sessionStorage.removeItem(STORAGE_KEYS.ROLE_ID)
+    sessionStorage.removeItem(STORAGE_KEYS.APPLICATION_ID)
+    sessionStorage.removeItem(STORAGE_KEYS.COMPANY_ID)
+    sessionStorage.removeItem(STORAGE_KEYS.USER_KEY)
+    window.location.href = getRoute('/login')
   }
 
   const updateUser = (userData: Partial<User>) => {
     if (user) {
       const updatedUser = { ...user, ...userData }
       setUser(updatedUser)
-      localStorage.setItem('auth_user', JSON.stringify(updatedUser))
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(updatedUser))
     }
   }
 
@@ -100,7 +134,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         updateUser,
-        loading
+        loading,
+        userRole: user?.role || sessionStorage.getItem(STORAGE_KEYS.ROLE_ID) || null,
+        userApplicationId: user?.applicationId || (sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID) ? Number(sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID)) : null),
+        userCompanyId: user?.companyId || sessionStorage.getItem(STORAGE_KEYS.COMPANY_ID) || null,
       }}
     >
       {children}

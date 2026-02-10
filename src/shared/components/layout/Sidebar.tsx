@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './Sidebar.sass'
 import { MenuItem } from '../../types/menu'
+import { getAsset } from '../../config/base-path'
 
 interface SidebarProps {
   menuItems: MenuItem[]
@@ -58,10 +59,10 @@ export function Sidebar({ menuItems, onNavigate, currentPath = '/', onExpandedCh
       <div className="sidebar__header">
         {isExpanded ? (
           <div className="sidebar__logo-container">
-            <img src="/assets/logo_lateral.jpg" alt="Logo" className="sidebar__logo-img" />
+            <img src={getAsset('/assets/logo_lateral.jpg')} alt="Logo" className="sidebar__logo-img" />
           </div>
         ) : (
-          <img src="/assets/logo.jpg" alt="Logo" className="sidebar__logo-img sidebar__logo-img--collapsed" />
+          <img src={getAsset('/assets/logo.jpg')} alt="Logo" className="sidebar__logo-img sidebar__logo-img--collapsed" />
         )}
       </div>
 

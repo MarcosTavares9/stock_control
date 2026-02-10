@@ -1,0 +1,173 @@
+@use '../../shared/styles/variables' as *
+@use '../../shared/styles/mixins' as *
+
+.usuarios-mobile
+  display: flex
+  flex-direction: column
+  gap: $spacing-lg
+
+  &__header
+    display: flex
+    justify-content: space-between
+    align-items: flex-start
+    gap: $spacing-md
+
+  &__header-content
+    flex: 1
+
+  &__header-content h1
+    @include text-2xl
+    color: $gray-900
+    margin-bottom: $spacing-xs
+    font-weight: $font-weight-bold
+
+  &__subtitle
+    @include text-sm
+    color: $gray-600
+
+  &__button-create
+    @include button-primary
+    width: 44px
+    height: 44px
+    padding: 0
+    border-radius: $radius-full
+    display: flex
+    align-items: center
+    justify-content: center
+    flex-shrink: 0
+
+  &__content
+    display: flex
+    flex-direction: column
+    gap: $spacing-lg
+
+  &__search
+    width: 100%
+
+  &__search-input-wrapper
+    position: relative
+    display: flex
+    align-items: center
+
+  &__search-icon
+    position: absolute
+    left: $spacing-md
+    color: $gray-400
+    z-index: 1
+
+  &__search-input
+    width: 100%
+    padding: $spacing-md $spacing-md $spacing-md 44px
+    border: 1px solid $gray-300
+    border-radius: $radius-md
+    @include text-base
+    font-family: $font-family
+    background: $white
+
+    &:focus
+      outline: none
+      border-color: $primary-500
+      box-shadow: 0 0 0 3px rgba($primary-500, 0.1)
+
+  &__loading
+    text-align: center
+    padding: $spacing-2xl
+    @include text-base
+    color: $gray-600
+
+  &__list
+    display: flex
+    flex-direction: column
+    gap: $spacing-md
+
+  &__empty
+    text-align: center
+    padding: $spacing-2xl
+    @include text-base
+    color: $gray-500
+
+  &__card
+    background: $white
+    border-radius: $radius-lg
+    padding: $spacing-md
+    box-shadow: $shadow-sm
+
+  &__card-header
+    display: flex
+    justify-content: space-between
+    align-items: flex-start
+    margin-bottom: $spacing-md
+    gap: $spacing-md
+
+  &__card-info
+    flex: 1
+    min-width: 0
+
+  &__card-name
+    @include text-base
+    font-weight: $font-weight-semibold
+    color: $gray-900
+    margin-bottom: $spacing-xs
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  &__card-email
+    @include text-sm
+    color: $gray-600
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  &__status
+    padding: $spacing-xs $spacing-sm
+    border-radius: $radius-sm
+    @include text-xs
+    font-weight: $font-weight-medium
+    white-space: nowrap
+
+    &--ativo
+      background: rgba($success, 0.1)
+      color: $success
+
+    &--inativo
+      background: rgba($gray-400, 0.1)
+      color: $gray-600
+
+  &__card-body
+    margin-bottom: $spacing-md
+
+  &__card-cargo
+    @include text-sm
+    color: $gray-600
+
+  &__card-actions
+    display: flex
+    gap: $spacing-sm
+    padding-top: $spacing-md
+    border-top: 1px solid $gray-200
+
+  &__action-button
+    @include button-base
+    flex: 1
+    padding: $spacing-sm $spacing-md
+    @include text-sm
+    display: flex
+    align-items: center
+    justify-content: center
+    gap: $spacing-xs
+
+    &--edit
+      background-color: rgba($primary-500, 0.1)
+      color: $primary-500
+
+      &:hover
+        background-color: rgba($primary-500, 0.2)
+
+    &--delete
+      background-color: rgba($error, 0.1)
+      color: $error
+
+      &:hover
+        background-color: rgba($error, 0.2)
+

@@ -1,4 +1,4 @@
-// Funções utilitárias para autenticação e JWT
+import { STORAGE_KEYS } from '../config/app.config';
 
 export interface DecodedToken {
   sub: string
@@ -8,10 +8,6 @@ export interface DecodedToken {
   exp?: number
 }
 
-/**
- * Decodifica um token JWT (sem verificar assinatura)
- * Em produção, use uma biblioteca como jwt-decode ou verifique a assinatura
- */
 export function decodeToken(token: string): DecodedToken | null {
   try {
     const parts = token.split('.')
@@ -23,14 +19,10 @@ export function decodeToken(token: string): DecodedToken | null {
     const decoded = JSON.parse(atob(payload))
     return decoded
   } catch (error) {
-    console.error('Erro ao decodificar token:', error)
     return null
   }
 }
 
-/**
- * Verifica se um token JWT está expirado
- */
 export function isTokenExpired(token: string): boolean {
   const decoded = decodeToken(token)
   if (!decoded || !decoded.exp) {
@@ -41,27 +33,18 @@ export function isTokenExpired(token: string): boolean {
   return decoded.exp < currentTime
 }
 
-/**
- * Verifica se o token é válido (não expirado)
- */
 export function isValidToken(token: string): boolean {
   if (!token) return false
   return !isTokenExpired(token)
 }
 
-/**
- * Obtém o token do localStorage
- */
 export function getStoredToken(): string | null {
-  return localStorage.getItem('auth_token')
+  return localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
 }
 
-/**
- * Remove o token do localStorage
- */
 export function removeStoredToken(): void {
-  localStorage.removeItem('auth_token')
-  localStorage.removeItem('auth_user')
+  localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+  localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
 }
 
 

@@ -1,127 +1,176 @@
 import { useState, useEffect } from 'react'
 import './App.css'
 import { Layout, LayoutMobile } from './shared/components/layout'
-import { menuItems } from './shared/config/menu'
+import { ROUTES } from './shared/config/routes.config'
 import { useAuth } from './shared/contexts/AuthContext'
 import { useIsMobile } from './shared/utils/useIsMobile'
-import Dashboard from './features/dashboard/ui/Dashboard'
-import Products from './features/products/ui/Products'
-import ProductsMobile from './features/products/mobile/ProductsMobile'
-import History from './features/history/ui/History'
-import HistoryMobile from './features/history/mobile/HistoryMobile'
-import Report from './features/report/ui/Report'
-import ReportMobile from './features/report/mobile/ReportMobile'
-import Login from './features/login/ui/Login'
-import LoginMobile from './features/login/mobile/LoginMobile'
-import Register from './features/register/ui/Register'
-import ConfirmRegistration from './features/register/ui/ConfirmRegistration'
-import Settings from './features/settings/ui/Settings'
-import SettingsMobile from './features/settings/mobile/SettingsMobile'
-import Categories from './features/categories/ui/Categories'
-import CategoriesMobile from './features/categories/mobile/CategoriesMobile'
-import Localizacao from './features/location/ui/Localizacao'
-import LocalizacaoMobile from './features/location/mobile/LocalizacaoMobile'
+import { PermissionGuard } from './shared/components/Guard'
+import { Unauthorized } from './shared/components/Unauthorized'
+import Login from './features/login/Login'
+import LoginMobile from './features/login/LoginMobile'
+import Register from './features/register/Register'
+import ConfirmRegistration from './features/register/ConfirmRegistration'
+import { getRoute, removeBasePath } from './shared/config/base-path'
 
 function App() {
-  const { isAuthenticated, loading } = useAuth()
-  const [currentPath, setCurrentPath] = useState('/dashboard')
+  const { isAuthenticated, loading, userRole, userCompanyId } = useAuth()
+  // Iniciar com a rota da URL atual ou dashboard se autenticado
+  const [currentPath, setCurrentPath] = useState(() => {
+    const fullPath = window.location.pathname
+    const path = removeBasePath(fullPath)
+    return path || '/dashboard'
+  })
   const isMobile = useIsMobile()
 
+  // Verificar rota inicial baseado na URL e autenticação
   useEffect(() => {
-    // Se não estiver autenticado, redirecionar para login (exceto se já estiver em /register ou /confirm-registration)
-    if (!loading && !isAuthenticated && currentPath !== '/register' && currentPath !== '/confirm-registration') {
-      setCurrentPath('/login')
-    } else if (!loading && isAuthenticated && (currentPath === '/login' || currentPath === '/register' || currentPath === '/confirm-registration')) {
-      // Se estiver autenticado e nas páginas de auth, redirecionar para dashboard
-      setCurrentPath('/dashboard')
+    // Aguardar o loading terminar antes de verificar rotas
+    if (loading) return
+
+    const fullPath = window.location.pathname
+    // Remover o base path para obter a rota relativa
+    const path = removeBasePath(fullPath)
+    
+    // Se não estiver autenticado, redirecionar para login (exceto register e confirm)
+    if (!isAuthenticated) {
+      if (path === '/register') {
+        setCurrentPath('/register')
+      } else if (path === '/confirm-registration') {
+        setCurrentPath('/confirm-registration')
+      } else {
+        // Qualquer outra rota sem autenticação vai para login
+        setCurrentPath('/login')
+        if (path !== '/login' && path !== '/register' && path !== '/confirm-registration') {
+          window.history.pushState({}, '', getRoute('/login'))
+        }
+      }
+      return
     }
-  }, [isAuthenticated, loading, currentPath])
+
+    // Se estiver autenticado, manter a rota atual ou redirecionar se necessário
+    if (path === '/register') {
+      setCurrentPath('/register')
+    } else if (path === '/confirm-registration') {
+      setCurrentPath('/confirm-registration')
+    } else if (path === '/login' || path === '/' || path === '') {
+      // Se estiver autenticado e na rota de login, redirecionar para dashboard
+      setCurrentPath('/dashboard')
+      window.history.pushState({}, '', getRoute('/dashboard'))
+    } else {
+      // Se for uma rota válida, manter ela (não redirecionar)
+      const validRoute = ROUTES.find(r => r.path === path) || 
+                        ROUTES.find(r => r.children?.some(c => c.path === path))
+      if (validRoute) {
+        setCurrentPath(path)
+        // Atualizar a URL se necessário (mas sem forçar reload)
+        if (fullPath !== getRoute(path)) {
+          window.history.replaceState({}, '', getRoute(path))
+        }
+      } else {
+        // Rota inválida, redirecionar para dashboard
+        setCurrentPath('/dashboard')
+        window.history.pushState({}, '', getRoute('/dashboard'))
+      }
+    }
+  }, [isAuthenticated, loading])
+
+  // Redirecionar para dashboard quando autenticado e estiver na rota de login
+  useEffect(() => {
+    if (isAuthenticated && (currentPath === '/' || currentPath === '/login')) {
+      setCurrentPath('/dashboard')
+      window.history.pushState({}, '', getRoute('/dashboard'))
+    } else if (!isAuthenticated && currentPath !== '/login' && currentPath !== '/register' && currentPath !== '/confirm-registration') {
+      // Se não estiver autenticado e não estiver em login/register/confirm, redirecionar para login
+      setCurrentPath('/login')
+      window.history.pushState({}, '', getRoute('/login'))
+    }
+  }, [isAuthenticated, currentPath])
 
   const handleNavigate = (path: string) => {
     setCurrentPath(path)
+    window.history.pushState({}, '', getRoute(path))
   }
 
+  // Converter ROUTES para menuItems para compatibilidade com Layout
+  const menuItems = ROUTES
+    .filter(route => !route.disableSidebar && route.desktop && !route.external)
+    .map(route => ({
+      path: route.path,
+      label: route.label || '',
+      icon: route.icon,
+      children: route.children
+        ?.filter(child => !child.disableSidebar && child.desktop && !child.external)
+        .map(child => ({
+          path: child.path,
+          label: child.label || '',
+          icon: child.icon,
+        }))
+    }))
+
   const renderPage = () => {
-    // Se for mobile, usar versões mobile das páginas
-    if (isMobile) {
-      switch (currentPath) {
-        case '/dashboard':
-          return <Dashboard />
-        case '/products':
-          return <ProductsMobile />
-        case '/history':
-          return <HistoryMobile />
-        case '/report':
-          return <ReportMobile />
-        case '/login':
-          return <LoginMobile onNavigate={handleNavigate} />
-        case '/register':
-          return <Register onNavigate={handleNavigate} />
-        case '/settings':
-        case '/settings/profile':
-        case '/settings/users':
-          return <SettingsMobile currentPath={currentPath} onNavigate={handleNavigate} />
-        case '/categories':
-          return <CategoriesMobile />
-        case '/location':
-          return <LocalizacaoMobile />
-        default:
-          return <Dashboard />
+    // Encontrar a rota atual
+    const findRoute = (path: string): typeof ROUTES[0] | undefined => {
+      // Verificar rotas principais
+      let route = ROUTES.find(r => r.path === path)
+      if (route) return route
+
+      // Verificar rotas filhas
+      for (const r of ROUTES) {
+        if (r.children) {
+          const child = r.children.find(c => c.path === path)
+          if (child) return child
+        }
       }
+      return undefined
     }
+
+    const currentRoute = findRoute(currentPath)
     
-    // Versões desktop
-    switch (currentPath) {
-      case '/dashboard':
-        return <Dashboard />
-      case '/products':
-        return <Products />
-      case '/history':
-        return <History />
-      case '/report':
-        return <Report />
-      case '/login':
-        return <Login onNavigate={handleNavigate} />
-      case '/register':
-        return <Register onNavigate={handleNavigate} />
-      case '/settings':
-      case '/settings/profile':
-      case '/settings/users':
-        return <Settings currentPath={currentPath} onNavigate={handleNavigate} />
-      case '/categories':
-        return <Categories />
-      case '/location':
-        return <Localizacao />
-      default:
-        return <Dashboard />
+    if (!currentRoute || !currentRoute.component) {
+      // Fallback para dashboard
+      const dashboardRoute = ROUTES.find(r => r.path === '/dashboard')
+      if (dashboardRoute?.component) {
+        const Component = dashboardRoute.component
+        return <Component />
+      }
+      return null
     }
+
+    const Component = currentRoute.component
+
+    // Verificar se precisa de proteção
+    if (currentRoute.applications || currentRoute.company_restriction) {
+      return (
+        <PermissionGuard
+          allowedApplications={currentRoute.applications}
+          userRole={userRole}
+          userCompanyId={userCompanyId}
+        >
+          <Component />
+        </PermissionGuard>
+      )
+    }
+
+    return <Component />
   }
 
   const getPageTitle = () => {
-    // Verifica se é uma sub-rota de settings
-    if (currentPath.startsWith('/settings')) {
-      if (currentPath === '/settings/users') {
-        return 'Usuários'
-      }
-      if (currentPath === '/settings/profile') {
-        return 'Meu Perfil'
-      }
-      return 'Configurações'
-    }
-    
-    const currentItem = menuItems.find(item => item.path === currentPath)
-    if (currentItem) {
-      return currentItem.label
-    }
-    
-    // Verifica se é um submenu
-    for (const item of menuItems) {
-      if (item.children) {
-        const child = item.children.find(child => child.path === currentPath)
-        if (child) {
-          return child.label
+    const findRoute = (path: string): typeof ROUTES[0] | undefined => {
+      let route = ROUTES.find(r => r.path === path)
+      if (route) return route
+
+      for (const r of ROUTES) {
+        if (r.children) {
+          const child = r.children.find(c => c.path === path)
+          if (child) return child
         }
       }
+      return undefined
+    }
+
+    const currentRoute = findRoute(currentPath)
+    if (currentRoute?.label) {
+      return currentRoute.label
     }
     
     return 'Dashboard Control'
@@ -142,7 +191,7 @@ function App() {
     )
   }
 
-  // Se não estiver autenticado, mostrar página de login, register ou confirmação
+  // Se não estiver autenticado, sempre mostrar página de login (ou register/confirm se for o caso)
   if (!isAuthenticated) {
     if (currentPath === '/register') {
       return <Register onNavigate={handleNavigate} />
@@ -152,6 +201,7 @@ function App() {
       const token = urlParams.get('token') || undefined
       return <ConfirmRegistration token={token} />
     }
+    // Sempre mostrar login quando não autenticado
     // Usar LoginMobile se for mobile, senão usar Login
     if (isMobile) {
       return <LoginMobile onNavigate={handleNavigate} />
@@ -162,28 +212,35 @@ function App() {
   // Se estiver autenticado, mostrar o layout completo (mobile ou desktop)
   if (isMobile) {
     return (
-      <LayoutMobile
+      <>
+        <Unauthorized />
+        <LayoutMobile
+          menuItems={menuItems}
+          currentPath={currentPath}
+          headerTitle={getPageTitle()}
+          onNavigate={handleNavigate}
+        >
+          {renderPage()}
+        </LayoutMobile>
+      </>
+    )
+  }
+
+  return (
+    <>
+      <Unauthorized />
+      <Layout
         menuItems={menuItems}
         currentPath={currentPath}
         headerTitle={getPageTitle()}
         onNavigate={handleNavigate}
       >
         {renderPage()}
-      </LayoutMobile>
-    )
-  }
-
-  return (
-    <Layout
-      menuItems={menuItems}
-      currentPath={currentPath}
-      headerTitle={getPageTitle()}
-      onNavigate={handleNavigate}
-    >
-      {renderPage()}
-    </Layout>
+      </Layout>
+    </>
   )
 }
 
 export default App
+
 

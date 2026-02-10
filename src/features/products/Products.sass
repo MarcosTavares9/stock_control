@@ -1,0 +1,248 @@
+@use '../../shared/styles/variables' as *
+@use '../../shared/styles/mixins' as *
+
+.products
+  padding: $spacing-xl
+  margin: 0
+  min-height: 100%
+  background-color: transparent
+
+  &__header
+    display: flex
+    align-items: flex-start
+    gap: $spacing-xl
+    margin-bottom: $spacing-2xl
+
+  &__create-button
+    display: inline-flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-md $spacing-xl
+    background-color: $primary-500
+    color: $white
+    border: none
+    border-radius: $radius-lg
+    @include text-base
+    font-weight: $font-weight-semibold
+    cursor: pointer
+    transition: all $transition-base
+    box-shadow: $shadow-sm
+    white-space: nowrap
+    flex-shrink: 0
+
+    &:hover
+      background-color: $primary-600
+      box-shadow: $shadow-md
+      transform: translateY(-1px)
+
+    &:active
+      transform: translateY(0)
+      box-shadow: $shadow-sm
+
+  &__header-content
+    flex: 1
+
+  &__header-actions
+    display: flex
+    align-items: center
+    gap: $spacing-md
+    flex-shrink: 0
+
+  &__title
+    @include text-3xl
+    font-weight: $font-weight-bold
+    color: $black
+    margin: 0
+    margin-bottom: $spacing-sm
+    text-align: left
+
+  &__description
+    @include text-base
+    color: $gray-600
+    line-height: $line-height-relaxed
+    margin: 0
+    text-align: left
+
+  &__filters
+    background-color: $white
+    border-radius: $radius-lg
+    border: 1px solid $gray-300
+    padding: $spacing-xl
+    margin-bottom: $spacing-lg
+    box-shadow: $shadow-sm
+
+  &__search
+    margin-bottom: $spacing-lg
+    position: relative
+
+  &__search-icon
+    position: absolute
+    left: $spacing-lg
+    top: 50%
+    transform: translateY(-50%)
+    color: $gray-400
+    pointer-events: none
+    z-index: 1
+
+  &__search-input
+    width: 100%
+    padding: $spacing-md $spacing-lg
+    padding-left: $spacing-xl + $spacing-lg
+    border: 1px solid $gray-300
+    border-radius: $radius-lg
+    @include text-base
+    color: $gray-900
+    background-color: $secondary-50
+    outline: none
+    transition: all $transition-base
+
+    &:focus
+      border-color: $primary-500
+      background-color: $white
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
+
+      ~ .products__search-icon
+        color: $primary-500
+
+    &::placeholder
+      color: $gray-400
+
+  &__filters-row
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+    gap: $spacing-lg
+
+  &__filter
+    display: flex
+    flex-direction: column
+
+  &__filter-label
+    display: block
+    @include text-sm
+    font-weight: $font-weight-semibold
+    color: $gray-800
+    margin-bottom: $spacing-sm
+    letter-spacing: 0.01em
+
+  &__filter-select
+    width: 100%
+    padding: $spacing-md $spacing-lg
+    padding-right: $spacing-xl + $spacing-md
+    border: 1px solid $gray-300
+    border-radius: $radius-lg
+    background-color: $secondary-50
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E")
+    background-repeat: no-repeat
+    background-position: right $spacing-md center
+    background-size: 12px
+    @include text-base
+    color: $gray-900
+    cursor: pointer
+    outline: none
+    transition: all $transition-base
+    appearance: none
+
+    &:hover
+      border-color: $gray-400
+      background-color: $white
+
+    &:focus
+      border-color: $primary-500
+      background-color: $white
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
+      outline: none
+
+  &__edit-button
+    display: inline-flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-md $spacing-xl
+    background-color: $primary-500
+    color: $white
+    border: none
+    border-radius: $radius-lg
+    @include text-base
+    font-weight: $font-weight-semibold
+    cursor: pointer
+    transition: all $transition-base
+    box-shadow: $shadow-sm
+
+    &:hover
+      background-color: $primary-600
+      box-shadow: $shadow-md
+
+    &:active
+      transform: scale(0.98)
+      box-shadow: $shadow-sm
+
+.table-action-button
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  padding: $spacing-xs
+  border: none
+  background-color: transparent
+  cursor: pointer
+  border-radius: $radius-sm
+  transition: all $transition-base
+
+  &--edit
+    color: $primary-600
+
+    &:hover
+      background-color: $primary-50
+      color: $primary-700
+
+    &:active
+      background-color: $primary-100
+
+  &--delete
+    color: $error
+
+    &:hover
+      background-color: rgba(239, 68, 68, 0.1)
+      color: $error
+
+    &:active
+      background-color: rgba(239, 68, 68, 0.2)
+
+// Product image styles
+.product-image
+  display: flex
+  align-items: center
+  justify-content: center
+  width: 100%
+  height: 100%
+
+  &__img
+    width: 60px
+    height: 60px
+    object-fit: cover
+    border-radius: $radius-md
+    border: 1px solid $gray-300
+    background-color: $gray-100
+    transition: transform $transition-base, box-shadow $transition-base
+
+    &:hover
+      transform: scale(1.05)
+      box-shadow: $shadow-md
+      border-color: $primary-300
+
+  &__icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 60px
+    height: 60px
+    border-radius: $radius-md
+    border: 1px solid $gray-300
+    background-color: $gray-50
+    color: $primary-600
+    transition: all $transition-base
+
+    &:hover
+      transform: scale(1.05)
+      box-shadow: $shadow-md
+      border-color: $primary-300
+      background-color: $primary-50
+      color: $primary-700

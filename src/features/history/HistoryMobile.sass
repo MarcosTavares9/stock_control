@@ -1,0 +1,200 @@
+@use '../../shared/styles/variables' as *
+@use '../../shared/styles/mixins' as *
+
+.history-mobile
+  padding: $spacing-md
+  background: $gray-50
+  min-height: 100vh
+
+  &__header
+    margin-bottom: $spacing-lg
+
+  &__title
+    @include text-2xl
+    color: $gray-900
+    margin-bottom: $spacing-xs
+    font-weight: $font-weight-bold
+
+  &__description
+    @include text-sm
+    color: $gray-600
+
+  &__filters
+    margin-bottom: $spacing-lg
+    display: flex
+    flex-direction: column
+    gap: $spacing-md
+
+  &__search
+    position: relative
+    display: flex
+    align-items: center
+
+  &__search-icon
+    position: absolute
+    left: $spacing-md
+    color: $gray-400
+    z-index: 1
+
+  &__search-input
+    width: 100%
+    padding: $spacing-md $spacing-md $spacing-md 44px
+    border: 1px solid $gray-300
+    border-radius: $radius-md
+    @include text-base
+    font-family: $font-family
+    background: $white
+
+    &:focus
+      outline: none
+      border-color: $primary-500
+      box-shadow: 0 0 0 3px rgba($primary-500, 0.1)
+
+  &__filters-row
+    display: flex
+    gap: $spacing-sm
+
+  &__filter-select,
+  &__filter-input
+    flex: 1
+    padding: $spacing-md
+    border: 1px solid $gray-300
+    border-radius: $radius-md
+    @include text-sm
+    font-family: $font-family
+    background: $white
+
+    &:focus
+      outline: none
+      border-color: $primary-500
+
+  &__empty
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    padding: $spacing-2xl
+    text-align: center
+
+  &__empty-icon
+    margin-bottom: $spacing-md
+    color: $gray-400
+
+  &__empty-title
+    @include text-lg
+    color: $gray-900
+    margin-bottom: $spacing-sm
+    font-weight: $font-weight-semibold
+
+  &__empty-description
+    @include text-sm
+    color: $gray-600
+
+  &__list
+    display: flex
+    flex-direction: column
+    gap: $spacing-md
+
+  &__card
+    background: $white
+    border-radius: $radius-lg
+    padding: $spacing-md
+    box-shadow: $shadow-sm
+
+  &__card-header
+    display: flex
+    justify-content: space-between
+    align-items: center
+    margin-bottom: $spacing-md
+    flex-wrap: wrap
+    gap: $spacing-sm
+
+  &__type
+    display: flex
+    align-items: center
+    gap: $spacing-xs
+    padding: $spacing-xs $spacing-sm
+    border-radius: $radius-sm
+    @include text-xs
+    font-weight: $font-weight-medium
+
+    &--success
+      background: rgba($success, 0.1)
+      color: $success
+
+    &--error
+      background: rgba($error, 0.1)
+      color: $error
+
+    &--warning
+      background: rgba($warning, 0.1)
+      color: $warning
+
+    &--info
+      background: rgba($info, 0.1)
+      color: $info
+
+  &__type-icon
+    display: flex
+    align-items: center
+
+  &__type-label
+    @include text-xs
+
+  &__card-date
+    @include text-xs
+    color: $gray-500
+
+  &__card-body
+    display: flex
+    flex-direction: column
+    gap: $spacing-sm
+
+  &__card-product
+    @include text-base
+    font-weight: $font-weight-semibold
+    color: $gray-900
+
+  &__card-info
+    display: flex
+    gap: $spacing-md
+    flex-wrap: wrap
+
+  &__card-category,
+  &__card-user
+    @include text-sm
+    color: $gray-600
+
+  &__quantity
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    @include text-base
+    font-weight: $font-weight-medium
+
+  &__quantity-old
+    color: $gray-500
+    text-decoration: line-through
+
+  &__quantity-arrow
+    color: $gray-400
+
+  &__quantity-new
+    color: $primary-500
+
+  &__quantity-deleted
+    @include text-base
+    color: $error
+
+  &__quantity-value
+    @include text-base
+    font-weight: $font-weight-semibold
+
+    &--entrada,
+    &--criacao
+      color: $success
+
+    &--saida,
+    &--exclusao
+      color: $error
+

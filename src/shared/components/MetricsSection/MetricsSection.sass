@@ -1,0 +1,262 @@
+@use '../../styles/variables' as *
+
+.metrics-container
+  width: 100%
+  display: flex
+  flex-direction: column
+  gap: 32px
+
+.metrics-header
+  display: flex
+  justify-content: space-between
+  align-items: center
+  flex-wrap: wrap
+  gap: 16px
+
+  .metrics-title
+    display: flex
+    flex-direction: column
+    gap: 4px
+
+    h1
+      font-size: $font-size-2xl
+      font-weight: $font-weight-bold
+      color: $gray-900
+      margin: 0
+
+    .metrics-date
+      font-size: $font-size-sm
+      font-weight: $font-weight-normal
+      color: $gray-600
+
+  .metrics-period-picker
+    position: relative
+
+    .metrics-period-select
+      padding: 8px 16px
+      border: 1px solid $gray-300
+      border-radius: $radius-md
+      font-size: $font-size-sm
+      font-weight: $font-weight-medium
+      color: $gray-900
+      background: $white
+      cursor: pointer
+      transition: border-color $transition-base
+      min-width: 180px
+
+      &:hover
+        border-color: $primary
+
+      &:focus
+        outline: none
+        border-color: $primary
+        box-shadow: 0 0 0 3px $primary-100
+
+    .calendar-inline-inputs
+      position: relative
+
+      .calendar-inputs
+        display: flex
+        gap: 8px
+
+        .calendar-input
+          padding: 8px 12px
+          border: 1px solid $gray-300
+          border-radius: $radius-md
+          font-size: $font-size-sm
+          color: $gray-900
+          background: $white
+          cursor: pointer
+          min-width: 120px
+
+          &:focus
+            outline: none
+            border-color: $primary
+
+      .calendar-popup
+        position: absolute
+        top: calc(100% + 8px)
+        right: 0
+        z-index: 1000
+        background: $white
+        border-radius: $radius-lg
+        box-shadow: $shadow-xl
+
+.metrics-cards
+  display: grid
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+  gap: 16px
+
+  &.single-line
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr))
+
+  &.compact
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr))
+
+  .metrics-skeleton
+    min-height: 120px
+    border-radius: $radius-md
+    background: linear-gradient(90deg, $gray-200 25%, $gray-100 50%, $gray-200 75%)
+    background-size: 200% 100%
+    animation: skeleton-loading 1.5s ease-in-out infinite
+
+@keyframes skeleton-loading
+  0%
+    background-position: 200% 0
+  100%
+    background-position: -200% 0
+
+.metric-card
+  position: relative
+  background: $white
+  border-radius: $radius-md
+  padding: 20px
+  box-shadow: $shadow-md
+  transition: all $transition-base
+  cursor: pointer
+  overflow: hidden
+  min-height: 120px
+  display: flex
+  flex-direction: column
+  justify-content: space-between
+
+  &:hover:not(.disable-hover)
+    box-shadow: $shadow-lg
+    transform: translateY(-2px)
+
+    .metric-default
+      opacity: 0
+      transform: translateY(-10px)
+
+    .metric-hover
+      opacity: 1
+      transform: translateY(0)
+
+  &.compact
+    min-height: 100px
+    padding: 16px
+
+  .metric-default
+    transition: all $transition-base
+    display: flex
+    flex-direction: column
+    gap: 12px
+
+    .metric-header
+      display: flex
+      align-items: center
+      gap: 8px
+
+      .metric-icon
+        font-size: 20px
+        color: $primary
+
+      .metric-label
+        font-size: $font-size-sm
+        font-weight: $font-weight-medium
+        color: $gray-600
+
+    .metric-value
+      font-size: $font-size-2xl
+      font-weight: $font-weight-bold
+      color: $gray-900
+
+    .metric-skeleton-text
+      height: 32px
+      width: 80px
+      background: $gray-200
+      border-radius: $radius-sm
+      animation: skeleton-loading 1.5s ease-in-out infinite
+
+  .metric-hover
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    padding: 20px
+    opacity: 0
+    transform: translateY(10px)
+    transition: all $transition-base
+    display: flex
+    flex-direction: column
+    justify-content: space-between
+    background: $white
+
+    .metric-hover-box
+      display: flex
+      flex-direction: column
+      gap: 8px
+
+      .metric-period-label
+        font-size: $font-size-xs
+        font-weight: $font-weight-medium
+        color: $gray-500
+        text-transform: uppercase
+
+      .metric-date
+        font-size: $font-size-sm
+        font-weight: $font-weight-semibold
+        color: $gray-700
+
+      .metric-summary
+        margin-top: 12px
+        padding-top: 12px
+        border-top: 1px solid $gray-200
+        display: flex
+        flex-direction: column
+        gap: 4px
+
+        .metric-label
+          font-size: $font-size-xs
+          color: $gray-600
+
+        .metric-value-alt
+          font-size: $font-size-lg
+          font-weight: $font-weight-bold
+          color: $gray-900
+
+  .metric-download
+    position: absolute
+    bottom: 12px
+    right: 12px
+    display: flex
+    align-items: center
+    gap: 4px
+    padding: 6px 12px
+    background: $primary-100
+    border-radius: $radius-md
+    transition: all $transition-base
+
+    &:hover
+      background: $primary
+      color: $white
+
+      .metric-download-icon
+        color: $white
+
+    .metric-download-button
+      font-size: $font-size-xs
+      font-weight: $font-weight-medium
+      color: $primary
+
+    .metric-download-icon
+      width: 16px
+      height: 16px
+      color: $primary
+      transition: color $transition-base
+
+@media (max-width: 768px)
+  .metrics-cards
+    grid-template-columns: 1fr
+
+  .metrics-header
+    flex-direction: column
+    align-items: flex-start
+
+    .metrics-period-picker
+      width: 100%
+
+      .metrics-period-select
+        width: 100%
+

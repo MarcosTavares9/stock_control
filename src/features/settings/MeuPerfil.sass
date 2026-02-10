@@ -1,0 +1,289 @@
+@use '../../shared/styles/variables' as *
+@use '../../shared/styles/mixins' as *
+
+.meu-perfil
+  padding: 2rem
+  height: 100%
+  overflow-y: auto
+
+  &__loading
+    display: flex
+    justify-content: center
+    align-items: center
+    padding: 4rem 2rem
+    color: $gray-600
+    @include text-sm
+
+  &__container
+    display: flex
+    gap: $spacing-lg
+    max-width: 1400px
+    margin: 0 auto
+
+    @media (max-width: 1024px)
+      flex-direction: column
+
+  // Sidebar
+  &__sidebar
+    display: flex
+    flex-direction: column
+    gap: $spacing-md
+    width: 280px
+    flex-shrink: 0
+    position: sticky
+    top: $spacing-md
+    height: fit-content
+
+    @media (max-width: 1024px)
+      width: 100%
+      position: relative
+      top: 0
+
+  // Photo Card
+  &__photo-card
+    background-color: $white
+    border: 1px solid $gray-200
+    border-radius: $radius-md
+    padding: $spacing-md
+    box-shadow: $shadow-sm
+    position: relative
+    overflow: hidden
+
+  &__upload-overlay
+    position: absolute
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    background-color: rgba($white, 0.9)
+    display: flex
+    align-items: center
+    justify-content: center
+    z-index: 10
+
+  &__spinner
+    width: 32px
+    height: 32px
+    border: 3px solid $gray-200
+    border-top-color: $primary-600
+    border-radius: 50%
+    animation: spin 0.8s linear infinite
+
+  @keyframes spin
+    to
+      transform: rotate(360deg)
+
+  &__photo-content
+    display: flex
+    align-items: center
+    gap: $spacing-md
+    margin-bottom: $spacing-md
+
+  &__photo-wrapper
+    width: 48px
+    height: 48px
+    border-radius: 50%
+    overflow: hidden
+    border: 2px solid $gray-200
+    flex-shrink: 0
+
+  &__photo
+    width: 100%
+    height: 100%
+    object-fit: cover
+
+  &__photo-placeholder
+    width: 100%
+    height: 100%
+    background-color: $primary-100
+    color: $primary-600
+    display: flex
+    align-items: center
+    justify-content: center
+    @include text-lg
+    font-weight: $font-weight-semibold
+
+  &__photo-info
+    flex: 1
+
+  &__photo-title
+    margin: 0 0 $spacing-xs 0
+    @include text-sm
+    font-weight: $font-weight-medium
+    color: $gray-700
+
+  &__photo-subtitle
+    margin: 0
+    @include text-xs
+    color: $gray-500
+
+  &__photo-actions
+    display: flex
+    gap: $spacing-xs
+
+  &__file-input
+    display: none
+
+  &__photo-button
+    display: flex
+    align-items: center
+    gap: $spacing-xs
+    padding: $spacing-xs $spacing-sm
+    border: none
+    border-radius: $radius-md
+    @include text-xs
+    font-weight: $font-weight-medium
+    font-family: $font-family
+    cursor: pointer
+    transition: all $transition-base
+    background-color: $primary-100
+    color: $primary-600
+
+    &:hover
+      background-color: $primary-200
+
+    &--delete
+      background-color: rgba($error, 0.1)
+      color: $error
+
+      &:hover
+        background-color: rgba($error, 0.2)
+
+
+  // Content Area
+  &__content-area
+    flex: 1
+    overflow-y: auto
+    max-height: calc(100vh - 4rem)
+
+  &__card
+    background-color: $white
+    border: 1px solid $gray-200
+    border-radius: $radius-md
+    padding: $spacing-xl
+    box-shadow: $shadow-sm
+
+  &__card-title
+    margin: 0 0 $spacing-xl 0
+    @include text-lg
+    font-weight: $font-weight-semibold
+    color: $gray-700
+
+  // Form
+  &__form
+    display: flex
+    flex-direction: column
+    gap: $spacing-xl
+
+  &__form-row
+    display: grid
+    grid-template-columns: 1fr 1fr
+    gap: $spacing-lg
+
+    @media (max-width: 768px)
+      grid-template-columns: 1fr
+
+  &__form-group
+    display: flex
+    flex-direction: column
+    gap: $spacing-xs
+
+  &__label
+    @include text-sm
+    font-weight: $font-weight-medium
+    color: $gray-700
+    margin-bottom: $spacing-xs
+
+  &__input-wrapper
+    position: relative
+    display: flex
+    align-items: center
+
+  &__input-icon
+    position: absolute
+    left: $spacing-md
+    color: $gray-400
+    font-size: 14px
+    z-index: 1
+    pointer-events: none
+
+  &__input
+    width: 100%
+    padding: $spacing-md $spacing-md $spacing-md 2.5rem
+    border: 1px solid $gray-300
+    border-radius: $radius-md
+    @include text-sm
+    font-family: $font-family
+    color: $gray-700
+    background-color: $white
+    transition: all $transition-base
+
+    &:focus
+      outline: none
+      border-color: $primary-500
+      box-shadow: 0 0 0 3px rgba($primary-500, 0.1)
+
+    &::placeholder
+      color: $gray-400
+
+    &:read-only
+      background-color: $gray-50
+      cursor: not-allowed
+
+  // Select styling
+  select.meu-perfil__input
+    padding-left: $spacing-md
+    cursor: pointer
+    appearance: none
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%234B5563' d='M6 9L1 4h10z'/%3E%3C/svg%3E")
+    background-repeat: no-repeat
+    background-position: right $spacing-md center
+    padding-right: 2.5rem
+
+  // Actions
+  &__actions
+    display: flex
+    gap: $spacing-md
+    margin-top: $spacing-md
+
+  &__button
+    padding: $spacing-md $spacing-lg
+    border: none
+    border-radius: $radius-md
+    @include text-sm
+    font-weight: $font-weight-medium
+    font-family: $font-family
+    cursor: pointer
+    transition: all $transition-base
+
+    &:disabled
+      opacity: 0.5
+      cursor: not-allowed
+
+    &--primary
+      background-color: $primary-600
+      color: $white
+
+      &:hover:not(:disabled)
+        background-color: $primary-700
+
+    &--secondary
+      background-color: $gray-200
+      color: $gray-700
+
+      &:hover:not(:disabled)
+        background-color: $gray-300
+
+  // Scrollbar
+  &__content-area::-webkit-scrollbar
+    width: 8px
+
+  &__content-area::-webkit-scrollbar-track
+    background: rgba($gray-200, 0.4)
+
+  &__content-area::-webkit-scrollbar-thumb
+    background: $gray-300
+    border-radius: 4px
+
+    &:hover
+      background: $gray-400

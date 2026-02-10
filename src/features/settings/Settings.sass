@@ -1,0 +1,44 @@
+@use '../../shared/styles/variables' as *
+@use '../../shared/styles/mixins' as *
+
+.settings
+  padding: 2rem
+
+  &__header
+    margin-bottom: 2rem
+
+    h1
+      margin: 0
+      font-size: 2rem
+      font-weight: 600
+
+  &__tabs
+    display: flex
+    gap: $spacing-sm
+    border-bottom: 2px solid $gray-200
+    margin-bottom: 2rem
+
+  &__tab
+    padding: $spacing-md $spacing-lg
+    border: none
+    background: none
+    @include text-sm
+    font-weight: $font-weight-medium
+    color: $gray-600
+    cursor: pointer
+    border-bottom: 2px solid transparent
+    margin-bottom: -2px
+    transition: all $transition-base
+    font-family: $font-family
+
+    &:hover
+      color: $primary-600
+
+    &--active
+      color: $primary-600
+      border-bottom-color: $primary-600
+      font-weight: $font-weight-semibold
+
+  &__content
+    width: 100%
+

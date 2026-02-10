@@ -1,0 +1,380 @@
+@use '../../shared/styles/variables' as *
+@use '../../shared/styles/mixins' as *
+
+.report
+  padding: $spacing-xl
+  margin: 0
+  min-height: 100%
+  background-color: transparent
+
+  &__header
+    display: flex
+    align-items: flex-start
+    gap: $spacing-xl
+    margin-bottom: $spacing-2xl
+
+  &__header-content
+    flex: 1
+
+  &__header-actions
+    display: flex
+    align-items: center
+    gap: $spacing-md
+    flex-shrink: 0
+
+  &__title
+    @include text-3xl
+    font-weight: $font-weight-bold
+    color: $black
+    margin: 0
+    margin-bottom: $spacing-sm
+    text-align: left
+
+  &__description
+    @include text-base
+    color: $gray-600
+    line-height: $line-height-relaxed
+    margin: 0
+    text-align: left
+
+  &__export-wrapper
+    position: relative
+
+  &__export-button
+    display: inline-flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-md $spacing-xl
+    background-color: $primary-500
+    color: $white
+    border: none
+    border-radius: $radius-lg
+    @include text-base
+    font-weight: $font-weight-semibold
+    cursor: pointer
+    transition: all $transition-base
+    box-shadow: $shadow-sm
+    white-space: nowrap
+
+    &:hover
+      background-color: $primary-600
+      box-shadow: $shadow-md
+      transform: translateY(-1px)
+
+    &:active
+      transform: translateY(0)
+      box-shadow: $shadow-sm
+
+  &__export-chevron
+    transition: transform $transition-base
+
+  &__export-wrapper:hover &__export-chevron,
+  &__export-wrapper:focus-within &__export-chevron
+    transform: rotate(180deg)
+
+  &__export-menu
+    position: absolute
+    top: calc(100% + $spacing-sm)
+    right: 0
+    background-color: $white
+    border: 1px solid $gray-300
+    border-radius: $radius-lg
+    box-shadow: $shadow-lg
+    min-width: 200px
+    z-index: 1000
+    overflow: hidden
+    animation: slideDown $transition-base
+    pointer-events: auto
+
+  &__export-menu-item
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    width: 100%
+    padding: $spacing-md $spacing-lg
+    background-color: transparent
+    border: none
+    @include text-base
+    color: $gray-800
+    cursor: pointer
+    transition: all $transition-base
+    text-align: left
+
+    &:hover
+      background-color: $gray-50
+      color: $primary-600
+
+    &:active
+      background-color: $gray-100
+
+    &:not(:last-child)
+      border-bottom: 1px solid $gray-200
+
+  &__filters
+    background-color: $white
+    border-radius: $radius-lg
+    border: 1px solid $gray-300
+    padding: $spacing-xl
+    margin-bottom: $spacing-lg
+    box-shadow: $shadow-sm
+
+  &__filters-row
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+    gap: $spacing-lg
+
+  &__filter
+    display: flex
+    flex-direction: column
+
+  &__filter-label
+    display: flex
+    align-items: center
+    gap: $spacing-xs
+    @include text-sm
+    font-weight: $font-weight-semibold
+    color: $gray-800
+    margin-bottom: $spacing-sm
+    letter-spacing: 0.01em
+
+  &__filter-input,
+  &__filter-select
+    width: 100%
+    padding: $spacing-md $spacing-lg
+    border: 1px solid $gray-300
+    border-radius: $radius-lg
+    background-color: $secondary-50
+    @include text-base
+    color: $gray-900
+    outline: none
+    transition: all $transition-base
+
+    &:hover
+      border-color: $gray-400
+      background-color: $white
+
+    &:focus
+      border-color: $primary-500
+      background-color: $white
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
+      outline: none
+
+  &__filter-select
+    padding-right: $spacing-xl + $spacing-md
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E")
+    background-repeat: no-repeat
+    background-position: right $spacing-md center
+    background-size: 12px
+    cursor: pointer
+    appearance: none
+
+  &__stats-grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+    gap: $spacing-lg
+    margin-bottom: $spacing-2xl
+
+  &__section-title
+    @include text-xl
+    font-weight: $font-weight-semibold
+    color: $gray-800
+    margin: 0
+    margin-bottom: $spacing-lg
+
+  &__movement-stats
+    margin-bottom: $spacing-2xl
+
+  &__movement-grid
+    display: grid
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
+    gap: $spacing-lg
+
+  &__tables
+    display: flex
+    flex-direction: column
+    gap: $spacing-2xl
+
+  &__table-section
+    background-color: $white
+    border-radius: $radius-lg
+    border: 1px solid $gray-300
+    padding: $spacing-xl
+    box-shadow: $shadow-sm
+
+  &__empty
+    padding: $spacing-xl
+    text-align: center
+    color: $gray-600
+    @include text-base
+
+// Stat Card Styles
+.report-stat-card
+  display: flex
+  align-items: center
+  gap: $spacing-lg
+  padding: $spacing-xl
+  background-color: $white
+  border-radius: $radius-lg
+  border: 1px solid $gray-300
+  box-shadow: $shadow-sm
+  transition: all $transition-base
+
+  &:hover
+    box-shadow: $shadow-md
+    transform: translateY(-2px)
+
+  &__icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 56px
+    height: 56px
+    border-radius: $radius-lg
+    flex-shrink: 0
+
+    &--primary
+      background-color: rgba(37, 99, 235, 0.1)
+      color: $primary-500
+
+    &--info
+      background-color: rgba(59, 130, 246, 0.1)
+      color: $info
+
+    &--warning
+      background-color: rgba(245, 158, 11, 0.1)
+      color: $warning
+
+    &--success
+      background-color: rgba(16, 185, 129, 0.1)
+      color: $success
+
+  &__content
+    flex: 1
+    min-width: 0
+
+  &__label
+    @include text-sm
+    font-weight: $font-weight-medium
+    color: $gray-600
+    margin: 0
+    margin-bottom: $spacing-xs
+
+  &__value
+    @include text-2xl
+    font-weight: $font-weight-bold
+    color: $gray-900
+    margin: 0
+
+  &__subtext
+    @include text-xs
+    color: $gray-500
+    margin-top: $spacing-xs
+    display: block
+
+// Movement Card Styles
+.report-movement-card
+  display: flex
+  align-items: center
+  gap: $spacing-md
+  padding: $spacing-lg
+  background-color: $white
+  border-radius: $radius-lg
+  border: 1px solid $gray-300
+  box-shadow: $shadow-sm
+  transition: all $transition-base
+
+  &:hover
+    box-shadow: $shadow-md
+
+  &--entrada
+    border-left: 4px solid $success
+
+  &--saida
+    border-left: 4px solid $error
+
+  &--saldo
+    border-left: 4px solid $primary-500
+
+  &--info
+    border-left: 4px solid $info
+
+  &__icon
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 40px
+    height: 40px
+    border-radius: $radius-md
+    flex-shrink: 0
+
+  &--entrada &__icon
+    background-color: rgba(16, 185, 129, 0.1)
+    color: $success
+
+  &--saida &__icon
+    background-color: rgba(239, 68, 68, 0.1)
+    color: $error
+
+  &--saldo &__icon
+    background-color: rgba(37, 99, 235, 0.1)
+    color: $primary-500
+
+  &--info &__icon
+    background-color: rgba(59, 130, 246, 0.1)
+    color: $info
+
+  &__content
+    flex: 1
+    min-width: 0
+
+  &__label
+    @include text-sm
+    font-weight: $font-weight-medium
+    color: $gray-600
+    margin: 0
+    margin-bottom: $spacing-xs
+
+  &__value
+    @include text-xl
+    font-weight: $font-weight-bold
+    color: $gray-900
+    margin: 0
+
+    &--positive
+      color: $success
+
+    &--negative
+      color: $error
+
+// Status Badge Styles
+.report-status
+  display: inline-block
+  padding: $spacing-xs $spacing-md
+  border-radius: $radius-full
+  @include text-sm
+  font-weight: $font-weight-medium
+
+  &--ok
+    background-color: rgba(16, 185, 129, 0.1)
+    color: $success
+
+  &--baixo
+    background-color: rgba(245, 158, 11, 0.1)
+    color: $warning
+
+  &--vazio
+    background-color: rgba(239, 68, 68, 0.1)
+    color: $error
+
+.report-warning
+  color: $warning
+  font-weight: $font-weight-semibold
+
+@keyframes slideDown
+  from
+    opacity: 0
+    transform: translateY(-10px)
+  to
+    opacity: 1
+    transform: translateY(0px)
+

@@ -48,9 +48,7 @@ src/
     styles/          # Estilos globais
 ```
 
-## Documentacao
-
-- [Variaveis de Ambiente](docs/ENV_VARIABLES.md)
+## Documentacao- [Variaveis de Ambiente](docs/ENV_VARIABLES.md)
 - [Endpoints da API](docs/API_ENDPOINTS.md)
 - [Analise Dashboard Base](docs/ANALISE_DASHBOARD_BASE.md)
 - [Melhorias Implementadas](docs/MELHORIAS_IMPLEMENTADAS.md)

@@ -3,6 +3,7 @@ import './EditLocalizacaoModal.sass'
 import { FaTimes, FaMapMarkerAlt } from 'react-icons/fa'
 import { updateLocalizacao } from './location.service'
 import { Localizacao } from './location.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 
 interface EditLocalizacaoModalProps {
   isOpen: boolean
@@ -17,6 +18,7 @@ export function EditLocalizacaoModal({
   onUpdate,
   localizacao
 }: EditLocalizacaoModalProps) {
+  const toast = useToast()
   const [formData, setFormData] = useState({
     nome: '',
     descricao: '',
@@ -61,10 +63,10 @@ export function EditLocalizacaoModal({
       await updateLocalizacao(localizacao.id, formData)
       await onUpdate()
       onClose()
-      alert('Localização atualizada com sucesso!')
+      toast.success('Localização atualizada com sucesso!')
     } catch (error: any) {
       console.error('Erro ao atualizar localização:', error)
-      alert(error.message || 'Erro ao atualizar localização. Tente novamente.')
+      toast.error(error.message || 'Erro ao atualizar localização. Tente novamente.')
     } finally {
       setLoading(false)
     }

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import './Settings.sass'
 import MeuPerfil from './MeuPerfil'
 import Usuarios from './Usuarios'
+import { useIsMobile } from '../../shared/utils/useIsMobile'
+import SettingsMobile from './SettingsMobile'
 
 interface SettingsProps {
   currentPath?: string
@@ -9,6 +11,12 @@ interface SettingsProps {
 }
 
 function Settings({ currentPath, onNavigate }: SettingsProps) {
+  const isMobile = useIsMobile()
+  if (isMobile) return <SettingsMobile currentPath={currentPath} onNavigate={onNavigate} />
+  return <SettingsDesktop currentPath={currentPath} onNavigate={onNavigate} />
+}
+
+function SettingsDesktop({ currentPath, onNavigate }: SettingsProps) {
   const [activeTab, setActiveTab] = useState<'profile' | 'users'>('profile')
 
   useEffect(() => {

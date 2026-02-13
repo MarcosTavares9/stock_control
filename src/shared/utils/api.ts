@@ -1,28 +1,20 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { AppConfig, STORAGE_KEYS } from '../config/app.config';
 
+/** Rotas que NÃO devem disparar logout automático em caso de 401 */
+const AUTH_ROUTES = ['/auth/login', '/auth/register', '/auth/confirm-registration'];
+
 /**
- * Obtém dados da sessão do usuário
+ * Verifica se a URL da requisição é uma rota de autenticação
  */
-const getSessionData = () => {
-  const sessionItem = window.sessionStorage.getItem(STORAGE_KEYS.USER_KEY);
-  const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-  
-  if (sessionItem) {
-    try {
-      return JSON.parse(sessionItem);
-    } catch {
-    }
-  }
-  
-  return {
-    user_key: token || null,
-    tenant_id: sessionStorage.getItem(STORAGE_KEYS.COMPANY_ID) || null,
-  };
+const isAuthRoute = (url?: string): boolean => {
+  if (!url) return false;
+  return AUTH_ROUTES.some((route) => url.endsWith(route) || url.includes(route));
 };
 
 /**
  * Cria uma instância do axios com interceptors configurados
+ * Padrão baseado no projeto Onmai: Bearer token via localStorage
  */
 const createApiInstance = (baseURL: string, additionalHeaders = {}): AxiosInstance => {
   const instance = axios.create({
@@ -33,26 +25,23 @@ const createApiInstance = (baseURL: string, additionalHeaders = {}): AxiosInstan
     },
   });
 
+  // Configura o token inicial se existir no localStorage
+  const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+  if (savedToken) {
+    instance.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
+  }
+
   // Interceptor de requisição: adiciona headers de autenticação
   instance.interceptors.request.use(
     (config) => {
-      const { user_key, tenant_id } = getSessionData();
-      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
-      
+      const token = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+
       if (token) {
         config.headers['Authorization'] = `Bearer ${token}`;
       }
-      
-      if (user_key) {
-        config.headers['x-api-key'] = user_key;
-      }
-      
-      if (tenant_id) {
-        config.headers['x-tenant-id'] = tenant_id;
-      }
-      
+
       Object.assign(config.headers, additionalHeaders);
-      
+
       return config;
     },
     (error) => {
@@ -60,18 +49,26 @@ const createApiInstance = (baseURL: string, additionalHeaders = {}): AxiosInstan
     }
   );
 
-  // Interceptor de resposta: trata erros 401 (não autorizado)
+  // Interceptor de resposta: trata erros de forma diferenciada
   instance.interceptors.response.use(
-    (response) => {
-      return response;
-    },
-    async (error: AxiosError) => {
-      if (error.response?.status === 401) {
-        window.dispatchEvent(new Event('unauthorized'));
-        
-        sessionStorage.clear();
-        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-        localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    (response) => response,
+    (error: AxiosError) => {
+      if (error.response) {
+        const { status, config } = error.response;
+
+        // 401 - Não autorizado
+        if (status === 401) {
+          // Se for rota de login/register, NÃO limpa storage nem faz logout
+          // Apenas repassa o erro para o componente tratar
+          if (isAuthRoute(config.url)) {
+            return Promise.reject(error);
+          }
+
+          // Para outras rotas, limpa storage e notifica sessão expirada
+          localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
+          localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+          window.dispatchEvent(new Event('unauthorized'));
+        }
       }
 
       return Promise.reject(error);
@@ -81,26 +78,9 @@ const createApiInstance = (baseURL: string, additionalHeaders = {}): AxiosInstan
   return instance;
 };
 
-/**
- * Função para refresh token (pode ser implementada conforme necessário)
- */
-const refreshToken = async (): Promise<boolean> => {
-  const refreshTokenValue = sessionStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN) || localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
-
-  if (!refreshTokenValue) {
-    return false;
-  }
-
-  try {
-    return false;
-  } catch (e) {
-    return false;
-  }
-};
-
 const API_BASE_URL = AppConfig.getApiBaseUrl();
 const api = createApiInstance(API_BASE_URL);
 
-export { api, createApiInstance, refreshToken };
+export { api, createApiInstance };
 export type { AxiosInstance };
 

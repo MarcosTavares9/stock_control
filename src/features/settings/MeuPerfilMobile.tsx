@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import './MeuPerfilMobile.sass'
 import { useAuth } from '../../shared/contexts/AuthContext'
-import { getUserProfile, updateUserProfile } from './settings.service'
+import { useToast } from '../../shared/contexts/ToastContext'
+import { getUserProfile, updateUserProfile, updateProfilePicture } from './settings.service'
+import { uploadImage, IMAGE_ACCEPT } from '../../shared/services/image-upload.service'
 import { UserProfile } from './settings.types'
 import { 
   FaRegUser, 
   FaUpload,
   FaTrash,
-  FaPhone
+  FaPhone,
+  FaSpinner
 } from 'react-icons/fa'
 
 function MeuPerfilMobile() {
   const { user, updateUser } = useAuth()
+  const toast = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -104,10 +108,10 @@ function MeuPerfilMobile() {
         email: updatedProfile.email
       })
       
-      alert('Perfil atualizado com sucesso!')
+      toast.success('Perfil atualizado com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar perfil:', error)
-      alert('Erro ao salvar perfil. Tente novamente.')
+      toast.error('Erro ao salvar perfil. Tente novamente.')
     } finally {
       setSaving(false)
     }
@@ -139,28 +143,25 @@ function MeuPerfilMobile() {
 
   const handleUploadPicture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Arquivo muito grande. Máximo de 15MB.')
-      return
-    }
+    if (!file || !user?.id) return
 
     try {
       setIsUploading(true)
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const result = reader.result as string
-        setProfilePicture(result)
-      }
-      reader.readAsDataURL(file)
+      // Upload para Firebase Storage
+      const downloadUrl = await uploadImage(file, 'users')
       
-      alert('Foto atualizada com sucesso!')
-    } catch (error) {
+      // Salvar URL no backend
+      await updateProfilePicture(user.id, downloadUrl)
+      
+      // Atualizar estado local e contexto
+      setProfilePicture(downloadUrl)
+      updateUser({ photo: downloadUrl })
+      
+      toast.success('Foto atualizada com sucesso!')
+    } catch (error: any) {
       console.error('Erro ao fazer upload:', error)
-      alert('Erro ao fazer upload da foto.')
+      toast.error(error.message || 'Erro ao fazer upload da foto.')
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) {
@@ -169,8 +170,24 @@ function MeuPerfilMobile() {
     }
   }
 
-  const handleDeletePicture = () => {
-    setProfilePicture('')
+  const handleDeletePicture = async () => {
+    if (!user?.id) return
+
+    try {
+      setIsUploading(true)
+      
+      // Remover URL no backend
+      await updateProfilePicture(user.id, null)
+      
+      // Atualizar estado local e contexto
+      setProfilePicture('')
+      updateUser({ photo: undefined })
+    } catch (error) {
+      console.error('Erro ao remover foto:', error)
+      toast.error('Erro ao remover foto. Tente novamente.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   if (loading) {
@@ -208,14 +225,14 @@ function MeuPerfilMobile() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png,image/jpeg"
+            accept={IMAGE_ACCEPT}
             onChange={handleUploadPicture}
             className="meu-perfil-mobile__file-input"
             id="photo-upload-mobile"
           />
-          <label htmlFor="photo-upload-mobile" className="meu-perfil-mobile__photo-button">
-            <FaUpload size={12} />
-            Alterar foto
+          <label htmlFor="photo-upload-mobile" className={`meu-perfil-mobile__photo-button ${isUploading ? 'meu-perfil-mobile__photo-button--disabled' : ''}`}>
+            {isUploading ? <FaSpinner size={12} className="meu-perfil-mobile__spinner-icon" /> : <FaUpload size={12} />}
+            {isUploading ? 'Enviando...' : 'Alterar foto'}
           </label>
           {profilePicture && (
             <button

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Unauthorized.sass';
 import { getRoute } from '../../config/base-path';
-import { STORAGE_KEYS } from '../../config/app.config';
 
 interface UnauthorizedProps {
   redirectUrl?: string;
@@ -24,9 +23,7 @@ const Unauthorized = ({ redirectUrl }: UnauthorizedProps) => {
 
   const handleRedirect = () => {
     setIsOpen(false);
-    sessionStorage.clear();
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.AUTH_USER);
+    // O interceptor já limpou o storage — apenas redireciona
     const redirect = redirectUrl || '/login';
     window.location.href = getRoute(redirect);
   };

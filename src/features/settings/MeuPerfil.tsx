@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import './MeuPerfil.sass'
 import { useAuth } from '../../shared/contexts/AuthContext'
-import { getUserProfile, updateUserProfile } from './settings.service'
+import { useToast } from '../../shared/contexts/ToastContext'
+import { getUserProfile, updateUserProfile, updateProfilePicture } from './settings.service'
+import { uploadImage, IMAGE_ACCEPT, IMAGE_MAX_SIZE_MB } from '../../shared/services/image-upload.service'
 import { UserProfile } from './settings.types'
 import { 
   FaRegUser, 
   FaUpload,
   FaTrash,
-  FaPhone
+  FaPhone,
+  FaSpinner
 } from 'react-icons/fa'
 
 function MeuPerfil() {
   const { user, updateUser } = useAuth()
+  const toast = useToast()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
@@ -104,10 +108,10 @@ function MeuPerfil() {
         email: updatedProfile.email
       })
       
-      alert('Perfil atualizado com sucesso!')
+      toast.success('Perfil atualizado com sucesso!')
     } catch (error) {
       console.error('Erro ao salvar perfil:', error)
-      alert('Erro ao salvar perfil. Tente novamente.')
+      toast.error('Erro ao salvar perfil. Tente novamente.')
     } finally {
       setSaving(false)
     }
@@ -139,30 +143,25 @@ function MeuPerfil() {
 
   const handleUploadPicture = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (!file) return
-
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Arquivo muito grande. Máximo de 15MB.')
-      return
-    }
+    if (!file || !user?.id) return
 
     try {
       setIsUploading(true)
-      // Simular upload (em produção seria uma chamada real à API)
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const result = reader.result as string
-        setProfilePicture(result)
-        // TODO: Salvar no backend
-      }
-      reader.readAsDataURL(file)
+      // Upload para Firebase Storage
+      const downloadUrl = await uploadImage(file, 'users')
       
-      alert('Foto atualizada com sucesso!')
-    } catch (error) {
+      // Salvar URL no backend
+      await updateProfilePicture(user.id, downloadUrl)
+      
+      // Atualizar estado local e contexto
+      setProfilePicture(downloadUrl)
+      updateUser({ photo: downloadUrl })
+      
+      toast.success('Foto atualizada com sucesso!')
+    } catch (error: any) {
       console.error('Erro ao fazer upload:', error)
-      alert('Erro ao fazer upload da foto.')
+      toast.error(error.message || 'Erro ao fazer upload da foto.')
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) {
@@ -171,9 +170,24 @@ function MeuPerfil() {
     }
   }
 
-  const handleDeletePicture = () => {
-    setProfilePicture('')
-    // TODO: Remover do backend
+  const handleDeletePicture = async () => {
+    if (!user?.id) return
+
+    try {
+      setIsUploading(true)
+      
+      // Remover URL no backend
+      await updateProfilePicture(user.id, null)
+      
+      // Atualizar estado local e contexto
+      setProfilePicture('')
+      updateUser({ photo: undefined })
+    } catch (error) {
+      console.error('Erro ao remover foto:', error)
+      toast.error('Erro ao remover foto. Tente novamente.')
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   if (loading) {
@@ -214,21 +228,21 @@ function MeuPerfil() {
               </div>
               <div className="meu-perfil__photo-info">
                 <p className="meu-perfil__photo-title">Foto de perfil</p>
-                <p className="meu-perfil__photo-subtitle">PNG, JPEG menor que 15MB</p>
+                <p className="meu-perfil__photo-subtitle">JPG, PNG, WebP ou GIF (máx {IMAGE_MAX_SIZE_MB}MB)</p>
               </div>
             </div>
             <div className="meu-perfil__photo-actions">
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/png,image/jpeg"
+                accept={IMAGE_ACCEPT}
                 onChange={handleUploadPicture}
                 className="meu-perfil__file-input"
                 id="photo-upload"
               />
-              <label htmlFor="photo-upload" className="meu-perfil__photo-button">
-                <FaUpload size={12} />
-                Alterar foto
+              <label htmlFor="photo-upload" className={`meu-perfil__photo-button ${isUploading ? 'meu-perfil__photo-button--disabled' : ''}`}>
+                {isUploading ? <FaSpinner size={12} className="meu-perfil__spinner-icon" /> : <FaUpload size={12} />}
+                {isUploading ? 'Enviando...' : 'Alterar foto'}
               </label>
               {profilePicture && (
                 <button

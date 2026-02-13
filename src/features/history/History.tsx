@@ -15,6 +15,8 @@ import { listCategories } from '../categories/categories.service'
 import type { History as HistoryDomain } from './history.types'
 import type { Product } from '../products/products.types'
 import type { Category } from '../categories/categories.types'
+import { useIsMobile } from '../../shared/utils/useIsMobile'
+import HistoryMobile from './HistoryMobile'
 import './History.sass'
 
 interface HistoryEntry {
@@ -107,6 +109,12 @@ const formatarData = (data: Date): string => {
 }
 
 function History() {
+  const isMobile = useIsMobile()
+  if (isMobile) return <HistoryMobile />
+  return <HistoryDesktop />
+}
+
+function HistoryDesktop() {
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -169,6 +177,7 @@ function History() {
       key: 'tipo',
       label: 'Tipo',
       align: 'left',
+      mobileBadge: true,
       render: (item) => {
         const tipoColor = getTipoColor(item.tipo)
         return (
@@ -184,12 +193,14 @@ function History() {
     {
       key: 'produto',
       label: 'Produto',
-      align: 'left'
+      align: 'left',
+      mobileTitle: true
     },
     {
       key: 'categoria',
       label: 'Categoria',
-      align: 'left'
+      align: 'left',
+      mobileSubtitle: true
     },
     {
       key: 'quantidade',

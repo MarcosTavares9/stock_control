@@ -6,6 +6,13 @@ import Localizacao from "../../features/location/Localizacao";
 import History from "../../features/history/History";
 import Report from "../../features/report/Report";
 import Settings from "../../features/settings/Settings";
+import DashboardMobile from "../../features/dashboard/DashboardMobile";
+import ProductsMobile from "../../features/products/ProductsMobile";
+import CategoriesMobile from "../../features/categories/CategoriesMobile";
+import LocalizacaoMobile from "../../features/location/LocalizacaoMobile";
+import HistoryMobile from "../../features/history/HistoryMobile";
+import ReportMobile from "../../features/report/ReportMobile";
+import SettingsMobile from "../../features/settings/SettingsMobile";
 import { 
   FaChartLine, 
   FaBox, 
@@ -28,7 +35,8 @@ export interface RouteItem {
   path: string;
   label?: string;
   icon?: React.ReactNode;
-  component?: React.ComponentType<any>;
+  component?: React.ComponentType<any>; // Desktop component
+  mobileComponent?: React.ComponentType<any>; // Mobile component
   company_restriction?: string | string[] | null;
   disableSidebar?: boolean;
   children?: RouteItem[];
@@ -45,52 +53,19 @@ export interface CompanyRouteRule {
   desktop?: boolean;
 }
 
-/**
- * Regras de acesso por empresa (multi-tenant)
- * 
- * Exemplo de uso:
- * "empresa-uuid": [
- *   { path: "/dashboard" }, // Acesso liberado para todos
- *   {
- *     path: "/products",
- *     applications: [
- *       { id: null, roles: ["1", "6", "7"] }, // Todas as aplicações, roles específicos
- *       { id: 1, roles: ["1", "2"] }, // Aplicação específica
- *     ],
- *   },
- * ]
- */
 export const COMPANY_ALLOWED_PATHS: Record<string, CompanyRouteRule[]> = {
-  // Exemplo: adicione regras específicas por empresa aqui
-  // "empresa-exemplo-uuid": [
-  //   {
-  //     path: "/dashboard",
-  //     applications: [
-  //       { id: null, roles: ["1", "6", "7"] },
-  //     ],
-  //   },
-  // ],
 };
 
-/**
- * Configuração de rotas da aplicação
- * 
- * - applications: Define quais aplicações e roles podem acessar a rota
- *   - id: null = todas as aplicações
- *   - roles: null = todos os roles
- * - company_restriction: Restringe a rota para empresas específicas
- * - mobile/desktop: Define se a rota está disponível em mobile/desktop
- * - external: Define se é uma rota externa (link)
- */
 export const ROUTES: RouteItem[] = [
   {
     path: "/dashboard",
     applications: [
-      { id: null, roles: null }, // Acesso liberado para todos
+      { id: null, roles: null },
     ],
     label: "Dashboard",
     icon: <FaChartLine size={20} />,
     component: Dashboard,
+    mobileComponent: DashboardMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -99,11 +74,12 @@ export const ROUTES: RouteItem[] = [
   {
     path: "/products",
     applications: [
-      { id: null, roles: null }, // Acesso liberado para todos
+      { id: null, roles: null },
     ],
     label: "Produtos",
     icon: <FaBox size={20} />,
     component: Products,
+    mobileComponent: ProductsMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -117,6 +93,7 @@ export const ROUTES: RouteItem[] = [
     label: "Categorias",
     icon: <FaTags size={20} />,
     component: Categories,
+    mobileComponent: CategoriesMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -130,6 +107,7 @@ export const ROUTES: RouteItem[] = [
     label: "Localização",
     icon: <FaMapMarkerAlt size={20} />,
     component: Localizacao,
+    mobileComponent: LocalizacaoMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -143,6 +121,7 @@ export const ROUTES: RouteItem[] = [
     label: "Histórico",
     icon: <FaHistory size={20} />,
     component: History,
+    mobileComponent: HistoryMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -156,6 +135,7 @@ export const ROUTES: RouteItem[] = [
     label: "Relatório",
     icon: <FaFileAlt size={20} />,
     component: Report,
+    mobileComponent: ReportMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -169,6 +149,7 @@ export const ROUTES: RouteItem[] = [
     label: "Configurações",
     icon: <FaCog size={20} />,
     component: Settings,
+    mobileComponent: SettingsMobile,
     company_restriction: null,
     mobile: true,
     desktop: true,
@@ -182,6 +163,7 @@ export const ROUTES: RouteItem[] = [
         label: "Meu Perfil",
         icon: <FaUser size={18} />,
         component: Settings,
+        mobileComponent: SettingsMobile,
         company_restriction: null,
         mobile: true,
         desktop: true,
@@ -190,11 +172,12 @@ export const ROUTES: RouteItem[] = [
       {
         path: "/settings/users",
         applications: [
-          { id: null, roles: ["1", "6", "7"] }, // Apenas admins
+          { id: null, roles: ["1", "6", "7"] },
         ],
         label: "Usuários",
         icon: <FaUsers size={18} />,
         component: Settings,
+        mobileComponent: SettingsMobile,
         company_restriction: null,
         mobile: true,
         desktop: true,
@@ -203,4 +186,3 @@ export const ROUTES: RouteItem[] = [
     ],
   },
 ];
-

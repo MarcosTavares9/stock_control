@@ -34,6 +34,7 @@ export interface UpdateProfileRequest {
   bairro?: string
   cidade?: string
   estado?: string
+  fotoPerfil?: string | null
 }
 
 export interface Usuario {

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { FaTimes } from 'react-icons/fa'
+import { useToast } from '../../shared/contexts/ToastContext'
 import { 
   FaLaptop,
   FaMouse,
@@ -52,6 +53,7 @@ export function CreateCategoryModal({
   onClose,
   onCreate
 }: CreateCategoryModalProps) {
+  const toast = useToast()
   const [nome, setNome] = useState('')
   const [selectedIcon, setSelectedIcon] = useState<string>('box')
 
@@ -59,7 +61,7 @@ export function CreateCategoryModal({
     e.preventDefault()
 
     if (!nome.trim()) {
-      alert('Por favor, preencha o nome da categoria')
+      toast.warning('Por favor, preencha o nome da categoria')
       return
     }
 

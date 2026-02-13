@@ -15,6 +15,7 @@ import { listCategories } from '../categories/categories.service'
 import type { Product as ProductDomain } from '../products/products.types'
 import type { History as HistoryDomain } from '../history/history.types'
 import type { Category } from '../categories/categories.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 import './ReportMobile.sass'
 
 interface Product {
@@ -76,6 +77,7 @@ const formatarDataParaNomeArquivo = (): string => {
 }
 
 function ReportMobile() {
+  const toast = useToast()
   const [products, setProducts] = useState<Product[]>([])
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([])
   const [, setCategories] = useState<Category[]>([])
@@ -212,7 +214,7 @@ function ReportMobile() {
       
       setShowExportMenu(false)
     } catch (error) {
-      alert('Erro ao exportar o relatório. Por favor, tente novamente.')
+      toast.error('Erro ao exportar o relatório. Por favor, tente novamente.')
     }
   }
 

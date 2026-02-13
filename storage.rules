@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Regras para imagens de produtos
+    match /products/{imageId} {
+      // Qualquer pessoa pode ler (para exibir as imagens)
+      allow read;
+      // Qualquer pessoa autenticada ou não pode fazer upload
+      // (Como não usamos Firebase Auth, permitimos write público
+      //  mas limitamos tamanho e tipo de arquivo)
+      allow write: if request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // Regras para imagens de usuários (futuramente)
+    match /users/{imageId} {
+      allow read;
+      allow write: if request.resource.size < 2 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

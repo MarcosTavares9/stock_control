@@ -4,6 +4,8 @@ import { getDashboardStats, getLowStockProducts } from './dashboard.service'
 import { listCategories } from '../categories/categories.service'
 import type { LowStockProduct } from './dashboard.types'
 import type { Category } from '../categories/categories.types'
+import { useIsMobile } from '../../shared/utils/useIsMobile'
+import DashboardMobile from './DashboardMobile'
 import './Dashboard.sass'
 
 interface ProductDisplay {
@@ -16,6 +18,16 @@ interface ProductDisplay {
 }
 
 function Dashboard() {
+  const isMobile = useIsMobile()
+
+  if (isMobile) {
+    return <DashboardMobile />
+  }
+
+  return <DashboardDesktop />
+}
+
+function DashboardDesktop() {
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalCategories: 0,
@@ -109,12 +121,14 @@ function Dashboard() {
     {
       key: 'nome',
       label: 'Produto',
-      align: 'left'
+      align: 'left',
+      mobileTitle: true
     },
     {
       key: 'categoria',
       label: 'Categoria',
-      align: 'left'
+      align: 'left',
+      mobileSubtitle: true
     },
     {
       key: 'quantidade',
@@ -132,6 +146,7 @@ function Dashboard() {
       key: 'status',
       label: 'Status',
       align: 'center',
+      mobileBadge: true,
       render: (item) => {
         const statusLabels = {
           ok: 'Ok',

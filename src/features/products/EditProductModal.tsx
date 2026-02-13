@@ -4,6 +4,7 @@ import { listCategories } from '../categories/categories.service'
 import { listLocalizacoes } from '../location/location.service'
 import type { Category } from '../categories/categories.types'
 import type { Localizacao } from '../location/location.types'
+import { ImageUpload } from '../../shared/components/ImageUpload/ImageUpload'
 import './EditProductModal.sass'
 
 interface Product {
@@ -107,7 +108,8 @@ export function EditProductModal({
     const updatedProduct = {
       ...editedProduct,
       quantidade: quantidadeInput === '' ? 0 : parseInt(quantidadeInput) || 0,
-      estoqueMinimo: estoqueMinimoInput === '' ? 0 : parseInt(estoqueMinimoInput) || 0
+      estoqueMinimo: estoqueMinimoInput === '' ? 0 : parseInt(estoqueMinimoInput) || 0,
+      imagem: editedProduct.imagem
     }
     
     // Sempre salvar o produto atual antes de avançar
@@ -127,7 +129,8 @@ export function EditProductModal({
     const updatedProduct = {
       ...editedProduct,
       quantidade: quantidadeInput === '' ? 0 : parseInt(quantidadeInput) || 0,
-      estoqueMinimo: estoqueMinimoInput === '' ? 0 : parseInt(estoqueMinimoInput) || 0
+      estoqueMinimo: estoqueMinimoInput === '' ? 0 : parseInt(estoqueMinimoInput) || 0,
+      imagem: editedProduct.imagem
     }
     onPrevious(updatedProduct)
   }
@@ -251,6 +254,16 @@ export function EditProductModal({
                   placeholder="Digite o valor"
                 />
               </div>
+            </div>
+
+            <div className="edit-product-modal__form-group">
+              <label className="edit-product-modal__form-label">Imagem do Produto</label>
+              <ImageUpload
+                currentImageUrl={editedProduct.imagem || null}
+                onImageUploaded={(url) => setEditedProduct({ ...editedProduct, imagem: url })}
+                onImageRemoved={() => setEditedProduct({ ...editedProduct, imagem: undefined })}
+                folder="products"
+              />
             </div>
           </div>
         </div>

@@ -1,6 +1,10 @@
 @use '../../styles/variables' as *
 @use '../../styles/mixins' as *
 
+// ============================================================
+// Desktop Table
+// ============================================================
+
 .table-container
   background-color: $white
   border-radius: $radius-md
@@ -118,3 +122,240 @@
   accent-color: $primary-500
   border-radius: $radius-sm
 
+// ============================================================
+// Mobile Card View
+// ============================================================
+
+.table-mobile
+  background-color: transparent
+
+  &__toolbar
+    display: flex
+    align-items: center
+    justify-content: space-between
+    padding: $spacing-sm $spacing-md
+    background: $white
+    border-radius: $radius-lg
+    margin-bottom: $spacing-md
+    box-shadow: $shadow-sm
+
+  &__select-all
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    @include text-sm
+    color: $gray-700
+    cursor: pointer
+    font-weight: $font-weight-medium
+
+  &__selected-count
+    @include text-xs
+    color: $primary-600
+    font-weight: $font-weight-semibold
+    background: $primary-50
+    padding: 2px $spacing-sm
+    border-radius: $radius-full
+
+  &__list
+    display: flex
+    flex-direction: column
+    gap: $spacing-sm
+
+  &__empty
+    text-align: center
+    padding: $spacing-2xl
+    color: $gray-500
+    @include text-sm
+    background: $white
+    border-radius: $radius-lg
+    box-shadow: $shadow-sm
+
+// ============================================================
+// Mobile Card - Cada item
+// ============================================================
+
+.table-mobile-card
+  background: $white
+  border-radius: $radius-lg
+  box-shadow: $shadow-sm
+  border: 2px solid transparent
+  transition: all $transition-base
+  overflow: hidden
+
+  &--selected
+    border-color: $primary-500
+    background: rgba($primary-50, 0.5)
+
+  &__header
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-md
+    min-height: 56px
+
+  &__checkbox
+    flex-shrink: 0
+    display: flex
+    align-items: center
+
+  &__image
+    width: 48px
+    height: 48px
+    border-radius: $radius-md
+    overflow: hidden
+    flex-shrink: 0
+    background: $gray-50
+    display: flex
+    align-items: center
+    justify-content: center
+
+    // Ajustar imagens de produto dentro do card
+    .product-image
+      width: 100%
+      height: 100%
+
+    .product-image__img
+      width: 48px
+      height: 48px
+      border-radius: $radius-md
+
+    .product-image__icon
+      width: 48px
+      height: 48px
+      border-radius: $radius-md
+
+      svg
+        width: 22px
+        height: 22px
+
+  &__title-area
+    flex: 1
+    min-width: 0
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+  &__title
+    @include text-sm
+    font-weight: $font-weight-bold
+    color: $gray-900
+    margin: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  &__subtitle
+    @include text-xs
+    color: $gray-500
+    margin: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap
+
+  &__header-right
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    flex-shrink: 0
+
+  &__badge
+    // Estilos do badge são herdados do .table-status
+    display: flex
+    align-items: center
+
+  &__actions-wrapper
+    position: relative
+
+  &__menu-btn
+    display: flex
+    align-items: center
+    justify-content: center
+    width: 32px
+    height: 32px
+    border: none
+    background: transparent
+    color: $gray-500
+    border-radius: $radius-md
+    cursor: pointer
+    transition: all $transition-base
+
+    &:hover
+      background: $gray-100
+      color: $gray-700
+
+    &:active
+      background: $gray-200
+
+  &__actions-overlay
+    position: fixed
+    top: 0
+    left: 0
+    right: 0
+    bottom: 0
+    z-index: 99
+
+  &__actions-dropdown
+    position: absolute
+    right: 0
+    top: 100%
+    margin-top: 4px
+    background: $white
+    border-radius: $radius-md
+    box-shadow: $shadow-lg
+    border: 1px solid $gray-200
+    padding: $spacing-xs
+    z-index: 100
+    min-width: 120px
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+    // Estilizar botões de ação dentro do dropdown
+    .table-action-button
+      width: 100%
+      padding: $spacing-sm $spacing-md
+      border-radius: $radius-sm
+      justify-content: flex-start
+      gap: $spacing-sm
+      @include text-sm
+
+      &--edit
+        color: $primary-600
+
+        &:hover
+          background: $primary-50
+
+      &--delete
+        color: $error
+
+        &:hover
+          background: rgba($error, 0.08)
+
+  // Detalhes - linhas label/valor
+  &__details
+    border-top: 1px solid $gray-100
+    padding: $spacing-sm $spacing-md $spacing-md
+
+  &__detail-row
+    display: flex
+    justify-content: space-between
+    align-items: center
+    padding: 6px 0
+    gap: $spacing-sm
+
+    &:not(:last-child)
+      border-bottom: 1px solid $gray-50
+
+  &__detail-label
+    @include text-xs
+    color: $gray-500
+    font-weight: $font-weight-medium
+    flex-shrink: 0  &__detail-value
+    @include text-sm
+    color: $gray-800
+    font-weight: $font-weight-medium
+    text-align: right
+    min-width: 0
+    overflow: hidden
+    text-overflow: ellipsis
+    white-space: nowrap

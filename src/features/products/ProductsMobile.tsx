@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { 
   FaSearch, 
   FaPlus,
@@ -17,12 +17,19 @@ import {
 } from 'react-icons/fa'
 import { EditProductModal } from './EditProductModal'
 import { CreateProductModal } from './CreateProductModal'
+import { listProducts, createProduct, updateProduct, deleteProduct } from './products.service'
+import { listCategories } from '../categories/categories.service'
+import { listLocalizacoes } from '../location/location.service'
+import type { Product as ProductDomain } from './products.types'
+import type { Category } from '../categories/categories.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 import './ProductsMobile.sass'
 
 interface Product {
   id: string
   nome: string
   categoria: string
+  categoriaIcon?: string
   quantidade: number
   estoqueMinimo: number
   localizacao: string
@@ -30,60 +37,47 @@ interface Product {
   imagem?: string
 }
 
-const produtosBase = [
-  { nome: 'Notebook Dell Inspiron', categoria: 'Eletrônicos' },
-  { nome: 'Mouse Logitech', categoria: 'Periféricos' },
-  { nome: 'Teclado Mecânico', categoria: 'Periféricos' },
-  { nome: 'Monitor LG 27"', categoria: 'Eletrônicos' },
-  { nome: 'Webcam HD', categoria: 'Periféricos' },
-  { nome: 'Headset Gamer', categoria: 'Áudio' },
-  { nome: 'SSD 500GB', categoria: 'Armazenamento' },
-  { nome: 'Memória RAM 16GB', categoria: 'Componentes' },
-  { nome: 'Cadeira Ergonômica', categoria: 'Móveis' },
-  { nome: 'Mesa Escritório', categoria: 'Móveis' }
-]
-
-const gerarLocalizacao = (index: number): string => {
-  const letras = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J']
-  const numero = Math.floor(index / 10) + 1
-  const letra = letras[index % 10]
-  return `${letra}${numero}-${letras[(index + 1) % 10]}${numero + 1}`
+const mapProductFromDomain = (product: ProductDomain, categories: Category[], locations: Array<{ id: string; nome: string }>): Product => {
+  const category = categories.find(c => c.uuid === product.category_id)
+  const location = locations.find(l => l.id === product.location_id)
+  
+  return {
+    id: product.uuid,
+    nome: product.name,
+    categoria: category?.name || 'Sem categoria',
+    categoriaIcon: category?.icon_name || undefined,
+    quantidade: product.quantity,
+    estoqueMinimo: product.minimum_stock,
+    localizacao: location?.nome || 'Sem localização',
+    status: product.stock_status === 'empty' ? 'vazio' : product.stock_status === 'low' ? 'baixo' : 'ok',
+    imagem: product.image || undefined
+  }
 }
 
-const calcularStatus = (quantidade: number, estoqueMinimo: number): 'ok' | 'baixo' | 'vazio' => {
-  if (quantidade === 0) {
-    return 'vazio'
-  }
-  if (quantidade < estoqueMinimo) {
-    return 'baixo'
-  }
-  return 'ok'
-}
-
-const getCategoryIcon = (categoria: string) => {
-  const categoriaLower = categoria.toLowerCase()
+const getCategoryIcon = (iconName?: string) => {
+  if (!iconName) return <FaBox size={28} />
   
   const iconMap: Record<string, React.ReactNode> = {
-    'eletrônicos': <FaLaptop size={28} />,
-    'eletronicos': <FaLaptop size={28} />,
-    'periféricos': <FaMouse size={28} />,
-    'perifericos': <FaMouse size={28} />,
-    'áudio': <FaHeadphones size={28} />,
-    'audio': <FaHeadphones size={28} />,
-    'armazenamento': <FaHdd size={28} />,
-    'componentes': <FaMemory size={28} />,
-    'móveis': <FaChair size={28} />,
-    'moveis': <FaChair size={28} />,
-    'escritório': <FaPrint size={28} />,
-    'escritorio': <FaPrint size={28} />,
-    'limpeza': <FaSprayCan size={28} />,
-    'alimentação': <FaUtensils size={28} />,
-    'alimentacao': <FaUtensils size={28} />,
-    'vestuário': <FaTshirt size={28} />,
-    'vestuario': <FaTshirt size={28} />
+    'laptop': <FaLaptop size={28} />,
+    'mouse': <FaMouse size={28} />,
+    'headphones': <FaHeadphones size={28} />,
+    'hdd': <FaHdd size={28} />,
+    'memory': <FaMemory size={28} />,
+    'chair': <FaChair size={28} />,
+    'print': <FaPrint size={28} />,
+    'spray': <FaSprayCan size={28} />,
+    'spraycan': <FaSprayCan size={28} />,
+    'utensils': <FaUtensils size={28} />,
+    'tshirt': <FaTshirt size={28} />,
+    'box': <FaBox size={28} />,
+    'electronics': <FaLaptop size={28} />,
+    'computer': <FaLaptop size={28} />,
+    'furniture': <FaChair size={28} />,
+    'office': <FaPrint size={28} />,
+    'cleaning': <FaSprayCan size={28} />
   }
   
-  return iconMap[categoriaLower] || <FaBox size={28} />
+  return iconMap[iconName.toLowerCase()] || <FaBox size={28} />
 }
 
 const ProductImage = ({ product }: { product: Product }) => {
@@ -106,39 +100,18 @@ const ProductImage = ({ product }: { product: Product }) => {
   return (
     <div className="products-mobile__image">
       <div className="products-mobile__image-icon">
-        {getCategoryIcon(product.categoria)}
+        {getCategoryIcon(product.categoriaIcon)}
       </div>
     </div>
   )
 }
 
-const gerarImagemProduto = (id: number): string => {
-  const seed = id % 1000
-  return `https://picsum.photos/seed/${seed}/80/80`
-}
-
-const mockProducts: Product[] = Array.from({ length: 200 }, (_, index) => {
-  const produtoBase = produtosBase[index % produtosBase.length]
-  const quantidade = Math.floor(Math.random() * 50)
-  const estoqueMinimo = Math.floor(Math.random() * 15) + 5
-  const status = calcularStatus(quantidade, estoqueMinimo)
-  const numId = index + 1
-  const temImagem = Math.random() > 0.2
-  
-  return {
-    id: String(numId),
-    nome: `${produtoBase.nome} ${index > produtosBase.length - 1 ? `#${Math.floor(index / produtosBase.length) + 1}` : ''}`,
-    categoria: produtoBase.categoria,
-    quantidade,
-    estoqueMinimo,
-    localizacao: gerarLocalizacao(index),
-    status,
-    imagem: temImagem ? gerarImagemProduto(numId) : undefined
-  }
-})
-
 function ProductsMobile() {
-  const [products, setProducts] = useState<Product[]>(mockProducts)
+  const toast = useToast()
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [locations, setLocations] = useState<Array<{ id: string; nome: string }>>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategoria, setSelectedCategoria] = useState<string>('')
   const [selectedStatus, setSelectedStatus] = useState<string>('')
@@ -147,6 +120,34 @@ function ProductsMobile() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [currentProductIndex, setCurrentProductIndex] = useState(0)
   const [productsToEdit, setProductsToEdit] = useState<Product[]>([])
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        const [productsData, categoriesData, locationsData] = await Promise.all([
+          listProducts(),
+          listCategories(),
+          listLocalizacoes()
+        ])
+        
+        setCategories(categoriesData)
+        const mappedLocations = locationsData.map(loc => ({ id: loc.id, nome: loc.nome }))
+        setLocations(mappedLocations)
+        
+        const mappedProducts = productsData.map(product => 
+          mapProductFromDomain(product, categoriesData, mappedLocations)
+        )
+        setProducts(mappedProducts)
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   const categoriasUnicas = useMemo(() => {
     return Array.from(new Set(products.map(p => p.categoria))).sort()
@@ -157,11 +158,8 @@ function ProductsMobile() {
       const matchSearch = searchTerm === '' || 
         produto.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
         produto.localizacao.toLowerCase().includes(searchTerm.toLowerCase())
-      
       const matchCategoria = selectedCategoria === '' || produto.categoria === selectedCategoria
-      
       const matchStatus = selectedStatus === '' || produto.status === selectedStatus
-
       return matchSearch && matchCategoria && matchStatus
     })
   }, [products, searchTerm, selectedCategoria, selectedStatus])
@@ -169,7 +167,6 @@ function ProductsMobile() {
   const handleOpenEditModal = () => {
     const selectedProductsList = produtosFiltrados.filter(p => selectedProducts.has(p.id))
     if (selectedProductsList.length === 0) return
-    
     setProductsToEdit(selectedProductsList)
     setCurrentProductIndex(0)
     setIsModalOpen(true)
@@ -197,25 +194,37 @@ function ProductsMobile() {
     }
   }
 
-  const handleModalSave = (updatedProducts: Product[]) => {
-    setProducts(prevProducts => {
-      const newProducts = [...prevProducts]
-      updatedProducts.forEach(updatedProduct => {
-        const index = newProducts.findIndex(p => p.id === updatedProduct.id)
-        if (index !== -1) {
-          newProducts[index] = {
-            ...updatedProduct,
-            status: calcularStatus(updatedProduct.quantidade, updatedProduct.estoqueMinimo)
-          }
+  const handleModalSave = async (updatedProducts: Product[]) => {
+    try {
+      for (const updatedProduct of updatedProducts) {
+        const category = categories.find(c => c.name === updatedProduct.categoria)
+        const location = locations.find(l => l.nome === updatedProduct.localizacao)
+        
+        if (category && location) {
+          await updateProduct(updatedProduct.id, {
+            name: updatedProduct.nome,
+            category_id: category.uuid,
+            location_id: location.id,
+            quantity: updatedProduct.quantidade,
+            minimum_stock: updatedProduct.estoqueMinimo,
+            image: updatedProduct.imagem || null
+          })
         }
-      })
-      return newProducts
-    })
-    
-    setSelectedProducts(new Set())
-    setIsModalOpen(false)
-    setProductsToEdit([])
-    setCurrentProductIndex(0)
+      }
+
+      // Recarregar produtos
+      const productsData = await listProducts()
+      const mappedProducts = productsData.map(product => 
+        mapProductFromDomain(product, categories, locations)
+      )
+      setProducts(mappedProducts)
+      setSelectedProducts(new Set())
+      setIsModalOpen(false)
+      setProductsToEdit([])
+      setCurrentProductIndex(0)
+    } catch (error) {
+      toast.error('Erro ao atualizar produtos. Tente novamente.')
+    }
   }
 
   const handleCloseModal = () => {
@@ -224,12 +233,19 @@ function ProductsMobile() {
     setCurrentProductIndex(0)
   }
 
-  const handleModalDelete = (productId: string) => {
+  const handleModalDelete = async (productId: string) => {
+    try {
+      await deleteProduct(productId)
+    } catch (error: any) {
+      if (error?.response?.status !== 404) {
+        toast.error('Erro ao deletar produto.')
+        return
+      }
+    }
+
     setProducts(prevProducts => prevProducts.filter(p => p.id !== productId))
-    
     const updatedProducts = productsToEdit.filter(p => p.id !== productId)
     setProductsToEdit(updatedProducts)
-    
     setSelectedProducts(prev => {
       const newSet = new Set(prev)
       newSet.delete(productId)
@@ -241,66 +257,85 @@ function ProductsMobile() {
       setCurrentProductIndex(0)
       return
     }
-    
     if (currentProductIndex >= updatedProducts.length) {
       setCurrentProductIndex(updatedProducts.length - 1)
     }
   }
 
-  const handleCreateProduct = () => {
-    setIsCreateModalOpen(true)
-  }
-
-  const handleCreateProductSubmit = (productData: Omit<Product, 'id' | 'status'>) => {
-    const maxId = Math.max(...products.map(p => Number(p.id)), 0) + 1
-    const status = calcularStatus(productData.quantidade, productData.estoqueMinimo)
-    
-    const newProduct: Product = {
-      id: String(maxId),
-      ...productData,
-      status,
-      imagem: gerarImagemProduto(maxId)
-    }
-    
-    setProducts(prevProducts => [...prevProducts, newProduct])
-  }
-
-  const handleCreateMultipleProducts = (productsData: Omit<Product, 'id' | 'status'>[]) => {
-    if (productsData.length === 0) return
-
-    const maxId = Math.max(...products.map(p => Number(p.id)), 0)
-    const newProducts: Product[] = productsData.map((productData, index) => {
-      const newId = maxId + index + 1
-      return {
-        id: String(newId),
-        ...productData,
-        status: calcularStatus(productData.quantidade, productData.estoqueMinimo),
-        imagem: gerarImagemProduto(newId)
+  const handleCreateProductSubmit = async (productData: Omit<Product, 'id' | 'status'>) => {
+    try {
+      const category = categories.find(c => c.name === productData.categoria)
+      const location = locations.find(l => l.nome === productData.localizacao)
+      
+      if (!category || !location) {
+        toast.error('Categoria ou localização não encontrada')
+        return
       }
-    })
-    
-    setProducts(prevProducts => [...prevProducts, ...newProducts])
+      
+      const newProduct = await createProduct({
+        name: productData.nome,
+        category_id: category.uuid,
+        location_id: location.id,
+        quantity: productData.quantidade,
+        minimum_stock: productData.estoqueMinimo,
+        image: productData.imagem || null
+      })
+      
+      const mappedProduct = mapProductFromDomain(newProduct, categories, locations)
+      setProducts(prevProducts => [...prevProducts, mappedProduct])
+    } catch (error) {
+      toast.error('Erro ao criar produto. Tente novamente.')
+    }
+  }
+
+  const handleCreateMultipleProducts = async (productsData: Omit<Product, 'id' | 'status'>[]) => {
+    if (productsData.length === 0) return
+    try {
+      const createdProducts = await Promise.all(
+        productsData.map(productData => {
+          const category = categories.find(c => c.name === productData.categoria)
+          const location = locations.find(l => l.nome === productData.localizacao)
+          if (!category || !location) throw new Error(`Dados inválidos para ${productData.nome}`)
+          return createProduct({
+            name: productData.nome,
+            category_id: category.uuid,
+            location_id: location.id,
+            quantity: productData.quantidade,
+            minimum_stock: productData.estoqueMinimo,
+            image: productData.imagem || null
+          })
+        })
+      )
+      const mapped = createdProducts.map(p => mapProductFromDomain(p, categories, locations))
+      setProducts(prev => [...prev, ...mapped])
+    } catch (error) {
+      toast.error('Erro ao criar produtos.')
+    }
   }
 
   const toggleProductSelection = (productId: string) => {
     setSelectedProducts(prev => {
       const newSet = new Set(prev)
-      if (newSet.has(productId)) {
-        newSet.delete(productId)
-      } else {
-        newSet.add(productId)
-      }
+      if (newSet.has(productId)) newSet.delete(productId)
+      else newSet.add(productId)
       return newSet
     })
   }
 
-  const getStatusLabel = (status: 'ok' | 'baixo' | 'vazio') => {
-    const statusLabels = {
-      ok: 'Estoque Ok',
-      baixo: 'Estoque Baixo',
-      vazio: 'Estoque Vazio'
-    }
-    return statusLabels[status]
+  const statusLabels: Record<string, string> = {
+    ok: 'Estoque Ok',
+    baixo: 'Estoque Baixo',
+    vazio: 'Estoque Vazio'
+  }
+
+  if (loading) {
+    return (
+      <div className="products-mobile">
+        <div className="products-mobile__loading">
+          <p>Carregando produtos...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -308,9 +343,6 @@ function ProductsMobile() {
       <div className="products-mobile__header">
         <div className="products-mobile__header-content">
           <h1 className="products-mobile__title">Produtos</h1>
-          <p className="products-mobile__description">
-            Controle de produtos do estoque
-          </p>
         </div>
         <div className="products-mobile__header-actions">
           {selectedProducts.size > 0 && (
@@ -323,7 +355,7 @@ function ProductsMobile() {
           )}
           <button 
             className="products-mobile__create-button"
-            onClick={handleCreateProduct}
+            onClick={() => setIsCreateModalOpen(true)}
           >
             <FaPlus size={18} />
           </button>
@@ -349,9 +381,7 @@ function ProductsMobile() {
           >
             <option value="">Todas categorias</option>
             {categoriasUnicas.map(categoria => (
-              <option key={categoria} value={categoria}>
-                {categoria}
-              </option>
+              <option key={categoria} value={categoria}>{categoria}</option>
             ))}
           </select>
           <select
@@ -396,7 +426,7 @@ function ProductsMobile() {
                       <span>{product.localizacao}</span>
                     </div>
                     <span className={`products-mobile__card-status products-mobile__card-status--${product.status}`}>
-                      {getStatusLabel(product.status)}
+                      {statusLabels[product.status]}
                     </span>
                   </div>
                 </div>
@@ -429,4 +459,3 @@ function ProductsMobile() {
 }
 
 export default ProductsMobile
-

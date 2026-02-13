@@ -4,8 +4,10 @@ import { FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa'
 import { CreateUsuarioModal } from './CreateUsuarioModal'
 import { listUsuarios, createUsuario, updateUsuario, deleteUsuario } from './settings.service'
 import { Usuario, CreateUsuarioRequest, UpdateUsuarioRequest } from './settings.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 
 function UsuariosMobile() {
+  const toast = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,7 +25,7 @@ function UsuariosMobile() {
       setUsuarios(data)
     } catch (error) {
       console.error('Erro ao carregar usuários:', error)
-      alert('Erro ao carregar usuários')
+      toast.error('Erro ao carregar usuários')
     } finally {
       setLoading(false)
     }
@@ -55,23 +57,23 @@ function UsuariosMobile() {
     try {
       await deleteUsuario(id)
       await loadUsuarios()
-      alert('Usuário excluído com sucesso!')
+      toast.success('Usuário excluído com sucesso!')
     } catch (error) {
       console.error('Erro ao excluir usuário:', error)
-      alert('Erro ao excluir usuário. Tente novamente.')
+      toast.error('Erro ao excluir usuário. Tente novamente.')
     }
   }
 
   const handleCreateUsuario = async (data: CreateUsuarioRequest) => {
     await createUsuario(data)
     await loadUsuarios()
-    alert('Usuário criado com sucesso!')
+    toast.success('Usuário criado com sucesso!')
   }
 
   const handleUpdateUsuario = async (id: string, data: UpdateUsuarioRequest) => {
     await updateUsuario(id, data)
     await loadUsuarios()
-    alert('Usuário atualizado com sucesso!')
+    toast.success('Usuário atualizado com sucesso!')
   }
 
   return (

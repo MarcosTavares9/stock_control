@@ -1,5 +1,6 @@
 @use '../../shared/styles/variables' as *
 @use '../../shared/styles/mixins' as *
+@use '../../shared/styles/modal-mobile' as *
 
 .edit-localizacao-modal
   position: fixed
@@ -13,6 +14,8 @@
   justify-content: center
   padding: $spacing-lg
 
+  @include modal-overlay-mobile
+
   &__overlay
     position: absolute
     top: 0
@@ -21,6 +24,7 @@
     bottom: 0
     background-color: rgba($black, 0.5)
     backdrop-filter: blur(4px)
+    animation: modalFadeIn 0.2s ease-out
 
   &__content
     position: relative
@@ -32,6 +36,11 @@
     max-height: 90vh
     overflow-y: auto
     z-index: 1001
+    display: flex
+    flex-direction: column
+
+    @include modal-container-mobile
+    @include modal-handle
 
   &__header
     display: flex
@@ -39,12 +48,17 @@
     align-items: center
     padding: $spacing-lg
     border-bottom: 1px solid $gray-200
+    flex-shrink: 0
+
+    @include modal-header-mobile
 
   &__title
     margin: 0
     @include text-xl
     font-weight: $font-weight-semibold
     color: $gray-700
+
+    @include modal-title-mobile
 
   &__close
     background: none
@@ -57,6 +71,8 @@
     justify-content: center
     border-radius: $radius-md
     transition: all $transition-base
+    min-width: 40px
+    min-height: 40px
 
     &:hover
       background-color: $gray-100
@@ -67,6 +83,13 @@
     display: flex
     flex-direction: column
     gap: $spacing-lg
+    flex: 1
+    overflow-y: auto
+
+    @media (max-width: 767px)
+      padding: $spacing-md
+      gap: $spacing-md
+      -webkit-overflow-scrolling: touch
 
   &__form-group
     display: flex
@@ -77,6 +100,8 @@
     @include text-sm
     font-weight: $font-weight-medium
     color: $gray-700
+
+    @include modal-label-mobile
 
   &__input-wrapper
     position: relative
@@ -117,6 +142,8 @@
         border-color: $error
         box-shadow: 0 0 0 3px rgba($error, 0.1)
 
+    @include modal-input-mobile
+
   select.edit-localizacao-modal__input
     padding-left: $spacing-md
     cursor: pointer
@@ -125,6 +152,8 @@
     background-repeat: no-repeat
     background-position: right $spacing-md center
     padding-right: 2.5rem
+
+    @include modal-select-mobile
 
   &__textarea
     width: 100%
@@ -146,6 +175,8 @@
     &::placeholder
       color: $gray-400
 
+    @include modal-textarea-mobile
+
   &__error
     @include text-xs
     color: $error
@@ -156,6 +187,16 @@
     gap: $spacing-md
     justify-content: flex-end
     margin-top: $spacing-md
+    flex-shrink: 0
+
+    @media (max-width: 767px)
+      flex-direction: column-reverse
+      padding-bottom: env(safe-area-inset-bottom, 0px)
+
+      .edit-localizacao-modal__button
+        width: 100%
+        text-align: center
+        justify-content: center
 
   &__button
     padding: $spacing-md $spacing-lg
@@ -166,10 +207,15 @@
     font-family: $font-family
     cursor: pointer
     transition: all $transition-base
+    display: flex
+    align-items: center
+    justify-content: center
 
     &:disabled
       opacity: 0.5
       cursor: not-allowed
+
+    @include modal-button-mobile
 
     &--primary
       background-color: $primary-600
@@ -178,14 +224,12 @@
       &:hover:not(:disabled)
         background-color: $primary-700
 
+      &:active:not(:disabled)
+        background-color: $primary-800
+
     &--secondary
       background-color: $gray-200
       color: $gray-700
 
       &:hover:not(:disabled)
         background-color: $gray-300
-
-
-
-
-

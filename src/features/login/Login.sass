@@ -118,6 +118,9 @@
   outline: none
   transition: all $transition-base
 
+  &--no-icon
+    padding-left: $spacing-lg
+
   &:focus
     border-color: $primary-500
     background-color: $white
@@ -129,6 +132,24 @@
 
   &::placeholder
     color: $gray-400
+
+.login-toggle-password
+  position: absolute
+  right: $spacing-md
+  display: flex
+  align-items: center
+  justify-content: center
+  background: none
+  border: none
+  color: $gray-400
+  cursor: pointer
+  padding: $spacing-xs
+  border-radius: $radius-sm
+  transition: all $transition-base
+  z-index: 1
+
+  &:hover
+    color: $primary-500
 
 .login-button
   width: 100%

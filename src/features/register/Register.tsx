@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FaLock, FaEnvelope, FaUser, FaPhone } from 'react-icons/fa'
+import { FaLock, FaEnvelope, FaUser, FaPhone, FaEye, FaEyeSlash } from 'react-icons/fa'
 import { RegisterFormData, RegisterErrors, validateRegisterForm, formatPhone, formatRegisterRequest } from './register.types'
 import { registerUser } from './register.service'
 import { getRoute, getAsset } from '../../shared/config/base-path'
@@ -10,6 +10,8 @@ interface RegisterProps {
 }
 
 function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState<RegisterFormData>({
     name: '',
     lastName: '',
@@ -22,17 +24,23 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
   const [errors, setErrors] = useState<RegisterErrors>({})
   const [loading, setLoading] = useState(false)
 
+  const getFormFieldName = (target: HTMLInputElement): keyof RegisterFormData => {
+    const fieldName = target.dataset.field ?? target.name
+    return fieldName as keyof RegisterFormData
+  }
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target
+    const { value, type, checked } = e.target
+    const fieldName = getFormFieldName(e.target)
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [fieldName]: type === 'checkbox' ? checked : value
     }))
     // Limpar erro do campo quando o usuário começar a digitar
-    if (errors[name as keyof RegisterErrors]) {
+    if (errors[fieldName as keyof RegisterErrors]) {
       setErrors(prev => {
         const newErrors = { ...prev }
-        delete newErrors[name as keyof RegisterErrors]
+        delete newErrors[fieldName as keyof RegisterErrors]
         return newErrors
       })
     }
@@ -85,7 +93,7 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
             <p className="register-subtitle">Preencha os dados abaixo para começar</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="register-form">
+          <form onSubmit={handleSubmit} className="register-form" noValidate autoComplete="off">
             {errors.submit && (
               <div className="register-error">
                 {errors.submit}
@@ -94,14 +102,15 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
 
             <div className="register-row">
               <div className="register-input-group">
-                <label htmlFor="name" className="register-label">
+                <label htmlFor="register-name" className="register-label">
                   Nome
                 </label>
                 <div className="register-input-wrapper">
                   <FaUser className="register-input-icon" size={18} />
                   <input
-                    id="name"
-                    name="name"
+                    id="register-name"
+                    name="registerName"
+                    data-field="name"
                     type="text"
                     className={`register-input ${errors.name ? 'register-input--error' : ''}`}
                     placeholder="Seu nome"
@@ -109,20 +118,22 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
                     onChange={handleChange}
                     disabled={loading}
                     required
+                    autoComplete="off"
                   />
                 </div>
                 {errors.name && <span className="register-error-text">{errors.name}</span>}
               </div>
 
               <div className="register-input-group">
-                <label htmlFor="lastName" className="register-label">
+                <label htmlFor="register-last-name" className="register-label">
                   Sobrenome
                 </label>
                 <div className="register-input-wrapper">
                   <FaUser className="register-input-icon" size={18} />
                   <input
-                    id="lastName"
-                    name="lastName"
+                    id="register-last-name"
+                    name="registerLastName"
+                    data-field="lastName"
                     type="text"
                     className={`register-input ${errors.lastName ? 'register-input--error' : ''}`}
                     placeholder="Seu sobrenome"
@@ -130,6 +141,7 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
                     onChange={handleChange}
                     disabled={loading}
                     required
+                    autoComplete="off"
                   />
                 </div>
                 {errors.lastName && <span className="register-error-text">{errors.lastName}</span>}
@@ -137,14 +149,15 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
             </div>
 
             <div className="register-input-group">
-              <label htmlFor="email" className="register-label">
+              <label htmlFor="register-email" className="register-label">
                 Email
               </label>
               <div className="register-input-wrapper">
                 <FaEnvelope className="register-input-icon" size={18} />
                 <input
-                  id="email"
-                  name="email"
+                  id="register-email"
+                  name="registerEmail"
+                  data-field="email"
                   type="email"
                   className={`register-input ${errors.email ? 'register-input--error' : ''}`}
                   placeholder="seu@email.com"
@@ -152,20 +165,22 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
                   onChange={handleChange}
                   disabled={loading}
                   required
+                  autoComplete="new-password"
                 />
               </div>
               {errors.email && <span className="register-error-text">{errors.email}</span>}
             </div>
 
             <div className="register-input-group">
-              <label htmlFor="phone" className="register-label">
+              <label htmlFor="register-phone" className="register-label">
                 Telefone
               </label>
               <div className="register-input-wrapper">
                 <FaPhone className="register-input-icon" size={18} />
                 <input
-                  id="phone"
-                  name="phone"
+                  id="register-phone"
+                  name="registerPhone"
+                  data-field="phone"
                   type="tel"
                   className={`register-input ${errors.phone ? 'register-input--error' : ''}`}
                   placeholder="(00) 00000-0000"
@@ -174,6 +189,7 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
                   maxLength={15}
                   disabled={loading}
                   required
+                  autoComplete="off"
                 />
               </div>
               {errors.phone && <span className="register-error-text">{errors.phone}</span>}
@@ -181,43 +197,63 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
 
             <div className="register-row">
               <div className="register-input-group">
-                <label htmlFor="password" className="register-label">
+                <label htmlFor="register-password" className="register-label">
                   Senha
                 </label>
                 <div className="register-input-wrapper">
                   <FaLock className="register-input-icon" size={18} />
                   <input
-                    id="password"
-                    name="password"
-                    type="password"
+                    id="register-password"
+                    name="registerPassword"
+                    data-field="password"
+                    type={showPassword ? 'text' : 'password'}
                     className={`register-input ${errors.password ? 'register-input--error' : ''}`}
                     placeholder="Sua senha"
                     value={formData.password}
                     onChange={handleChange}
                     disabled={loading}
                     required
+                    autoComplete="new-password"
                   />
+                  <button
+                    type="button"
+                    className="register-toggle-password"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                  </button>
                 </div>
                 {errors.password && <span className="register-error-text">{errors.password}</span>}
               </div>
 
               <div className="register-input-group">
-                <label htmlFor="confirmPassword" className="register-label">
+                <label htmlFor="register-confirm-password" className="register-label">
                   Confirmar Senha
                 </label>
                 <div className="register-input-wrapper">
                   <FaLock className="register-input-icon" size={18} />
                   <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
+                    id="register-confirm-password"
+                    name="registerConfirmPassword"
+                    data-field="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
                     className={`register-input ${errors.confirmPassword ? 'register-input--error' : ''}`}
                     placeholder="Confirme sua senha"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     disabled={loading}
                     required
+                    autoComplete="new-password"
                   />
+                  <button
+                    type="button"
+                    className="register-toggle-password"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    tabIndex={-1}
+                  >
+                    {showConfirmPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                  </button>
                 </div>
                 {errors.confirmPassword && <span className="register-error-text">{errors.confirmPassword}</span>}
               </div>
@@ -227,7 +263,8 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
               <label className="register-checkbox">
                 <input
                   type="checkbox"
-                  name="termsAccepted"
+                  name="registerTermsAccepted"
+                  data-field="termsAccepted"
                   checked={formData.termsAccepted}
                   onChange={handleChange}
                   disabled={loading}

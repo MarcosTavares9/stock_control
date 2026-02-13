@@ -130,13 +130,13 @@ function App() {
       // Fallback para dashboard
       const dashboardRoute = ROUTES.find(r => r.path === '/dashboard')
       if (dashboardRoute?.component) {
-        const Component = dashboardRoute.component
-        return <Component />
+        const Component = isMobile && dashboardRoute.mobileComponent ? dashboardRoute.mobileComponent : dashboardRoute.component
+        return <Component currentPath={currentPath} onNavigate={handleNavigate} />
       }
       return null
     }
 
-    const Component = currentRoute.component
+    const Component = isMobile && currentRoute.mobileComponent ? currentRoute.mobileComponent : currentRoute.component
 
     // Verificar se precisa de proteção
     if (currentRoute.applications || currentRoute.company_restriction) {
@@ -146,12 +146,12 @@ function App() {
           userRole={userRole}
           userCompanyId={userCompanyId}
         >
-          <Component />
+          <Component currentPath={currentPath} onNavigate={handleNavigate} />
         </PermissionGuard>
       )
     }
 
-    return <Component />
+    return <Component currentPath={currentPath} onNavigate={handleNavigate} />
   }
 
   const getPageTitle = () => {

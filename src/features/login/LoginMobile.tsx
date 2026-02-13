@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../../shared/contexts/AuthContext'
-import { FaLock, FaEnvelope } from 'react-icons/fa'
+import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
 import { getRoute, getAsset } from '../../shared/config/base-path'
 import './LoginMobile.sass'
 
@@ -9,8 +9,9 @@ interface LoginMobileProps {
 }
 
 function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
-  const [email, setEmail] = useState('admin@teste.com.br')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const { login, loading } = useAuth()
 
@@ -52,11 +53,10 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
                 Email
               </label>
               <div className="login-mobile__input-wrapper">
-                <FaEnvelope className="login-mobile__input-icon" size={18} />
                 <input
                   id="email-mobile"
                   type="email"
-                  className="login-mobile__input"
+                  className="login-mobile__input login-mobile__input--no-icon"
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -74,7 +74,7 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
                 <FaLock className="login-mobile__input-icon" size={18} />
                 <input
                   id="password-mobile"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   className="login-mobile__input"
                   placeholder="Sua senha"
                   value={password}
@@ -82,6 +82,14 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
                   disabled={loading}
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  className="login-mobile__toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
               </div>
             </div>
 

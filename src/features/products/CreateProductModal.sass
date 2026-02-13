@@ -1,5 +1,6 @@
 @use '../../shared/styles/variables' as *
 @use '../../shared/styles/mixins' as *
+@use '../../shared/styles/modal-mobile' as *
 
 .create-product-modal-overlay
   position: fixed
@@ -13,6 +14,9 @@
   justify-content: center
   z-index: 1000
   padding: $spacing-lg
+  animation: modalFadeIn 0.2s ease-out
+
+  @include modal-overlay-mobile
 
 .create-product-modal
   background-color: $white
@@ -25,18 +29,26 @@
   flex-direction: column
   overflow: hidden
 
+  @include modal-container-mobile
+  @include modal-handle
+
   &__header
     display: flex
     align-items: center
     justify-content: space-between
     padding: $spacing-lg $spacing-xl
     border-bottom: 1px solid $gray-300
+    flex-shrink: 0
+
+    @include modal-header-mobile
 
   &__title
     @include text-xl
     font-weight: $font-weight-semibold
     color: $gray-900
     margin: 0
+
+    @include modal-title-mobile
 
   &__close
     display: flex
@@ -49,6 +61,8 @@
     cursor: pointer
     border-radius: $radius-sm
     transition: all $transition-base
+    min-width: 40px
+    min-height: 40px
 
     &:hover
       background-color: $gray-100
@@ -58,6 +72,10 @@
     display: flex
     border-bottom: 1px solid $gray-300
     padding: 0 $spacing-xl
+    flex-shrink: 0
+
+    @media (max-width: 767px)
+      padding: 0
 
   &__tab
     padding: $spacing-md $spacing-lg
@@ -69,10 +87,23 @@
     cursor: pointer
     border-bottom: 2px solid transparent
     transition: all $transition-base
+    flex: 1
+    text-align: center
+    min-height: 48px
+    display: flex
+    align-items: center
+    justify-content: center
+
+    @media (max-width: 767px)
+      padding: $spacing-sm $spacing-md
+      font-size: $font-size-sm
 
     &:hover
       color: $gray-900
       background-color: $gray-50
+
+    &:active
+      background-color: $gray-100
 
     &--active
       color: $primary-600
@@ -83,11 +114,15 @@
     display: flex
     flex-direction: column
     height: 100%
+    min-height: 0
 
   &__content
     padding: $spacing-xl
     overflow-y: auto
     flex: 1
+    min-height: 0
+
+    @include modal-content-mobile
 
   &__form-group
     display: flex
@@ -98,10 +133,14 @@
     &:last-child
       margin-bottom: 0
 
+    @include modal-form-group-mobile
+
   &__form-row
     display: grid
     grid-template-columns: 1fr 1fr
     gap: $spacing-lg
+
+    @include modal-form-row-mobile
 
   &__label-row
     display: flex
@@ -109,12 +148,19 @@
     justify-content: space-between
     margin-bottom: $spacing-sm
 
+    @media (max-width: 767px)
+      flex-direction: column
+      align-items: flex-start
+      gap: $spacing-sm
+
   &__form-label
     @include text-sm
     font-weight: $font-weight-semibold
     color: $gray-700
     display: flex
     align-items: center
+
+    @include modal-label-mobile
 
   &__download-button
     display: inline-flex
@@ -129,6 +175,7 @@
     font-weight: $font-weight-semibold
     cursor: pointer
     transition: all $transition-base
+    min-height: 36px
 
     &:hover
       background-color: $primary-100
@@ -137,6 +184,11 @@
 
     &:active
       background-color: $primary-200
+
+    @media (max-width: 767px)
+      width: 100%
+      justify-content: center
+      min-height: 44px
 
   &__form-input
     width: 100%
@@ -161,6 +213,12 @@
       &::-webkit-outer-spin-button
         opacity: 1
 
+    @include modal-input-mobile
+
+  // Select precisa de estilo especial para mobile
+  select#{&}__form-input
+    @include modal-select-mobile
+
   &__textarea
     width: 100%
     padding: $spacing-md $spacing-lg
@@ -174,6 +232,11 @@
     font-family: $font-family
     resize: vertical
     min-height: 200px
+
+    @media (max-width: 767px)
+      min-height: 150px
+
+    @include modal-textarea-mobile
 
     &:focus
       border-color: $primary-500
@@ -208,16 +271,25 @@
     justify-content: center
     min-height: 60px
 
+    @media (max-width: 767px)
+      min-height: 56px
+      font-size: $font-size-sm
+
     &:hover
       border-color: $primary-500
       background-color: $primary-50
       color: $primary-700
 
+    &:active
+      background-color: $primary-100
+
   &__divider
     display: flex
     align-items: center
     margin: $spacing-lg 0
-    text-align: center
+
+    @media (max-width: 767px)
+      margin: $spacing-md 0
 
     &::before,
     &::after
@@ -245,6 +317,9 @@
     gap: $spacing-md
     padding: $spacing-lg $spacing-xl
     border-top: 1px solid $gray-300
+    flex-shrink: 0
+
+    @include modal-footer-mobile
 
   &__button
     padding: $spacing-md $spacing-xl
@@ -254,6 +329,11 @@
     font-weight: $font-weight-semibold
     cursor: pointer
     transition: all $transition-base
+    display: flex
+    align-items: center
+    justify-content: center
+
+    @include modal-button-mobile
 
     &--primary
       background-color: $primary-500
@@ -263,10 +343,12 @@
         background-color: $primary-600
         box-shadow: $shadow-md
 
+      &:active
+        background-color: $primary-700
+
     &--secondary
       background-color: $gray-200
       color: $gray-700
 
       &:hover
         background-color: $gray-300
-

@@ -73,3 +73,27 @@
       opacity: 0.5
       cursor: not-allowed
 
+  // Responsivo mobile
+  @media (max-width: 768px)
+    flex-wrap: wrap
+    justify-content: center
+    gap: $spacing-sm
+    padding: $spacing-md
+    border-radius: 0 0 $radius-lg $radius-lg
+    border-top: none
+    background: $white
+    box-shadow: $shadow-sm
+    margin-top: $spacing-sm    .table-pagination__info
+      order: 2
+
+    .table-pagination__text
+      @include text-xs
+
+    .table-pagination__controls
+      order: 1
+      width: 100%
+      justify-content: space-between
+
+    .table-pagination__select
+      @include text-xs
+      padding: $spacing-xs

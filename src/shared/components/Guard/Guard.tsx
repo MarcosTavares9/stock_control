@@ -1,7 +1,6 @@
 import React from "react";
 import { COMPANY_ALLOWED_PATHS } from "../../config/routes.config";
 import { getRoute, removeBasePath } from "../../config/base-path";
-import { STORAGE_KEYS } from "../../config/app.config";
 
 type RouteApplication = {
   id: number | null;
@@ -23,7 +22,6 @@ export function PermissionGuard({
   userCompanyId,
   redirectTo = "/dashboard",
 }: PermissionGuardProps) {
-  const userApplication = Number(sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID)) || null;
   const fullPath = window.location.pathname;
   const currentPath = removeBasePath(fullPath);
 
@@ -38,26 +36,20 @@ export function PermissionGuard({
       const appMatch = routeRule.applications.find((app) => {
         if (!app) return false;
         if (app.id === null) return true;
-        return app.id === userApplication;
+        return false;
       });
       if (!appMatch) {
-        sessionStorage.removeItem(STORAGE_KEYS.ROLE_ID);
-        sessionStorage.removeItem("name");
         window.location.href = getRoute(redirectTo);
         return null;
       }
       const hasPermission =
         appMatch.roles === null || appMatch.roles.includes(userRole || "");
       if (!hasPermission) {
-        sessionStorage.removeItem(STORAGE_KEYS.ROLE_ID);
-        sessionStorage.removeItem("name");
         window.location.href = getRoute(redirectTo);
         return null;
       }
       return <>{children}</>;
     }
-    sessionStorage.removeItem("role_id");
-    sessionStorage.removeItem("name");
     window.location.href = getRoute(redirectTo);
     return null;
   }
@@ -70,12 +62,10 @@ export function PermissionGuard({
   const appMatch = allowedApplications.find((app) => {
     if (!app) return false;
     if (app.id === null) return true;
-    return app.id === userApplication;
+    return false;
   });
 
   if (!appMatch) {
-    sessionStorage.removeItem("role_id");
-    sessionStorage.removeItem("name");
     window.location.href = getRoute(redirectTo);
     return null;
   }
@@ -84,8 +74,6 @@ export function PermissionGuard({
     appMatch.roles === null || appMatch.roles.includes(userRole || "");
 
   if (!hasPermission) {
-    sessionStorage.removeItem("role_id");
-    sessionStorage.removeItem("name");
     window.location.href = getRoute(redirectTo);
     return null;
   }

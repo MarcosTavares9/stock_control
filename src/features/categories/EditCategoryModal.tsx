@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { FaTimes, FaTrash } from 'react-icons/fa'
+import { useToast } from '../../shared/contexts/ToastContext'
 import { 
   FaLaptop,
   FaMouse,
@@ -56,6 +57,7 @@ export function EditCategoryModal({
   onSave,
   onDelete
 }: EditCategoryModalProps) {
+  const toast = useToast()
   const [nome, setNome] = useState('')
   const [selectedIcon, setSelectedIcon] = useState<string>('box')
 
@@ -72,7 +74,7 @@ export function EditCategoryModal({
     if (!category) return
 
     if (!nome.trim()) {
-      alert('Por favor, preencha o nome da categoria')
+      toast.warning('Por favor, preencha o nome da categoria')
       return
     }
 

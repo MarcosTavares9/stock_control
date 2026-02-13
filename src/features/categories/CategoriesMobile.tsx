@@ -17,6 +17,7 @@ import { CreateCategoryModal } from './CreateCategoryModal'
 import { EditCategoryModal } from './EditCategoryModal'
 import { listCategories, createCategory, updateCategory, deleteCategory } from './categories.service'
 import type { Category as CategoryDomain } from './categories.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 import './CategoriesMobile.sass'
 
 interface Category {
@@ -50,6 +51,7 @@ const getCategoryIcon = (iconName: string) => {
 }
 
 function CategoriesMobile() {
+  const toast = useToast()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -90,7 +92,7 @@ function CategoriesMobile() {
       setCategories(prevCategories => [...prevCategories, mapCategoryFromDomain(newCategory)])
     } catch (error) {
       console.error('Erro ao criar categoria:', error)
-      alert('Erro ao criar categoria. Tente novamente.')
+      toast.error('Erro ao criar categoria. Tente novamente.')
     }
   }
 
@@ -107,7 +109,7 @@ function CategoriesMobile() {
       )
     } catch (error) {
       console.error('Erro ao atualizar categoria:', error)
-      alert('Erro ao atualizar categoria. Tente novamente.')
+      toast.error('Erro ao atualizar categoria. Tente novamente.')
     }
   }
 
@@ -117,7 +119,7 @@ function CategoriesMobile() {
       setCategories(prevCategories => prevCategories.filter(c => c.id !== categoryId))
     } catch (error: any) {
       const msg = error?.response?.data?.error || 'Erro ao deletar categoria. Tente novamente.'
-      alert(msg)
+      toast.error(msg)
     }
   }
 

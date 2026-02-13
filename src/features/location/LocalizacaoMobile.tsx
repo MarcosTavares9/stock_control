@@ -5,8 +5,10 @@ import { CreateLocalizacaoModal } from './CreateLocalizacaoModal'
 import { EditLocalizacaoModal } from './EditLocalizacaoModal'
 import { listLocalizacoes, deleteLocalizacao } from './location.service'
 import { Localizacao as LocalizacaoType } from './location.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 
 function LocalizacaoMobile() {
+  const toast = useToast()
   const [searchTerm, setSearchTerm] = useState('')
   const [localizacoes, setLocalizacoes] = useState<LocalizacaoType[]>([])
   const [loading, setLoading] = useState(true)
@@ -25,7 +27,7 @@ function LocalizacaoMobile() {
       setLocalizacoes(data)
     } catch (error) {
       console.error('Erro ao carregar localizações:', error)
-      alert('Erro ao carregar localizações')
+      toast.error('Erro ao carregar localizações')
     } finally {
       setLoading(false)
     }
@@ -57,10 +59,10 @@ function LocalizacaoMobile() {
     try {
       await deleteLocalizacao(id)
       await loadLocalizacoes()
-      alert('Localização excluída com sucesso!')
+      toast.success('Localização excluída com sucesso!')
     } catch (error) {
       console.error('Erro ao excluir localização:', error)
-      alert('Erro ao excluir localização. Tente novamente.')
+      toast.error('Erro ao excluir localização. Tente novamente.')
     }
   }
 

@@ -15,14 +15,17 @@ export class AppConfig {
   static getSwaggerUrl(): string {
     return `${this.getApiBaseUrl()}/docs`;
   }
+
+  static getAuthLoginPath(): string {
+    return '/login';
+  }
+
+  static getAuthRegisterPath(): string {
+    return '/register';
+  }
 }
 
 export const STORAGE_KEYS = {
   AUTH_TOKEN: 'auth_token',
   AUTH_USER: 'auth_user',
-  REFRESH_TOKEN: 'refreshToken',
-  USER_KEY: 'user-key',
-  ROLE_ID: 'role_id',
-  APPLICATION_ID: 'application_id',
-  COMPANY_ID: 'company_id',
 } as const;

@@ -126,6 +126,11 @@
   outline: none
   transition: all $transition-base
 
+  &[type="text"][data-field="password"],
+  &[type="password"],
+  &[type="text"][data-field="confirmPassword"]
+    padding-right: $spacing-xl + $spacing-md
+
   &:focus
     border-color: $primary-500
     background-color: $white
@@ -145,6 +150,25 @@
 
   &::placeholder
     color: $gray-400
+
+.register-toggle-password
+  position: absolute
+  right: $spacing-md
+  background: none
+  border: none
+  color: $gray-500
+  cursor: pointer
+  padding: $spacing-xs
+  display: flex
+  align-items: center
+  justify-content: center
+  border-radius: $radius-sm
+  transition: all $transition-base
+  z-index: 2
+
+  &:hover
+    color: $gray-700
+    background-color: $gray-100
 
 .register-error-text
   @include text-xs

@@ -20,6 +20,9 @@ import { listCategories } from '../categories/categories.service'
 import type { Product as ProductDomain } from '../products/products.types'
 import type { History as HistoryDomain } from '../history/history.types'
 import type { Category } from '../categories/categories.types'
+import { useIsMobile } from '../../shared/utils/useIsMobile'
+import { useToast } from '../../shared/contexts/ToastContext'
+import ReportMobile from './ReportMobile'
 import './Report.sass'
 
 interface Product {
@@ -91,6 +94,13 @@ const formatarDataParaNomeArquivo = (): string => {
 }
 
 function Report() {
+  const isMobile = useIsMobile()
+  if (isMobile) return <ReportMobile />
+  return <ReportDesktop />
+}
+
+function ReportDesktop() {
+  const toast = useToast()
   const [products, setProducts] = useState<Product[]>([])
   const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([])
   const [, setCategories] = useState<Category[]>([])
@@ -208,12 +218,14 @@ function Report() {
     {
       key: 'nome',
       label: 'Produto',
-      align: 'left'
+      align: 'left',
+      mobileTitle: true
     },
     {
       key: 'categoria',
       label: 'Categoria',
-      align: 'left'
+      align: 'left',
+      mobileSubtitle: true
     },
     {
       key: 'quantidade',
@@ -231,6 +243,7 @@ function Report() {
       key: 'status',
       label: 'Status',
       align: 'center',
+      mobileBadge: true,
       render: (item) => {
         const statusLabels = {
           ok: 'Estoque Ok',
@@ -250,7 +263,8 @@ function Report() {
     {
       key: 'categoria',
       label: 'Categoria',
-      align: 'left'
+      align: 'left',
+      mobileTitle: true
     },
     {
       key: 'totalProdutos',
@@ -373,7 +387,7 @@ function Report() {
       setShowExportMenu(false)
     } catch (error) {
       console.error('Erro ao exportar CSV:', error)
-      alert('Erro ao exportar o relatório. Por favor, tente novamente.')
+      toast.error('Erro ao exportar o relatório. Por favor, tente novamente.')
     }
   }
 
@@ -454,7 +468,7 @@ function Report() {
       setShowExportMenu(false)
     } catch (error) {
       console.error('Erro ao exportar Excel:', error)
-      alert('Erro ao exportar o relatório. Por favor, tente novamente.')
+      toast.error('Erro ao exportar o relatório. Por favor, tente novamente.')
     }
   }
 
@@ -579,7 +593,7 @@ function Report() {
       setShowExportMenu(false)
     } catch (error) {
       console.error('Erro ao exportar PDF:', error)
-      alert('Erro ao exportar o relatório. Por favor, tente novamente.')
+      toast.error('Erro ao exportar o relatório. Por favor, tente novamente.')
     }
   }
 

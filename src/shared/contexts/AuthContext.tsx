@@ -1,18 +1,19 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { api } from '../utils/api'
 import { endpoints } from '../config/endpoints'
 import { getRoute } from '../config/base-path'
 import { STORAGE_KEYS } from '../config/app.config'
+import { isTokenExpired } from '../utils/auth'
 
 interface User {
   id: string
   name: string
   email: string
   photo?: string
-  role?: string | null // Role do usuário (ex: '1', '6', '7', etc.)
-  roleId?: number | null // ID numérico do role
-  applicationId?: number | null // ID da aplicação atual
-  companyId?: string | null // ID da empresa (multi-tenant)
+  role?: string | null
+  roleId?: number | null
+  applicationId?: number | null
+  companyId?: string | null
 }
 
 interface AuthContextType {
@@ -23,7 +24,6 @@ interface AuthContextType {
   logout: () => void
   updateUser: (userData: Partial<User>) => void
   loading: boolean
-  // Novos campos para controle de acesso
   userRole: string | null
   userApplicationId: number | null
   userCompanyId: string | null
@@ -31,99 +31,109 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+/**
+ * Limpa todos os dados de autenticação do localStorage
+ */
+const clearAuthStorage = () => {
+  localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
+  localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
+  // Restaura sessão do localStorage ao montar
   useEffect(() => {
-    const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN) || sessionStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-    const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH_USER) || sessionStorage.getItem(STORAGE_KEYS.AUTH_USER)
-    
-    const roleId = sessionStorage.getItem(STORAGE_KEYS.ROLE_ID)
-    const applicationId = sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID)
-    const companyId = sessionStorage.getItem(STORAGE_KEYS.COMPANY_ID)
+    const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+    const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH_USER)
 
     if (savedToken && savedUser) {
+      // Verifica se o token ainda é válido (não expirado)
+      if (isTokenExpired(savedToken)) {
+        clearAuthStorage()
+        setLoading(false)
+        return
+      }
+
       try {
-        const userData = JSON.parse(savedUser)
+        const userData: User = JSON.parse(savedUser)
         setToken(savedToken)
-        setUser({
-          ...userData,
-          role: roleId || userData.role || null,
-          roleId: roleId ? Number(roleId) : userData.roleId || null,
-          applicationId: applicationId ? Number(applicationId) : userData.applicationId || null,
-          companyId: companyId || userData.companyId || null,
-        })
-      } catch (error) {
-        localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-        localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
-        sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-        sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER)
+        setUser(userData)
+
+        // Configura o token nos headers padrão do axios
+        api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
+      } catch {
+        clearAuthStorage()
       }
     }
+
     setLoading(false)
   }, [])
 
-  const login = async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string) => {
     setLoading(true)
     try {
-      // Chamada real à API de login
-      const response = await api.post(endpoints.auth.login(), {
-        email,
-        password
-      })
+      const response = await api.post(endpoints.auth.login(), { email, password })
+      const { token: newToken, user: userData } = response.data
 
-      const { token, user: userData } = response.data
-
-      // Formatar dados do usuário
-      const user: User = {
+      const formattedUser: User = {
         id: userData.id,
         name: `${userData.firstName} ${userData.lastName}`,
         email: userData.email,
         photo: userData.photo || undefined,
-        role: null, // Será definido pela API se necessário
+        role: null,
         roleId: null,
         applicationId: null,
-        companyId: null
+        companyId: null,
       }
 
-      setToken(token)
-      setUser(user)
-      
-      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token)
-      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(user))
-    } catch (error: any) {
-      setLoading(false)
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          'Email ou senha inválidos'
-      throw new Error(errorMessage)
-    }
-    setLoading(false)
-  }
+      // Salva no localStorage (fonte única de verdade)
+      localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken)
+      localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(formattedUser))
 
-  const logout = () => {
+      // Configura o token nos headers padrão do axios (padrão Onmai)
+      api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+
+      // Atualiza o state
+      setToken(newToken)
+      setUser(formattedUser)
+    } catch (error: any) {
+      // Extrai mensagem de erro da resposta da API
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        'Email ou senha inválidos'
+      throw new Error(errorMessage)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const logout = useCallback(() => {
+    // Limpa headers do axios
+    delete api.defaults.headers.common['Authorization']
+
+    // Limpa state
     setToken(null)
     setUser(null)
-    localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-    localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
-    sessionStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
-    sessionStorage.removeItem(STORAGE_KEYS.AUTH_USER)
-    sessionStorage.removeItem(STORAGE_KEYS.ROLE_ID)
-    sessionStorage.removeItem(STORAGE_KEYS.APPLICATION_ID)
-    sessionStorage.removeItem(STORAGE_KEYS.COMPANY_ID)
-    sessionStorage.removeItem(STORAGE_KEYS.USER_KEY)
-    window.location.href = getRoute('/login')
-  }
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const updatedUser = { ...user, ...userData }
-      setUser(updatedUser)
+    // Limpa storage
+    clearAuthStorage()
+
+    // Redireciona para login
+    window.location.href = getRoute('/login')
+  }, [])
+
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev
+      const updatedUser = { ...prev, ...userData }
       localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(updatedUser))
-    }
-  }
+      return updatedUser
+    })
+  }, [])
 
   return (
     <AuthContext.Provider
@@ -135,9 +145,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         updateUser,
         loading,
-        userRole: user?.role || sessionStorage.getItem(STORAGE_KEYS.ROLE_ID) || null,
-        userApplicationId: user?.applicationId || (sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID) ? Number(sessionStorage.getItem(STORAGE_KEYS.APPLICATION_ID)) : null),
-        userCompanyId: user?.companyId || sessionStorage.getItem(STORAGE_KEYS.COMPANY_ID) || null,
+        userRole: user?.role ?? null,
+        userApplicationId: user?.applicationId ?? null,
+        userCompanyId: user?.companyId ?? null,
       }}
     >
       {children}

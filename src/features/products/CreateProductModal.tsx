@@ -4,6 +4,8 @@ import { listCategories } from '../categories/categories.service'
 import { listLocalizacoes } from '../location/location.service'
 import type { Category } from '../categories/categories.types'
 import type { Localizacao } from '../location/location.types'
+import { ImageUpload } from '../../shared/components/ImageUpload/ImageUpload'
+import { useToast } from '../../shared/contexts/ToastContext'
 import './CreateProductModal.sass'
 
 interface Product {
@@ -32,12 +34,14 @@ export function CreateProductModal({
   onCreateMultiple,
   categorias: _categorias
 }: CreateProductModalProps) {
+  const toast = useToast()
   const [mode, setMode] = useState<'single' | 'bulk'>('single')
   const [nome, setNome] = useState('')
   const [categoria, setCategoria] = useState('')
   const [localizacao, setLocalizacao] = useState('')
   const [quantidadeInput, setQuantidadeInput] = useState<string>('')
   const [estoqueMinimoInput, setEstoqueMinimoInput] = useState<string>('')
+  const [imagem, setImagem] = useState<string | undefined>(undefined)
   const [listaManual, setListaManual] = useState('')
   const [arquivoExcel, setArquivoExcel] = useState<File | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
@@ -180,7 +184,8 @@ export function CreateProductModal({
         categoria,
         localizacao,
         quantidade,
-        estoqueMinimo
+        estoqueMinimo,
+        imagem
       })
 
       // Limpar formulário
@@ -189,6 +194,7 @@ export function CreateProductModal({
       setLocalizacao('')
       setQuantidadeInput('')
       setEstoqueMinimoInput('')
+      setImagem(undefined)
       onClose()
     } else {
       // Modo bulk
@@ -198,7 +204,7 @@ export function CreateProductModal({
         try {
           products = await parseExcelFile(arquivoExcel)
         } catch (error) {
-          alert('Erro ao processar arquivo Excel. Verifique o formato do arquivo.')
+          toast.error('Erro ao processar arquivo Excel. Verifique o formato do arquivo.')
           return
         }
       } else if (listaManual.trim()) {
@@ -206,7 +212,7 @@ export function CreateProductModal({
       }
 
       if (products.length === 0) {
-        alert('Nenhum produto válido encontrado. Verifique os dados inseridos.')
+        toast.warning('Nenhum produto válido encontrado. Verifique os dados inseridos.')
         return
       }
 
@@ -227,7 +233,7 @@ export function CreateProductModal({
         setArquivoExcel(file)
         setListaManual('') // Limpar lista manual quando selecionar arquivo
       } else {
-        alert('Por favor, selecione um arquivo Excel (.xlsx, .xls) ou CSV (.csv)')
+        toast.warning('Por favor, selecione um arquivo Excel (.xlsx, .xls) ou CSV (.csv)')
         e.target.value = ''
       }
     }
@@ -265,6 +271,7 @@ export function CreateProductModal({
     setLocalizacao('')
     setQuantidadeInput('')
     setEstoqueMinimoInput('')
+    setImagem(undefined)
     setListaManual('')
     setArquivoExcel(null)
     setMode('single')
@@ -388,6 +395,16 @@ export function CreateProductModal({
                       placeholder="Digite o valor"
                     />
                   </div>
+                </div>
+
+                <div className="create-product-modal__form-group">
+                  <label className="create-product-modal__form-label">Imagem do Produto</label>
+                  <ImageUpload
+                    currentImageUrl={null}
+                    onImageUploaded={(url) => setImagem(url)}
+                    onImageRemoved={() => setImagem(undefined)}
+                    folder="products"
+                  />
                 </div>
               </>
             ) : (

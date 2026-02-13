@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { 
   FaSearch,
   FaArrowUp,
@@ -8,10 +8,16 @@ import {
   FaTrash,
   FaBox
 } from 'react-icons/fa'
+import { listHistory } from './history.service'
+import { listProducts } from '../products/products.service'
+import { listCategories } from '../categories/categories.service'
+import type { History as HistoryDomain } from './history.types'
+import type { Product } from '../products/products.types'
+import type { Category } from '../categories/categories.types'
 import './HistoryMobile.sass'
 
 interface HistoryEntry {
-  id: number
+  id: string
   tipo: 'entrada' | 'saida' | 'ajuste' | 'criacao' | 'edicao' | 'exclusao'
   produto: string
   categoria: string
@@ -23,102 +29,34 @@ interface HistoryEntry {
   observacao?: string
 }
 
+const mapHistoryFromDomain = (history: HistoryDomain, products: Product[], categories: Category[]): HistoryEntry => {
+  const product = history.product_id ? products.find(p => p.uuid === history.product_id) : null
+  const category = product ? categories.find(c => c.uuid === product.category_id) : null
+  
+  let tipo: HistoryEntry['tipo'] = 'ajuste'
+  if (history.type === 'entry') tipo = 'entrada'
+  else if (history.type === 'exit') tipo = 'saida'
+  else if (history.type === 'adjustment') tipo = 'ajuste'
+  
+  return {
+    id: history.uuid,
+    tipo,
+    produto: history.product?.name || 'Produto não encontrado',
+    categoria: category?.name || 'Sem categoria',
+    quantidade: history.quantity_changed,
+    quantidadeAnterior: history.previous_quantity,
+    quantidadeNova: history.new_quantity,
+    usuario: history.user?.name || 'Usuário não encontrado',
+    data: new Date(history.created_at),
+    observacao: history.observation
+  }
+}
+
 const tiposMovimentacao = [
   { value: 'entrada', label: 'Entrada' },
   { value: 'saida', label: 'Saída' },
-  { value: 'ajuste', label: 'Ajuste' },
-  { value: 'criacao', label: 'Criação' },
-  { value: 'edicao', label: 'Edição' },
-  { value: 'exclusao', label: 'Exclusão' }
+  { value: 'ajuste', label: 'Ajuste' }
 ]
-
-const gerarDataAleatoria = (diasAtras: number): Date => {
-  const data = new Date()
-  data.setDate(data.getDate() - diasAtras)
-  data.setHours(Math.floor(Math.random() * 24))
-  data.setMinutes(Math.floor(Math.random() * 60))
-  return data
-}
-
-const usuarios = ['João Silva', 'Maria Santos', 'Pedro Oliveira', 'Ana Costa', 'Carlos Souza']
-const produtosBase = [
-  'Notebook Dell Inspiron',
-  'Mouse Logitech',
-  'Teclado Mecânico',
-  'Monitor LG 27"',
-  'Webcam HD',
-  'Headset Gamer',
-  'SSD 500GB',
-  'Memória RAM 16GB',
-  'Cadeira Ergonômica',
-  'Mesa Escritório'
-]
-const categoriasBase = [
-  'Eletrônicos',
-  'Periféricos',
-  'Áudio',
-  'Armazenamento',
-  'Componentes',
-  'Móveis'
-]
-
-const gerarHistoricoMock = (): HistoryEntry[] => {
-  const historico: HistoryEntry[] = []
-  const tipos: HistoryEntry['tipo'][] = ['entrada', 'saida', 'ajuste', 'criacao', 'edicao', 'exclusao']
-  
-  for (let i = 0; i < 150; i++) {
-    const tipo = tipos[Math.floor(Math.random() * tipos.length)]
-    const produto = produtosBase[Math.floor(Math.random() * produtosBase.length)]
-    const categoria = categoriasBase[Math.floor(Math.random() * categoriasBase.length)]
-    const usuario = usuarios[Math.floor(Math.random() * usuarios.length)]
-    const diasAtras = Math.floor(Math.random() * 90)
-    const data = gerarDataAleatoria(diasAtras)
-    
-    let quantidade = 0
-    let quantidadeAnterior: number | undefined
-    let quantidadeNova: number | undefined
-    
-    switch (tipo) {
-      case 'entrada':
-        quantidade = Math.floor(Math.random() * 50) + 1
-        break
-      case 'saida':
-        quantidade = Math.floor(Math.random() * 30) + 1
-        break
-      case 'ajuste':
-        quantidadeAnterior = Math.floor(Math.random() * 100)
-        quantidadeNova = Math.floor(Math.random() * 100)
-        quantidade = quantidadeNova - quantidadeAnterior
-        break
-      case 'criacao':
-        quantidade = Math.floor(Math.random() * 50) + 1
-        break
-      case 'edicao':
-        quantidadeAnterior = Math.floor(Math.random() * 100)
-        quantidadeNova = Math.floor(Math.random() * 100)
-        quantidade = quantidadeNova - quantidadeAnterior
-        break
-      case 'exclusao':
-        quantidade = 0
-        break
-    }
-    
-    historico.push({
-      id: i + 1,
-      tipo,
-      produto,
-      categoria,
-      quantidade,
-      quantidadeAnterior,
-      quantidadeNova,
-      usuario,
-      data,
-      observacao: tipo === 'ajuste' ? 'Ajuste de inventário' : undefined
-    })
-  }
-  
-  return historico.sort((a, b) => b.data.getTime() - a.data.getTime())
-}
 
 const getTipoIcon = (tipo: HistoryEntry['tipo']) => {
   const iconMap: Record<HistoryEntry['tipo'], React.ReactNode> = {
@@ -167,12 +105,35 @@ const formatarData = (data: Date): string => {
 }
 
 function HistoryMobile() {
-  const [historyEntries] = useState<HistoryEntry[]>(gerarHistoricoMock())
+  const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedTipo, setSelectedTipo] = useState<string>('')
   const [selectedCategoria, setSelectedCategoria] = useState<string>('')
   const [dataInicio, setDataInicio] = useState<string>('')
   const [dataFim, setDataFim] = useState<string>('')
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true)
+        const [historyData, productsData, categoriesData] = await Promise.all([
+          listHistory(),
+          listProducts(),
+          listCategories()
+        ])
+        
+        const mappedHistory = historyData.map(h => mapHistoryFromDomain(h, productsData, categoriesData))
+        setHistoryEntries(mappedHistory.sort((a, b) => b.data.getTime() - a.data.getTime()))
+      } catch (error) {
+        console.error('Erro ao carregar histórico:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    loadData()
+  }, [])
 
   const categoriasUnicas = useMemo(() => {
     return Array.from(new Set(historyEntries.map(e => e.categoria))).sort()
@@ -186,9 +147,7 @@ function HistoryMobile() {
         entry.categoria.toLowerCase().includes(searchTerm.toLowerCase())
       
       const matchTipo = selectedTipo === '' || entry.tipo === selectedTipo
-      
       const matchCategoria = selectedCategoria === '' || entry.categoria === selectedCategoria
-      
       const matchDataInicio = dataInicio === '' || entry.data >= new Date(dataInicio)
       
       const matchDataFim = dataFim === '' || (() => {
@@ -201,14 +160,21 @@ function HistoryMobile() {
     })
   }, [historyEntries, searchTerm, selectedTipo, selectedCategoria, dataInicio, dataFim])
 
+  if (loading) {
+    return (
+      <div className="history-mobile">
+        <div className="history-mobile__loading">
+          <p>Carregando histórico...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="history-mobile">
       <div className="history-mobile__header">
         <div className="history-mobile__header-content">
           <h1 className="history-mobile__title">Histórico</h1>
-          <p className="history-mobile__description">
-            Acompanhe todas as movimentações de estoque
-          </p>
         </div>
       </div>
 
@@ -231,9 +197,7 @@ function HistoryMobile() {
           >
             <option value="">Todos os tipos</option>
             {tiposMovimentacao.map(tipo => (
-              <option key={tipo.value} value={tipo.value}>
-                {tipo.label}
-              </option>
+              <option key={tipo.value} value={tipo.value}>{tipo.label}</option>
             ))}
           </select>
           <select
@@ -243,9 +207,7 @@ function HistoryMobile() {
           >
             <option value="">Todas categorias</option>
             {categoriasUnicas.map(categoria => (
-              <option key={categoria} value={categoria}>
-                {categoria}
-              </option>
+              <option key={categoria} value={categoria}>{categoria}</option>
             ))}
           </select>
         </div>
@@ -255,14 +217,12 @@ function HistoryMobile() {
             className="history-mobile__filter-input"
             value={dataInicio}
             onChange={(e) => setDataInicio(e.target.value)}
-            placeholder="Data Início"
           />
           <input
             type="date"
             className="history-mobile__filter-input"
             value={dataFim}
             onChange={(e) => setDataFim(e.target.value)}
-            placeholder="Data Fim"
           />
         </div>
       </div>
@@ -274,7 +234,7 @@ function HistoryMobile() {
           </div>
           <h3 className="history-mobile__empty-title">Nenhum registro encontrado</h3>
           <p className="history-mobile__empty-description">
-            Não há movimentações que correspondam aos filtros selecionados
+            Não há movimentações que correspondam aos filtros
           </p>
         </div>
       ) : (
@@ -322,4 +282,3 @@ function HistoryMobile() {
 }
 
 export default HistoryMobile
-

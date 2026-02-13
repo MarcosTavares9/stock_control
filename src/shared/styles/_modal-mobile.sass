@@ -1,0 +1,123 @@
+@use './variables' as *
+
+// ============================================
+// Modal Mobile Mixins - Bottom Sheet Pattern
+// ============================================
+
+// Breakpoint mobile
+$modal-mobile-bp: 767px
+
+// Overlay base para mobile (bottom sheet)
+@mixin modal-overlay-mobile
+  @media (max-width: $modal-mobile-bp)
+    padding: 0
+    align-items: flex-end
+
+// Container principal do modal para mobile
+@mixin modal-container-mobile
+  @media (max-width: $modal-mobile-bp)
+    max-width: 100%
+    max-height: 90dvh
+    border-radius: $radius-xl $radius-xl 0 0
+    animation: modalSlideUp 0.3s ease-out
+
+// Handle indicator (barra no topo do bottom sheet)
+@mixin modal-handle
+  @media (max-width: $modal-mobile-bp)
+    &::before
+      content: ''
+      display: block
+      width: 36px
+      height: 4px
+      background-color: $gray-300
+      border-radius: $radius-full
+      margin: $spacing-sm auto $spacing-xs
+      flex-shrink: 0
+
+// Header do modal para mobile
+@mixin modal-header-mobile
+  @media (max-width: $modal-mobile-bp)
+    padding: $spacing-sm $spacing-md $spacing-md
+
+// Título do modal para mobile
+@mixin modal-title-mobile
+  @media (max-width: $modal-mobile-bp)
+    font-size: $font-size-lg
+
+// Conteúdo scrollável do modal para mobile
+@mixin modal-content-mobile
+  @media (max-width: $modal-mobile-bp)
+    padding: $spacing-md
+    -webkit-overflow-scrolling: touch
+
+// Inputs com 16px para evitar zoom no iOS
+@mixin modal-input-mobile
+  @media (max-width: $modal-mobile-bp)
+    font-size: 16px !important
+    min-height: 48px
+    padding: $spacing-md
+    border-radius: $radius-md
+
+// Select inputs para mobile
+@mixin modal-select-mobile
+  @media (max-width: $modal-mobile-bp)
+    font-size: 16px !important
+    min-height: 48px
+    padding: $spacing-md
+    appearance: none
+
+// Textarea para mobile
+@mixin modal-textarea-mobile
+  @media (max-width: $modal-mobile-bp)
+    font-size: 16px !important
+    min-height: 100px
+    padding: $spacing-md
+
+// Footer (ações) do modal para mobile
+@mixin modal-footer-mobile
+  @media (max-width: $modal-mobile-bp)
+    padding: $spacing-md
+    padding-bottom: calc($spacing-md + env(safe-area-inset-bottom, 0px))
+    flex-direction: column-reverse
+    gap: $spacing-sm
+
+// Botões para mobile (touch-friendly)
+@mixin modal-button-mobile
+  @media (max-width: $modal-mobile-bp)
+    width: 100%
+    min-height: 48px
+    justify-content: center
+    font-size: $font-size-base
+    border-radius: $radius-lg
+
+// Label para mobile
+@mixin modal-label-mobile
+  @media (max-width: $modal-mobile-bp)
+    font-size: $font-size-sm
+    margin-bottom: $spacing-xs
+
+// Form group para mobile
+@mixin modal-form-group-mobile
+  @media (max-width: $modal-mobile-bp)
+    margin-bottom: $spacing-md
+
+// Form row (grid 2 colunas -> 1 coluna)
+@mixin modal-form-row-mobile
+  @media (max-width: $modal-mobile-bp)
+    grid-template-columns: 1fr
+    gap: $spacing-md
+
+// Animação de slide-up otimizada para bottom sheet
+@keyframes modalSlideUp
+  0%
+    opacity: 0
+    transform: translateY(100%)
+  100%
+    opacity: 1
+    transform: translateY(0)
+
+@keyframes modalFadeIn
+  0%
+    opacity: 0
+  100%
+    opacity: 1

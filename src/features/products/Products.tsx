@@ -22,6 +22,9 @@ import { listCategories } from '../categories/categories.service'
 import { listLocalizacoes } from '../location/location.service'
 import type { Product as ProductDomain } from './products.types'
 import type { Category } from '../categories/categories.types'
+import { useIsMobile } from '../../shared/utils/useIsMobile'
+import { useToast } from '../../shared/contexts/ToastContext'
+import ProductsMobile from './ProductsMobile'
 import './Products.sass'
 
 interface Product {
@@ -118,6 +121,17 @@ const ProductImage = ({ product }: { product: Product }) => {
 }
 
 function Products() {
+  const isMobile = useIsMobile()
+
+  if (isMobile) {
+    return <ProductsMobile />
+  }
+
+  return <ProductsDesktop />
+}
+
+function ProductsDesktop() {
+  const toast = useToast()
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [locations, setLocations] = useState<Array<{ id: string; nome: string }>>([])
@@ -185,12 +199,14 @@ function Products() {
     {
       key: 'nome',
       label: 'Nome',
-      align: 'left'
+      align: 'left',
+      mobileTitle: true
     },
     {
       key: 'categoria',
       label: 'Categoria',
-      align: 'left'
+      align: 'left',
+      mobileSubtitle: true
     },
     {
       key: 'quantidade',
@@ -213,6 +229,7 @@ function Products() {
       key: 'status',
       label: 'Status',
       align: 'left',
+      mobileBadge: true,
       render: (item) => {
         const statusLabels = {
           ok: 'Estoque Ok',
@@ -289,7 +306,7 @@ function Products() {
       }
 
       if (removedIds.length > 0) {
-        alert(`${removedIds.length} produto(s) já havia(m) sido removido(s). A lista será atualizada.`)
+        toast.warning(`${removedIds.length} produto(s) já havia(m) sido removido(s). A lista será atualizada.`)
       }
       
       // Recarregar produtos do banco
@@ -305,7 +322,7 @@ function Products() {
       setProductsToEdit([])
       setCurrentProductIndex(0)
     } catch (error) {
-      alert('Erro ao atualizar produtos. Tente novamente.')
+      toast.error('Erro ao atualizar produtos. Tente novamente.')
     }
   }
 
@@ -321,7 +338,7 @@ function Products() {
     } catch (error: any) {
       // Se 404, o produto já foi removido — continuar normalmente
       if (error?.response?.status !== 404) {
-        alert('Erro ao deletar produto. Tente novamente.')
+        toast.error('Erro ao deletar produto. Tente novamente.')
         return
       }
     }
@@ -363,7 +380,7 @@ function Products() {
       const location = locations.find(l => l.nome === productData.localizacao)
       
       if (!category || !location) {
-        alert('Categoria ou localização não encontrada')
+        toast.error('Categoria ou localização não encontrada')
         return
       }
       
@@ -379,7 +396,7 @@ function Products() {
       const mappedProduct = mapProductFromDomain(newProduct, categories, locations)
       setProducts(prevProducts => [...prevProducts, mappedProduct])
     } catch (error) {
-      alert('Erro ao criar produto. Tente novamente.')
+      toast.error('Erro ao criar produto. Tente novamente.')
     }
   }
 
@@ -416,7 +433,7 @@ function Products() {
       
       setProducts(prevProducts => [...prevProducts, ...mappedProducts])
     } catch (error) {
-      alert('Erro ao criar produtos. Tente novamente.')
+      toast.error('Erro ao criar produtos. Tente novamente.')
     }
   }
 

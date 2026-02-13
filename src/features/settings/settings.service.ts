@@ -62,8 +62,25 @@ export async function updateUserProfile(
   }
   
   if (data.telefone) apiData.phone = data.telefone
+  if (data.fotoPerfil !== undefined) apiData.profilePicture = data.fotoPerfil
   
   const response = await api.put<UserApiResponse>(endpoints.users.update(userId), apiData)
+  return mapUserToProfile(response.data)
+}
+
+/**
+ * Atualiza a foto de perfil do usuário
+ * @param userId ID do usuário
+ * @param photoUrl URL da foto no Firebase Storage (ou null para remover)
+ * @returns Promise com os dados atualizados do perfil
+ */
+export async function updateProfilePicture(
+  userId: string,
+  photoUrl: string | null
+): Promise<UserProfile> {
+  const response = await api.put<UserApiResponse>(endpoints.users.update(userId), {
+    profilePicture: photoUrl
+  })
   return mapUserToProfile(response.data)
 }
 

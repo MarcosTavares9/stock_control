@@ -111,6 +111,9 @@
     transition: all $transition-base
     box-sizing: border-box
 
+    &--no-icon
+      padding-left: $spacing-md
+
     &:focus
       outline: none
       border-color: $primary-500
@@ -119,6 +122,26 @@
     &:disabled
       background-color: $gray-100
       cursor: not-allowed
+
+  &__toggle-password
+    position: absolute
+    right: $spacing-md
+    display: flex
+    align-items: center
+    justify-content: center
+    background: none
+    border: none
+    color: $gray-400
+    cursor: pointer
+    padding: $spacing-xs
+    border-radius: $radius-sm
+    transition: all $transition-base
+    z-index: 1
+    min-width: 40px
+    min-height: 40px
+
+    &:hover
+      color: $primary-500
 
   &__button
     @include button-primary

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import './CreateUsuarioModal.sass'
 import { FaTimes, FaRegUser, FaEnvelope, FaLock } from 'react-icons/fa'
 import { CreateUsuarioRequest, UpdateUsuarioRequest, Usuario } from './settings.types'
+import { useToast } from '../../shared/contexts/ToastContext'
 
 interface CreateUsuarioModalProps {
   isOpen: boolean
@@ -18,6 +19,7 @@ export function CreateUsuarioModal({
   onUpdate,
   usuario
 }: CreateUsuarioModalProps) {
+  const toast = useToast()
   const [formData, setFormData] = useState({
     nome: '',
     email: '',
@@ -108,7 +110,7 @@ export function CreateUsuarioModal({
       onClose()
     } catch (error: any) {
       console.error('Erro ao salvar usuário:', error)
-      alert(error.message || 'Erro ao salvar usuário. Tente novamente.')
+      toast.error(error.message || 'Erro ao salvar usuário. Tente novamente.')
     } finally {
       setLoading(false)
     }

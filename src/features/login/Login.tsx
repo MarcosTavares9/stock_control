@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../../shared/contexts/AuthContext'
-import { FaLock, FaEnvelope } from 'react-icons/fa'
+import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
 import { getRoute, getAsset } from '../../shared/config/base-path'
 import './Login.sass'
 
@@ -9,8 +9,9 @@ interface LoginProps {
 }
 
 function Login({ onNavigate }: LoginProps = {}) {
-  const [email, setEmail] = useState('admin@teste.com.br')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const { login, loading } = useAuth()
 
@@ -53,11 +54,10 @@ function Login({ onNavigate }: LoginProps = {}) {
                 Email
               </label>
               <div className="login-input-wrapper">
-                <FaEnvelope className="login-input-icon" size={18} />
                 <input
                   id="email"
                   type="email"
-                  className="login-input"
+                  className="login-input login-input--no-icon"
                   placeholder="seu@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -75,7 +75,7 @@ function Login({ onNavigate }: LoginProps = {}) {
                 <FaLock className="login-input-icon" size={18} />
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   className="login-input"
                   placeholder="Sua senha"
                   value={password}
@@ -83,6 +83,14 @@ function Login({ onNavigate }: LoginProps = {}) {
                   disabled={loading}
                   autoComplete="new-password"
                 />
+                <button
+                  type="button"
+                  className="login-toggle-password"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
               </div>
             </div>
 

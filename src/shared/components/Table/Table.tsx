@@ -4,7 +4,22 @@ import { FaEllipsisV } from 'react-icons/fa'
 import './Table.sass'
 import { Pagination } from './Pagination'
 
-export interface TableColumn<T = any> {
+type IndexableRecord = Record<string, unknown>
+
+const getRecordValue = (value: unknown, key: string): unknown => {
+  if (value && typeof value === 'object') {
+    return (value as IndexableRecord)[key]
+  }
+  return undefined
+}
+
+const getDefaultItemId = (value: unknown): string | number => {
+  const id = getRecordValue(value, 'id')
+  if (typeof id === 'string' || typeof id === 'number') return id
+  throw new Error('Table: item sem id. Forneça getItemId.')
+}
+
+export interface TableColumn<T = unknown> {
   key: string
   label: string
   render?: (item: T) => ReactNode
@@ -19,7 +34,7 @@ export interface TableColumn<T = any> {
   mobileHidden?: boolean
 }
 
-export interface TableProps<T = any> {
+export interface TableProps<T = unknown> {
   columns: TableColumn<T>[]
   data: T[]
   actions?: (item: T) => ReactNode
@@ -31,7 +46,7 @@ export interface TableProps<T = any> {
   getItemId?: (item: T) => string | number
 }
 
-export function Table<T = any>({ 
+export function Table<T = unknown>({ 
   columns, 
   data, 
   actions,
@@ -40,7 +55,7 @@ export function Table<T = any>({
   selectable = false,
   selectedItems = new Set(),
   onSelectionChange,
-  getItemId = (item: any) => item.id
+  getItemId = (item: T) => getDefaultItemId(item)
 }: TableProps<T>) {
   const isMobile = useIsMobile()
   const [currentPage, setCurrentPage] = useState(1)
@@ -123,7 +138,7 @@ export function Table<T = any>({
           <thead>
             <tr>
               {selectable && (
-                <th className="table-header table-header--center" style={{ width: '50px' }}>
+                <th className="table-header table-header--center table-header--checkbox">
                   <input
                     type="checkbox"
                     checked={allSelected}
@@ -180,7 +195,7 @@ export function Table<T = any>({
                           key={column.key}
                           className={`table-cell table-cell--${column.align || 'left'} ${isImageColumn ? 'table-cell--image' : ''}`}
                         >
-                          {column.render ? column.render(item) : (item as any)[column.key]}
+                          {column.render ? column.render(item) : getRecordValue(item, column.key) as ReactNode}
                         </td>
                       )
                     })}
@@ -377,7 +392,7 @@ function MobileCard<T>({
 
   const renderColumnValue = (column: TableColumn<T>) => {
     if (column.render) return column.render(item)
-    return (item as any)[column.key]
+    return getRecordValue(item, column.key) as ReactNode
   }
 
   return (

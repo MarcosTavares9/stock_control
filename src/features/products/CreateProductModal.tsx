@@ -5,8 +5,9 @@ import { listLocalizacoes } from '../location/location.service'
 import type { Category } from '../categories/categories.types'
 import type { Localizacao } from '../location/location.types'
 import { ImageUpload } from '../../shared/components/ImageUpload/ImageUpload'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import './CreateProductModal.sass'
+import { isAbortError } from '../../shared/utils/isAbortError'
 
 interface Product {
   id: string
@@ -24,7 +25,6 @@ interface CreateProductModalProps {
   onClose: () => void
   onCreate: (product: Omit<Product, 'id' | 'status'>) => void
   onCreateMultiple: (products: Omit<Product, 'id' | 'status'>[]) => void
-  categorias: string[]
 }
 
 export function CreateProductModal({
@@ -32,7 +32,6 @@ export function CreateProductModal({
   onClose,
   onCreate,
   onCreateMultiple,
-  categorias: _categorias
 }: CreateProductModalProps) {
   const toast = useToast()
   const [mode, setMode] = useState<'single' | 'bulk'>('single')
@@ -49,19 +48,27 @@ export function CreateProductModal({
 
   useEffect(() => {
     if (isOpen) {
+      const controller = new AbortController()
+      const { signal } = controller
+
       const loadData = async () => {
         try {
           const [categoriesData, locationsData] = await Promise.all([
-            listCategories(),
-            listLocalizacoes(true) // Apenas localizações ativas
+            listCategories(signal),
+            listLocalizacoes(true, signal) // Apenas localizações ativas
           ])
-          setCategories(categoriesData)
-          setLocations(locationsData)
+          if (!signal.aborted) {
+            setCategories(categoriesData)
+            setLocations(locationsData)
+          }
         } catch (error) {
+          if (isAbortError(error)) return
           console.error('Erro ao carregar categorias e localizações:', error)
         }
       }
       loadData()
+
+      return () => controller.abort()
     }
   }, [isOpen])
 
@@ -89,7 +96,7 @@ export function CreateProductModal({
   }
 
   const parseExcelFile = (file: File): Promise<Omit<Product, 'id' | 'status'>[]> => {
-    return new Promise(async (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader()
       
       reader.onload = async (e) => {
@@ -112,14 +119,22 @@ export function CreateProductModal({
             const data = new Uint8Array(e.target?.result as ArrayBuffer)
             const workbook = XLSX.read(data, { type: 'array' })
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
-            const jsonData = XLSX.utils.sheet_to_json(firstSheet) as any[]
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet) as Record<string, unknown>[]
 
-            const products: Omit<Product, 'id' | 'status'>[] = jsonData.map((row: any) => ({
-              nome: row['Nome'] || row['nome'] || row['Nome do Produto'] || '',
-              categoria: row['Categoria'] || row['categoria'] || 'Geral',
-              localizacao: row['Localização'] || row['localizacao'] || row['Localizacao'] || 'A1-1',
-              quantidade: parseInt(row['Quantidade'] || row['quantidade'] || 0) || 0,
-              estoqueMinimo: parseInt(row['Estoque Mínimo'] || row['Estoque Minimo'] || row['estoqueMinimo'] || row['Estoque Mínimo'] || 0) || 0
+            const getCell = (row: Record<string, unknown>, key: string) => row[key]
+            const asString = (value: unknown) => (typeof value === 'string' ? value : '')
+            const asNumber = (value: unknown) => {
+              if (typeof value === 'number') return value
+              if (typeof value === 'string') return parseInt(value, 10) || 0
+              return 0
+            }
+
+            const products: Omit<Product, 'id' | 'status'>[] = jsonData.map((row) => ({
+              nome: asString(getCell(row, 'Nome')) || asString(getCell(row, 'nome')) || asString(getCell(row, 'Nome do Produto')),
+              categoria: asString(getCell(row, 'Categoria')) || asString(getCell(row, 'categoria')) || 'Geral',
+              localizacao: asString(getCell(row, 'Localização')) || asString(getCell(row, 'localizacao')) || asString(getCell(row, 'Localizacao')) || 'A1-1',
+              quantidade: asNumber(getCell(row, 'Quantidade')) || asNumber(getCell(row, 'quantidade')),
+              estoqueMinimo: asNumber(getCell(row, 'Estoque Mínimo')) || asNumber(getCell(row, 'Estoque Minimo')) || asNumber(getCell(row, 'estoqueMinimo'))
             })).filter(p => p.nome)
 
             resolve(products)
@@ -412,7 +427,7 @@ export function CreateProductModal({
                 <div className="create-product-modal__form-group">
                   <div className="create-product-modal__label-row">
                     <label className="create-product-modal__form-label">
-                      <FaFileExcel size={16} style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                      <FaFileExcel size={16} />
                       Upload de Arquivo (Excel ou CSV)
                     </label>
                     <button

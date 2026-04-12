@@ -27,23 +27,5 @@ export async function registerUser(data: RegisterRequest): Promise<void> {
  * @returns Promise que resolve quando a confirmação é concluída
  */
 export async function confirmRegistration(token: string, signal?: AbortSignal): Promise<void> {
-  // Simulação de chamada à API
-  await new Promise(resolve => setTimeout(resolve, 2000))
-  
-  // Verificar se a requisição foi cancelada
-  if (signal?.aborted) {
-    throw new DOMException('AbortError', 'AbortError')
-  }
-  
-  // Em produção, aqui seria a chamada real à API
-  // const response = await fetch(`/api/confirm-registration/${token}`, {
-  //   method: 'POST',
-  //   signal
-  // })
-  // if (!response.ok) {
-  //   const error = await response.json()
-  //   throw new Error(error.message || 'Erro ao confirmar registro')
-  // }
-  
-  console.log('Confirmação de registro:', token)
+  await api.post(endpoints.auth.confirmRegistration(token), {}, { signal })
 }

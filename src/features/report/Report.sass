@@ -168,9 +168,60 @@
     cursor: pointer
     appearance: none
 
+  &__quick-filters
+    display: flex
+    gap: $spacing-sm
+    margin-bottom: $spacing-md
+    flex-wrap: wrap
+
+  &__quick-filter-btn
+    padding: $spacing-xs $spacing-md
+    border-radius: $radius-full
+    border: 1px solid $gray-300
+    background-color: $white
+    color: $gray-600
+    font-size: $font-size-sm
+    font-weight: $font-weight-medium
+    cursor: pointer
+    transition: all $transition-base
+    white-space: nowrap
+
+    &:hover
+      border-color: $primary-500
+      color: $primary-500
+
+    &--active
+      background-color: $primary-500
+      border-color: $primary-500
+      color: $white
+
+      &:hover
+        background-color: $primary-600
+        color: $white
+
+  &__clear-btn
+    display: inline-flex
+    align-items: center
+    gap: $spacing-xs
+    padding: $spacing-xs $spacing-md
+    border-radius: $radius-full
+    border: 1px dashed $error
+    background-color: transparent
+    color: $error
+    font-size: $font-size-sm
+    font-weight: $font-weight-medium
+    cursor: pointer
+    transition: all $transition-base
+    align-self: flex-end
+    height: fit-content
+    margin-top: auto
+
+    &:hover
+      background-color: rgba(239, 68, 68, 0.05)
+
   &__stats-grid
     display: grid
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr))
     gap: $spacing-lg
     margin-bottom: $spacing-2xl
 
@@ -180,6 +231,12 @@
     color: $gray-800
     margin: 0
     margin-bottom: $spacing-lg
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+
+  &__section-title-icon--warning
+    color: $warning
 
   &__movement-stats
     margin-bottom: $spacing-2xl
@@ -188,6 +245,203 @@
     display: grid
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))
     gap: $spacing-lg
+    margin-bottom: $spacing-md
+
+  &__flow-bar
+    background-color: $white
+    border-radius: $radius-lg
+    border: 1px solid $gray-200
+    padding: $spacing-md $spacing-lg
+    margin-top: $spacing-sm
+
+  &__flow-bar-track
+    display: flex
+    height: 10px
+    border-radius: $radius-full
+    overflow: hidden
+    background-color: $gray-100
+    margin-bottom: $spacing-sm
+
+  &__flow-bar-fill
+    transition: width $transition-slow
+
+    &--entrada
+      background-color: $success
+
+    &--saida
+      background-color: $error
+
+  &__flow-bar-legend
+    display: flex
+    gap: $spacing-lg
+    justify-content: flex-end
+
+  &__flow-legend-item
+    display: flex
+    align-items: center
+    gap: $spacing-xs
+    font-size: $font-size-xs
+    color: $gray-600
+    font-weight: $font-weight-medium
+
+  &__flow-legend-dot
+    width: 10px
+    height: 10px
+    border-radius: $radius-full
+    display: inline-block
+
+    .report__flow-legend-item--entrada &
+      background-color: $success
+
+    .report__flow-legend-item--saida &
+      background-color: $error
+
+  // Top Produtos
+  &__top-section
+    margin-bottom: $spacing-2xl
+
+  &__top-list
+    display: flex
+    flex-direction: column
+    gap: $spacing-sm
+    background-color: $white
+    border-radius: $radius-lg
+    border: 1px solid $gray-200
+    padding: $spacing-lg
+    box-shadow: $shadow-sm
+
+  &__top-item
+    display: flex
+    align-items: flex-start
+    gap: $spacing-md
+    padding: $spacing-md 0
+    border-bottom: 1px solid $gray-100
+
+    &:last-child
+      border-bottom: none
+      padding-bottom: 0
+
+    &:first-child
+      padding-top: 0
+
+  &__top-rank
+    font-size: $font-size-sm
+    font-weight: $font-weight-bold
+    min-width: 32px
+    height: 32px
+    border-radius: $radius-md
+    display: flex
+    align-items: center
+    justify-content: center
+    flex-shrink: 0
+
+    &--1
+      background-color: #FEF3C7
+      color: #D97706
+
+    &--2
+      background-color: $gray-100
+      color: $gray-600
+
+    &--3
+      background-color: rgba(180, 120, 60, 0.12)
+      color: #B45309
+
+    &--4, &--5
+      background-color: $gray-50
+      color: $gray-500
+
+  &__top-info
+    flex: 1
+    min-width: 0
+
+  &__top-name-row
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    margin-bottom: $spacing-xs
+    flex-wrap: wrap
+
+  &__top-name
+    font-size: $font-size-sm
+    font-weight: $font-weight-semibold
+    color: $gray-900
+
+  &__top-categoria
+    font-size: $font-size-xs
+    color: $gray-500
+    background-color: $gray-100
+    padding: 2px $spacing-sm
+    border-radius: $radius-full
+
+  &__top-bar-row
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    margin-bottom: $spacing-xs
+
+  &__top-bar-track
+    flex: 1
+    height: 6px
+    background-color: $gray-100
+    border-radius: $radius-full
+    overflow: hidden
+
+  &__top-bar-fill
+    height: 100%
+    background: linear-gradient(90deg, $primary-400, $primary-500)
+    border-radius: $radius-full
+    transition: width $transition-slow
+
+  &__top-count
+    font-size: $font-size-xs
+    font-weight: $font-weight-semibold
+    color: $gray-600
+    white-space: nowrap
+
+  &__top-tags
+    display: flex
+    gap: $spacing-sm
+
+  &__top-tag
+    font-size: $font-size-xs
+    font-weight: $font-weight-medium
+    padding: 2px $spacing-sm
+    border-radius: $radius-full
+
+    &--entrada
+      background-color: rgba(16, 185, 129, 0.1)
+      color: $success
+
+    &--saida
+      background-color: rgba(239, 68, 68, 0.1)
+      color: $error
+
+  // Category bar cell
+  &__cat-bar-cell
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    min-width: 120px
+
+  &__cat-bar-track
+    flex: 1
+    height: 6px
+    background-color: $gray-100
+    border-radius: $radius-full
+    overflow: hidden
+
+  &__cat-bar-fill
+    height: 100%
+    background: linear-gradient(90deg, $primary-300, $primary-500)
+    border-radius: $radius-full
+    transition: width $transition-slow
+
+  &__cat-bar-value
+    font-size: $font-size-sm
+    font-weight: $font-weight-semibold
+    color: $gray-700
+    white-space: nowrap
 
   &__tables
     display: flex
@@ -345,6 +599,31 @@
 
     &--negative
       color: $error
+
+  &__pct
+    display: block
+    font-size: $font-size-xs
+    color: $gray-400
+    margin-top: 2px
+
+// Badge Styles
+.report-badge
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  min-width: 28px
+  padding: 2px $spacing-sm
+  border-radius: $radius-full
+  font-size: $font-size-xs
+  font-weight: $font-weight-semibold
+
+  &--warning
+    background-color: rgba(245, 158, 11, 0.12)
+    color: $warning
+
+  &--ok
+    background-color: rgba(16, 185, 129, 0.1)
+    color: $success
 
 // Status Badge Styles
 .report-status

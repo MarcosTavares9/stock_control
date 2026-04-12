@@ -93,11 +93,10 @@ const MetricCard = ({
 
       {onDownload && value > 0 && (
         <div
-          className="metric-download"
+          className={`metric-download${downloading ? ' metric-download--downloading' : ''}`}
           onClick={handleDownloadClick}
           onMouseEnter={() => setHoverDownload(true)}
           onMouseLeave={() => setHoverDownload(false)}
-          style={{ cursor: downloading ? 'wait' : 'pointer' }}
         >
           {downloading ? (
             <span>Baixando...</span>
@@ -142,7 +141,7 @@ const MetricsSection = ({
   const applyPresetFilter = (preset: string) => {
     const now = new Date();
     let start = new Date(now);
-    let end = new Date(now);
+    const end = new Date(now);
 
     switch (preset) {
       case 'today':
@@ -158,12 +157,14 @@ const MetricsSection = ({
         break;
 
       case 'this_week':
-        const dayOfWeek = start.getDay();
-        const diff = start.getDate() - dayOfWeek;
-        start = new Date(start.setDate(diff));
-        start.setHours(0, 0, 0, 0);
-        end.setHours(23, 59, 59, 999);
-        break;
+        {
+          const dayOfWeek = start.getDay();
+          const diff = start.getDate() - dayOfWeek;
+          start = new Date(start.setDate(diff));
+          start.setHours(0, 0, 0, 0);
+          end.setHours(23, 59, 59, 999);
+          break;
+        }
 
       case 'last_7_days':
         start.setDate(start.getDate() - 6);

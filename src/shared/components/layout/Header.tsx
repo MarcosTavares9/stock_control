@@ -1,6 +1,6 @@
 import { ReactNode, useState, useRef, useEffect } from 'react'
 import { FaUserCircle, FaUser, FaSignOutAlt } from 'react-icons/fa'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth/useAuth'
 import './Header.sass'
 
 interface HeaderProps {
@@ -31,7 +31,6 @@ export function Header({ title, actions, isSidebarExpanded = false }: HeaderProp
   }, [isMenuOpen])
 
   const handleProfileClick = () => {
-    console.log('Meu Perfil')
     setIsMenuOpen(false)
   }
 

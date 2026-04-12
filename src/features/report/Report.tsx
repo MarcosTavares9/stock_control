@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Table, TableColumn } from '../../shared/components/Table'
-import { 
+import {
   FaFileExport,
   FaBox,
   FaTags,
@@ -12,7 +12,9 @@ import {
   FaFileCsv,
   FaFileExcel,
   FaFilePdf,
-  FaChevronDown
+  FaChevronDown,
+  FaFire,
+  FaTimes
 } from 'react-icons/fa'
 import { listProducts } from '../products/products.service'
 import { listHistory } from '../history/history.service'
@@ -21,7 +23,7 @@ import type { Product as ProductDomain } from '../products/products.types'
 import type { History as HistoryDomain } from '../history/history.types'
 import type { Category } from '../categories/categories.types'
 import { useIsMobile } from '../../shared/utils/useIsMobile'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import ReportMobile from './ReportMobile'
 import './Report.sass'
 
@@ -68,7 +70,7 @@ const mapHistoryFromDomain = (history: HistoryDomain, products: ProductDomain[],
   return {
     id: history.uuid,
     tipo,
-    produto: history.product.name,
+    produto: history.product?.name || product?.name || 'Produto removido',
     categoria: category?.name || 'Sem categoria',
     quantidade: history.quantity_changed,
     data: new Date(history.created_at)
@@ -109,7 +111,26 @@ function ReportDesktop() {
   const [dataFim, setDataFim] = useState<string>('')
   const [selectedCategoria, setSelectedCategoria] = useState<string>('')
   const [showExportMenu, setShowExportMenu] = useState(false)
+  const [activeQuickFilter, setActiveQuickFilter] = useState<string>('tudo')
   const exportMenuRef = useRef<HTMLDivElement>(null)
+
+  const setQuickFilter = (key: string, days: number | null) => {
+    setActiveQuickFilter(key)
+    if (days === null) {
+      setDataInicio('')
+      setDataFim('')
+    } else {
+      const fim = new Date()
+      const inicio = new Date()
+      if (key === 'hoje') {
+        inicio.setHours(0, 0, 0, 0)
+      } else {
+        inicio.setDate(inicio.getDate() - days)
+      }
+      setDataInicio(inicio.toISOString().split('T')[0])
+      setDataFim(fim.toISOString().split('T')[0])
+    }
+  }
 
   useEffect(() => {
     const loadData = async () => {
@@ -171,8 +192,12 @@ function ReportDesktop() {
       return matchDataInicio && matchDataFim && matchCategoria
     })
 
-    const entradas = historicoFiltrado.filter(e => e.tipo === 'entrada').reduce((sum, e) => sum + e.quantidade, 0)
-    const saidas = historicoFiltrado.filter(e => e.tipo === 'saida').reduce((sum, e) => sum + e.quantidade, 0)
+    const entradas = historicoFiltrado
+      .filter(e => e.tipo === 'entrada' || (e.tipo === 'ajuste' && e.quantidade > 0))
+      .reduce((sum, e) => sum + Math.abs(e.quantidade), 0)
+    const saidas = historicoFiltrado
+      .filter(e => e.tipo === 'saida' || (e.tipo === 'ajuste' && e.quantidade < 0))
+      .reduce((sum, e) => sum + Math.abs(e.quantidade), 0)
     const ajustes = historicoFiltrado.filter(e => e.tipo === 'ajuste').length
 
     return {
@@ -213,6 +238,24 @@ function ReportDesktop() {
       }
     }).sort((a, b) => b.totalEstoque - a.totalEstoque)
   }, [products, categoriasUnicas])
+
+  // Top 5 produtos mais movimentados
+  const topProdutos = useMemo(() => {
+    const contagem: Record<string, { nome: string; categoria: string; movimentacoes: number; entradas: number; saidas: number }> = {}
+    historyEntries.forEach(entry => {
+      const key = entry.produto
+      if (!contagem[key]) {
+        contagem[key] = { nome: entry.produto, categoria: entry.categoria, movimentacoes: 0, entradas: 0, saidas: 0 }
+      }
+      contagem[key].movimentacoes++
+      if (entry.tipo === 'entrada' || (entry.tipo === 'ajuste' && entry.quantidade > 0)) {
+        contagem[key].entradas += Math.abs(entry.quantidade)
+      } else if (entry.tipo === 'saida' || (entry.tipo === 'ajuste' && entry.quantidade < 0)) {
+        contagem[key].saidas += Math.abs(entry.quantidade)
+      }
+    })
+    return Object.values(contagem).sort((a, b) => b.movimentacoes - a.movimentacoes).slice(0, 5)
+  }, [historyEntries])
 
   const columns: TableColumn<Product>[] = [
     {
@@ -259,6 +302,8 @@ function ReportDesktop() {
     }
   ]
 
+  const maxEstoqueCategoria = Math.max(...estatisticasPorCategoria.map(e => e.totalEstoque), 1)
+
   const categoriaColumns: TableColumn<typeof estatisticasPorCategoria[0]>[] = [
     {
       key: 'categoria',
@@ -268,28 +313,38 @@ function ReportDesktop() {
     },
     {
       key: 'totalProdutos',
-      label: 'Total de Produtos',
+      label: 'Produtos',
       align: 'center',
       render: (item) => item.totalProdutos.toString()
     },
     {
       key: 'totalEstoque',
       label: 'Total em Estoque',
-      align: 'center',
-      render: (item) => item.totalEstoque.toString()
+      align: 'left',
+      render: (item) => (
+        <div className="report__cat-bar-cell">
+          <div className="report__cat-bar-track">
+            <div
+              className="report__cat-bar-fill"
+              style={{ width: `${(item.totalEstoque / maxEstoqueCategoria) * 100}%` }}
+            />
+          </div>
+          <span className="report__cat-bar-value">{item.totalEstoque}</span>
+        </div>
+      )
     },
     {
       key: 'estoqueMedio',
-      label: 'Estoque Médio',
+      label: 'Média',
       align: 'center',
       render: (item) => item.estoqueMedio.toString()
     },
     {
       key: 'produtosBaixo',
-      label: 'Produtos com Estoque Baixo',
+      label: 'Estoque Baixo',
       align: 'center',
       render: (item) => (
-        <span className={item.produtosBaixo > 0 ? 'report-warning' : ''}>
+        <span className={item.produtosBaixo > 0 ? 'report-badge report-badge--warning' : 'report-badge report-badge--ok'}>
           {item.produtosBaixo}
         </span>
       )
@@ -680,6 +735,22 @@ function ReportDesktop() {
 
       {/* Filtros */}
       <div className="report__filters">
+        <div className="report__quick-filters">
+          {[
+            { key: 'hoje', label: 'Hoje', days: 0 },
+            { key: '7d', label: '7 dias', days: 7 },
+            { key: '30d', label: '30 dias', days: 30 },
+            { key: 'tudo', label: 'Tudo', days: null },
+          ].map(({ key, label, days }) => (
+            <button
+              key={key}
+              className={`report__quick-filter-btn ${activeQuickFilter === key ? 'report__quick-filter-btn--active' : ''}`}
+              onClick={() => setQuickFilter(key, days)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <div className="report__filters-row">
           <div className="report__filter">
             <label className="report__filter-label">
@@ -690,7 +761,7 @@ function ReportDesktop() {
               type="date"
               className="report__filter-input"
               value={dataInicio}
-              onChange={(e) => setDataInicio(e.target.value)}
+              onChange={(e) => { setDataInicio(e.target.value); setActiveQuickFilter('') }}
             />
           </div>
           <div className="report__filter">
@@ -702,7 +773,7 @@ function ReportDesktop() {
               type="date"
               className="report__filter-input"
               value={dataFim}
-              onChange={(e) => setDataFim(e.target.value)}
+              onChange={(e) => { setDataFim(e.target.value); setActiveQuickFilter('') }}
             />
           </div>
           <div className="report__filter">
@@ -723,6 +794,15 @@ function ReportDesktop() {
               ))}
             </select>
           </div>
+          {(dataInicio || dataFim || selectedCategoria) && (
+            <button
+              className="report__clear-btn"
+              onClick={() => { setDataInicio(''); setDataFim(''); setSelectedCategoria(''); setActiveQuickFilter('tudo') }}
+            >
+              <FaTimes size={12} />
+              Limpar filtros
+            </button>
+          )}
         </div>
       </div>
 
@@ -782,7 +862,12 @@ function ReportDesktop() {
             </div>
             <div className="report-movement-card__content">
               <p className="report-movement-card__label">Entradas</p>
-              <p className="report-movement-card__value">+{movimentacoes.entradas}</p>
+              <p className="report-movement-card__value report-movement-card__value--positive">+{movimentacoes.entradas}</p>
+              {movimentacoes.totalMovimentacoes > 0 && (
+                <span className="report-movement-card__pct">
+                  {Math.round((movimentacoes.entradas / (movimentacoes.entradas + movimentacoes.saidas || 1)) * 100)}% do fluxo
+                </span>
+              )}
             </div>
           </div>
 
@@ -792,7 +877,12 @@ function ReportDesktop() {
             </div>
             <div className="report-movement-card__content">
               <p className="report-movement-card__label">Saídas</p>
-              <p className="report-movement-card__value">-{movimentacoes.saidas}</p>
+              <p className="report-movement-card__value report-movement-card__value--negative">{movimentacoes.saidas > 0 ? `-${movimentacoes.saidas}` : '0'}</p>
+              {movimentacoes.totalMovimentacoes > 0 && (
+                <span className="report-movement-card__pct">
+                  {Math.round((movimentacoes.saidas / (movimentacoes.entradas + movimentacoes.saidas || 1)) * 100)}% do fluxo
+                </span>
+              )}
             </div>
           </div>
 
@@ -805,6 +895,7 @@ function ReportDesktop() {
               <p className={`report-movement-card__value ${movimentacoes.saldo >= 0 ? 'report-movement-card__value--positive' : 'report-movement-card__value--negative'}`}>
                 {movimentacoes.saldo >= 0 ? '+' : ''}{movimentacoes.saldo}
               </p>
+              <span className="report-movement-card__pct">{movimentacoes.saldo >= 0 ? 'Saldo positivo' : 'Saldo negativo'}</span>
             </div>
           </div>
 
@@ -813,12 +904,76 @@ function ReportDesktop() {
               <FaChartBar size={20} />
             </div>
             <div className="report-movement-card__content">
-              <p className="report-movement-card__label">Total de Movimentações</p>
+              <p className="report-movement-card__label">Total de Registros</p>
               <p className="report-movement-card__value">{movimentacoes.totalMovimentacoes}</p>
+              <span className="report-movement-card__pct">{movimentacoes.ajustes} ajustes</span>
             </div>
           </div>
         </div>
+
+        {/* Barra visual entradas vs saídas */}
+        {(movimentacoes.entradas + movimentacoes.saidas) > 0 && (
+          <div className="report__flow-bar">
+            <div className="report__flow-bar-track">
+              <div
+                className="report__flow-bar-fill report__flow-bar-fill--entrada"
+                style={{ width: `${Math.round((movimentacoes.entradas / (movimentacoes.entradas + movimentacoes.saidas)) * 100)}%` }}
+              />
+              <div
+                className="report__flow-bar-fill report__flow-bar-fill--saida"
+                style={{ width: `${Math.round((movimentacoes.saidas / (movimentacoes.entradas + movimentacoes.saidas)) * 100)}%` }}
+              />
+            </div>
+            <div className="report__flow-bar-legend">
+              <span className="report__flow-legend-item report__flow-legend-item--entrada">
+                <span className="report__flow-legend-dot" /> Entradas
+              </span>
+              <span className="report__flow-legend-item report__flow-legend-item--saida">
+                <span className="report__flow-legend-dot" /> Saídas
+              </span>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Top Produtos */}
+      {topProdutos.length > 0 && (
+        <div className="report__top-section">
+          <h2 className="report__section-title">
+            <FaFire size={18} className="report__section-title-icon--warning" />
+            Top Produtos Mais Movimentados
+          </h2>
+          <div className="report__top-list">
+            {topProdutos.map((produto, index) => {
+              const maxMov = topProdutos[0].movimentacoes
+              return (
+                <div key={produto.nome} className="report__top-item">
+                  <span className={`report__top-rank report__top-rank--${index + 1}`}>#{index + 1}</span>
+                  <div className="report__top-info">
+                    <div className="report__top-name-row">
+                      <span className="report__top-name">{produto.nome}</span>
+                      <span className="report__top-categoria">{produto.categoria}</span>
+                    </div>
+                    <div className="report__top-bar-row">
+                      <div className="report__top-bar-track">
+                        <div
+                          className="report__top-bar-fill"
+                          style={{ width: `${(produto.movimentacoes / maxMov) * 100}%` }}
+                        />
+                      </div>
+                      <span className="report__top-count">{produto.movimentacoes} mov.</span>
+                    </div>
+                    <div className="report__top-tags">
+                      <span className="report__top-tag report__top-tag--entrada">+{produto.entradas} entradas</span>
+                      <span className="report__top-tag report__top-tag--saida">-{produto.saidas} saídas</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Tabelas */}
       <div className="report__tables">
@@ -843,6 +998,7 @@ function ReportDesktop() {
             columns={categoriaColumns}
             data={estatisticasPorCategoria}
             pageSize={10}
+            getItemId={(item) => item.categoria}
           />
         </div>
       </div>

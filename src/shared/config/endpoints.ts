@@ -1,12 +1,12 @@
 /**
  * Endpoints centralizados da API
- * 
+ *
  * Este arquivo contém todos os endpoints da API organizados por módulo.
  * Use este arquivo como fonte única de verdade para todos os endpoints.
- * 
+ *
  * Base URL e Swagger são configurados via variáveis de ambiente.
  * Ver: src/shared/config/app.config.ts
- * 
+ *
  * Todos os endpoints (exceto login e register) requerem autenticação:
  * Header: Authorization: Bearer <token>
  */
@@ -18,7 +18,8 @@
 export const authEndpoints = {
   login: () => '/auth/login',
   register: () => '/auth/register',
-} as const
+  confirmRegistration: (token: string) => `/auth/confirm-registration/${token}`,
+} as const;
 
 /**
  * Endpoints de Usuários
@@ -29,8 +30,9 @@ export const usersEndpoints = {
   getById: (id: string) => `/users/${id}`,
   create: () => '/users',
   update: (id: string) => `/users/${id}`,
+  updateProfile: (id: string) => `/users/${id}/profile`,
   delete: (id: string) => `/users/${id}`,
-} as const
+} as const;
 
 /**
  * Endpoints de Produtos
@@ -45,7 +47,7 @@ export const productsEndpoints = {
   bulkCreate: () => '/products/bulk',
   bulkUpdate: () => '/products/bulk',
   bulkDelete: () => '/products/bulk',
-} as const
+} as const;
 
 /**
  * Endpoints de Categorias
@@ -57,12 +59,12 @@ export const categoriesEndpoints = {
   create: () => '/categories',
   update: (id: string) => `/categories/${id}`,
   delete: (id: string) => `/categories/${id}`,
-} as const
+} as const;
 
 /**
  * Endpoints de Localizações
  * Requerem autenticação
- * 
+ *
  * Query params para list: ?active=true (opcional)
  */
 export const locationsEndpoints = {
@@ -71,12 +73,12 @@ export const locationsEndpoints = {
   create: () => '/locations',
   update: (id: string) => `/locations/${id}`,
   delete: (id: string) => `/locations/${id}`,
-} as const
+} as const;
 
 /**
  * Endpoints de Histórico
  * Requerem autenticação
- * 
+ *
  * Query params opcionais:
  * - page (padrão: 1)
  * - limit (padrão: 10)
@@ -88,23 +90,23 @@ export const locationsEndpoints = {
  */
 export const historyEndpoints = {
   list: () => '/history',
-} as const
+} as const;
 
 /**
  * Endpoints de Dashboard
  * Requerem autenticação
- * 
+ *
  * Query params para lowStock: ?limit=10 (opcional)
  */
 export const dashboardEndpoints = {
   stats: () => '/dashboard/stats',
   lowStock: () => '/dashboard/low-stock',
-} as const
+} as const;
 
 /**
  * Endpoints de Relatórios
  * Requerem autenticação
- * 
+ *
  * Query params opcionais:
  * - type (entry | exit | adjustment)
  * - product_id (UUID)
@@ -116,7 +118,7 @@ export const reportsEndpoints = {
   exportCsv: () => '/reports/export/csv',
   exportExcel: () => '/reports/export/excel',
   exportPdf: () => '/reports/export/pdf',
-} as const
+} as const;
 
 /**
  * Objeto centralizado com todos os endpoints
@@ -130,4 +132,4 @@ export const endpoints = {
   history: historyEndpoints,
   dashboard: dashboardEndpoints,
   reports: reportsEndpoints,
-} as const
+} as const;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './Localizacao.sass'
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaMapMarkerAlt } from 'react-icons/fa'
 import { CreateLocalizacaoModal } from './CreateLocalizacaoModal'
@@ -6,7 +6,7 @@ import { EditLocalizacaoModal } from './EditLocalizacaoModal'
 import { listLocalizacoes, deleteLocalizacao } from './location.service'
 import { Localizacao as LocalizacaoType } from './location.types'
 import { useIsMobile } from '../../shared/utils/useIsMobile'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import LocalizacaoMobile from './LocalizacaoMobile'
 
 function Localizacao() {
@@ -24,22 +24,25 @@ function LocalizacaoDesktop() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [selectedLocalizacao, setSelectedLocalizacao] = useState<LocalizacaoType | null>(null)
 
-  useEffect(() => {
-    loadLocalizacoes()
-  }, [])
-
-  const loadLocalizacoes = async () => {
+  const loadLocalizacoes = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true)
-      const data = await listLocalizacoes()
+      const data = await listLocalizacoes(undefined, signal)
       setLocalizacoes(data)
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.name === 'AbortError' || error?.code === 'ERR_CANCELED') return
       console.error('Erro ao carregar localizações:', error)
       toast.error('Erro ao carregar localizações')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadLocalizacoes(controller.signal)
+    return () => controller.abort()
+  }, [loadLocalizacoes])
 
   const filteredLocalizacoes = localizacoes.filter(localizacao =>
     localizacao.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||

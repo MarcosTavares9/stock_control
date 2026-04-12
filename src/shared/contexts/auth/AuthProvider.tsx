@@ -1,42 +1,31 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
-import { api } from '../utils/api'
-import { endpoints } from '../config/endpoints'
-import { getRoute } from '../config/base-path'
-import { STORAGE_KEYS } from '../config/app.config'
-import { isTokenExpired } from '../utils/auth'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
+import { api } from '../../utils/api'
+import { endpoints } from '../../config/endpoints'
+import { getRoute } from '../../config/base-path'
+import { STORAGE_KEYS } from '../../config/app.config'
+import { isTokenExpired } from '../../utils/auth'
+import { AuthContext, type User } from './auth-context'
 
-interface User {
-  id: string
-  name: string
-  email: string
-  photo?: string
-  role?: string | null
-  roleId?: number | null
-  applicationId?: number | null
-  companyId?: string | null
-}
-
-interface AuthContextType {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
-  logout: () => void
-  updateUser: (userData: Partial<User>) => void
-  loading: boolean
-  userRole: string | null
-  userApplicationId: number | null
-  userCompanyId: string | null
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-/**
- * Limpa todos os dados de autenticação do localStorage
- */
 const clearAuthStorage = () => {
   localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.AUTH_USER)
+}
+
+const normalizeUser = (userData: any): User => {
+  const firstName = userData?.firstName ?? userData?.name?.split?.(' ')[0] ?? ''
+  const lastName = userData?.lastName ?? userData?.surname ?? ''
+  const fullName = userData?.name ?? `${firstName} ${lastName}`.trim()
+
+  return {
+    id: userData?.id ?? '',
+    name: fullName,
+    email: userData?.email ?? '',
+    photo: userData?.photo || userData?.profilePicture || undefined,
+    role: userData?.role ?? userData?.roleName ?? null,
+    roleId: userData?.roleId ?? userData?.role_id ?? userData?.role?.id ?? null,
+    applicationId: userData?.applicationId ?? userData?.application_id ?? userData?.application?.id ?? null,
+    companyId: userData?.companyId ?? userData?.company_id ?? userData?.company?.id ?? null,
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -44,13 +33,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Restaura sessão do localStorage ao montar
   useEffect(() => {
     const savedToken = localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
     const savedUser = localStorage.getItem(STORAGE_KEYS.AUTH_USER)
 
     if (savedToken && savedUser) {
-      // Verifica se o token ainda é válido (não expirado)
       if (isTokenExpired(savedToken)) {
         clearAuthStorage()
         setLoading(false)
@@ -61,9 +48,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userData: User = JSON.parse(savedUser)
         setToken(savedToken)
         setUser(userData)
-
-        // Configura o token nos headers padrão do axios
         api.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`
+
+        // Busca perfil atualizado para sincronizar foto e dados recentes
+        api.get(endpoints.users.getById(userData.id))
+          .then((res) => {
+            const fresh = res.data?.data ?? res.data
+            if (fresh?.profilePicture !== undefined) {
+              const updated: User = { ...userData, photo: fresh.profilePicture || undefined }
+              setUser(updated)
+              localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(updated))
+            }
+          })
+          .catch(() => { /* silencioso — dados do localStorage já estão carregados */ })
       } catch {
         clearAuthStorage()
       }
@@ -78,51 +75,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await api.post(endpoints.auth.login(), { email, password })
       const { token: newToken, user: userData } = response.data
 
-      const formattedUser: User = {
-        id: userData.id,
-        name: `${userData.firstName} ${userData.lastName}`,
-        email: userData.email,
-        photo: userData.photo || undefined,
-        role: null,
-        roleId: null,
-        applicationId: null,
-        companyId: null,
-      }
+      const formattedUser = normalizeUser(userData)
 
-      // Salva no localStorage (fonte única de verdade)
       localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, newToken)
       localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(formattedUser))
 
-      // Configura o token nos headers padrão do axios (padrão Onmai)
       api.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
 
-      // Atualiza o state
       setToken(newToken)
       setUser(formattedUser)
-    } catch (error: any) {
-      // Extrai mensagem de erro da resposta da API
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: unknown } } }
+      const apiMessage = axiosError?.response?.data?.message
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        'Email ou senha inválidos'
-      throw new Error(errorMessage)
+        typeof apiMessage === 'string'
+          ? apiMessage
+          : error instanceof Error
+            ? error.message
+            : 'Email ou senha inválidos'
+
+      // Preserva dados da resposta para a UI (ex.: lista `error` do backend)
+      const err = new Error(errorMessage) as Error & { response?: unknown }
+      if ((error as any)?.response) {
+        err.response = (error as any).response
+      }
+      throw err
     } finally {
       setLoading(false)
     }
   }, [])
 
   const logout = useCallback(() => {
-    // Limpa headers do axios
     delete api.defaults.headers.common['Authorization']
-
-    // Limpa state
     setToken(null)
     setUser(null)
-
-    // Limpa storage
     clearAuthStorage()
-
-    // Redireciona para login
     window.location.href = getRoute('/login')
   }, [])
 
@@ -154,12 +141,3 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   )
 }
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider')
-  }
-  return context
-}
-

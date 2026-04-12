@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
 import { confirmRegistration } from './register.service'
 import { getRoute } from '../../shared/config/base-path'
+import { isAbortError } from '../../shared/utils/isAbortError'
 import './ConfirmRegistration.sass'
 
 interface ConfirmRegistrationProps {
@@ -34,13 +35,14 @@ function ConfirmRegistration({ token }: ConfirmRegistrationProps) {
         if (!signal.aborted) {
           setSuccess(true)
         }
-      } catch (err: any) {
-        if (err.name === 'AbortError') {
+      } catch (err: unknown) {
+        if (isAbortError(err)) {
           return
         }
         console.error('Erro ao confirmar registro:', err)
         if (!signal.aborted) {
-          setError(err.message || 'Ocorreu um erro ao confirmar seu registro. O link pode ter expirado ou ser inválido.')
+          const message = err instanceof Error ? err.message : null
+          setError(message || 'Ocorreu um erro ao confirmar seu registro. O link pode ter expirado ou ser inválido.')
           setSuccess(false)
         }
       } finally {

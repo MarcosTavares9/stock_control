@@ -49,10 +49,40 @@ const createApiInstance = (baseURL: string, additionalHeaders = {}): AxiosInstan
     }
   );
 
-  // Interceptor de resposta: trata erros de forma diferenciada
+  // Interceptor de resposta: trata erros de forma diferenciada e normaliza payload
   instance.interceptors.response.use(
-    (response) => response,
+    (response) => {
+      // Desembrulha envelope { data, statusCode, timestamp } quando presente
+      if (response.data && typeof response.data === 'object' && 'data' in response.data && 'statusCode' in response.data) {
+        response.data = response.data.data;
+      }
+      return response;
+    },
     (error: AxiosError) => {
+      // Normalização de erro para formato { error: string[], statusCode?, timestamp?, path? }
+      if (error.response) {
+        const data = (error.response.data ?? {}) as any
+
+        const extractArray = (val: any): string[] => {
+          if (Array.isArray(val)) return val.filter((m) => typeof m === 'string')
+          if (typeof val === 'string') return [val]
+          return []
+        }
+
+        const normalized = {
+          error: extractArray(data.error).length
+            ? extractArray(data.error)
+            : extractArray(data.message).length
+            ? extractArray(data.message)
+            : [error.message || 'Erro desconhecido'],
+          statusCode: data.statusCode ?? error.response.status,
+          timestamp: data.timestamp ?? new Date().toISOString(),
+          path: data.path ?? error.config?.url ?? undefined,
+        }
+
+        ;(error as any).response.data = normalized
+      }
+
       if (error.response) {
         const { status, config } = error.response;
 
@@ -83,4 +113,3 @@ const api = createApiInstance(API_BASE_URL);
 
 export { api, createApiInstance };
 export type { AxiosInstance };
-

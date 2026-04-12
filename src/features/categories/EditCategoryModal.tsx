@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { FaTimes, FaTrash } from 'react-icons/fa'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import { 
   FaLaptop,
   FaMouse,

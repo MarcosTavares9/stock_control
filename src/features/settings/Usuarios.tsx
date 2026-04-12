@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './Usuarios.sass'
 import { FaPlus, FaEdit, FaTrash, FaSearch } from 'react-icons/fa'
 import { CreateUsuarioModal } from './CreateUsuarioModal'
 import { listUsuarios, createUsuario, updateUsuario, deleteUsuario } from './settings.service'
 import { Usuario, CreateUsuarioRequest, UpdateUsuarioRequest } from './settings.types'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 
 function Usuarios() {
   const toast = useToast()
@@ -14,14 +14,10 @@ function Usuarios() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUsuario, setSelectedUsuario] = useState<Usuario | null>(null)
 
-  useEffect(() => {
-    loadUsuarios()
-  }, [])
-
-  const loadUsuarios = async () => {
+  const loadUsuarios = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoading(true)
-      const data = await listUsuarios()
+      const data = await listUsuarios(signal)
       setUsuarios(data)
     } catch (error) {
       console.error('Erro ao carregar usuários:', error)
@@ -29,7 +25,13 @@ function Usuarios() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    loadUsuarios(controller.signal)
+    return () => controller.abort()
+  }, [loadUsuarios])
 
   const filteredUsuarios = usuarios.filter(usuario =>
     usuario.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||

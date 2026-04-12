@@ -9,8 +9,8 @@ import { History, HistoryFilters } from './history.types'
  * @param filters Filtros opcionais para o histórico
  * @returns Promise com lista de histórico
  */
-export async function listHistory(filters?: HistoryFilters): Promise<History[]> {
-  const params: any = {}
+export async function listHistory(filters?: HistoryFilters, signal?: AbortSignal): Promise<History[]> {
+  const params: Record<string, string> = {}
   
   if (filters?.type) params.type = filters.type
   if (filters?.product_id) params.product_id = filters.product_id
@@ -18,6 +18,6 @@ export async function listHistory(filters?: HistoryFilters): Promise<History[]> 
   if (filters?.start_date) params.start_date = filters.start_date
   if (filters?.end_date) params.end_date = filters.end_date
   
-  const response = await api.get<{ data: History[] }>(endpoints.history.list(), { params })
+  const response = await api.get<{ data: History[] }>(endpoints.history.list(), { params, signal })
   return response.data.data
 }

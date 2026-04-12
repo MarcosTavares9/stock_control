@@ -17,7 +17,8 @@ import { CreateCategoryModal } from './CreateCategoryModal'
 import { EditCategoryModal } from './EditCategoryModal'
 import { listCategories, createCategory, updateCategory, deleteCategory } from './categories.service'
 import type { Category as CategoryDomain } from './categories.types'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
+import { isAbortError } from '../../shared/utils/isAbortError'
 import './CategoriesMobile.sass'
 
 interface Category {
@@ -56,19 +57,26 @@ function CategoriesMobile() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     const loadCategories = async () => {
       try {
         setLoading(true)
-        const categoriesData = await listCategories()
-        setCategories(categoriesData.map(mapCategoryFromDomain))
+        const categoriesData = await listCategories(signal)
+        if (!signal.aborted) {
+          setCategories(categoriesData.map(mapCategoryFromDomain))
+        }
       } catch (error) {
+        if (isAbortError(error)) return
         console.error('Erro ao carregar categorias:', error)
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
 
     loadCategories()
+    return () => controller.abort()
   }, [])
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
@@ -117,8 +125,9 @@ function CategoriesMobile() {
     try {
       await deleteCategory(categoryId)
       setCategories(prevCategories => prevCategories.filter(c => c.id !== categoryId))
-    } catch (error: any) {
-      const msg = error?.response?.data?.error || 'Erro ao deletar categoria. Tente novamente.'
+    } catch (error: unknown) {
+      const apiError = (error as { response?: { data?: { error?: unknown } } } | null)?.response?.data?.error
+      const msg = typeof apiError === 'string' ? apiError : 'Erro ao deletar categoria. Tente novamente.'
       toast.error(msg)
     }
   }

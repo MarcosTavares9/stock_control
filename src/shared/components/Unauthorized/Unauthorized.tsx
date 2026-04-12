@@ -23,7 +23,7 @@ const Unauthorized = ({ redirectUrl }: UnauthorizedProps) => {
 
   const handleRedirect = () => {
     setIsOpen(false);
-    // O interceptor já limpou o storage — apenas redireciona
+    // O interceptor já limpou o storage  apenas redireciona
     const redirect = redirectUrl || '/login';
     window.location.href = getRoute(redirect);
   };
@@ -53,5 +53,4 @@ const Unauthorized = ({ redirectUrl }: UnauthorizedProps) => {
   );
 };
 
-export default Unauthorized;
-
+export default Unauthorized;

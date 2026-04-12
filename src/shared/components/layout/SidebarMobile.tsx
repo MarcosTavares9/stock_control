@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useAuth } from '../../contexts/AuthContext'
+import { useAuth } from '../../contexts/auth/useAuth'
 import { MenuItem } from '../../types/menu'
 import { FaTimes, FaSignOutAlt, FaSun, FaMoon } from 'react-icons/fa'
 import './SidebarMobile.sass'

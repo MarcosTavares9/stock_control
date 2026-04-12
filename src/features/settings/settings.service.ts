@@ -21,7 +21,7 @@ interface UserApiResponse {
  * Converte resposta da API para formato do domínio (UserProfile)
  */
 function mapUserToProfile(data: UserApiResponse): UserProfile {
-  const nameParts = data.firstName.split(' ')
+  const nameParts = (data.firstName || '').split(' ')
   const nome = nameParts[0] || ''
   const sobrenome = nameParts.slice(1).join(' ') || data.lastName || ''
   
@@ -40,9 +40,10 @@ function mapUserToProfile(data: UserApiResponse): UserProfile {
  * @param userId ID do usuário
  * @returns Promise com os dados do perfil
  */
-export async function getUserProfile(userId: string): Promise<UserProfile> {
-  const response = await api.get<UserApiResponse>(endpoints.users.getById(userId))
-  return mapUserToProfile(response.data)
+export async function getUserProfile(userId: string, signal?: AbortSignal): Promise<UserProfile> {
+  const response = await api.get<any>(endpoints.users.getById(userId), { signal })
+  const userData: UserApiResponse = response.data?.data ?? response.data
+  return mapUserToProfile(userData)
 }
 
 /**
@@ -55,17 +56,18 @@ export async function updateUserProfile(
   userId: string,
   data: UpdateProfileRequest
 ): Promise<UserProfile> {
-  const apiData: any = {
-    firstName: data.nome,
-    lastName: data.sobrenome || '',
+  const apiData: Record<string, unknown> = {
+    nome: data.nome,
     email: data.email
   }
-  
-  if (data.telefone) apiData.phone = data.telefone
+
+  if (data.sobrenome !== undefined) apiData.sobrenome = data.sobrenome
+  if (data.telefone) apiData.telefone = data.telefone
   if (data.fotoPerfil !== undefined) apiData.profilePicture = data.fotoPerfil
-  
-  const response = await api.put<UserApiResponse>(endpoints.users.update(userId), apiData)
-  return mapUserToProfile(response.data)
+
+  const response = await api.put<any>(endpoints.users.updateProfile(userId), apiData)
+  const userData: UserApiResponse = response.data?.data ?? response.data
+  return mapUserToProfile(userData)
 }
 
 /**
@@ -78,10 +80,11 @@ export async function updateProfilePicture(
   userId: string,
   photoUrl: string | null
 ): Promise<UserProfile> {
-  const response = await api.put<UserApiResponse>(endpoints.users.update(userId), {
+  const response = await api.put<any>(endpoints.users.updateProfile(userId), {
     profilePicture: photoUrl
   })
-  return mapUserToProfile(response.data)
+  const userData: UserApiResponse = response.data?.data ?? response.data
+  return mapUserToProfile(userData)
 }
 
 /**
@@ -90,10 +93,10 @@ export async function updateProfilePicture(
 function mapUserToUsuario(data: UserApiResponse): Usuario {
   return {
     id: data.id,
-    nome: `${data.firstName} ${data.lastName}`,
+    nome: `${data.firstName} ${data.lastName || ''}`.trim(),
     email: data.email,
-    cargo: 'Usuário', // A API não retorna cargo, usar padrão
-    status: data.status === 'active' ? 'ativo' : 'inativo'
+    cargo: (data as any).role ?? 'Operador',
+    status: data.status === 'true' ? 'ativo' : 'inativo'
   }
 }
 
@@ -101,9 +104,9 @@ function mapUserToUsuario(data: UserApiResponse): Usuario {
  * Lista todos os usuários
  * @returns Promise com lista de usuários
  */
-export async function listUsuarios(): Promise<Usuario[]> {
-  const response = await api.get<UserApiResponse[]>(endpoints.users.list())
-  return response.data.map(mapUserToUsuario)
+export async function listUsuarios(signal?: AbortSignal): Promise<Usuario[]> {
+  const response = await api.get<{ data: UserApiResponse[] }>(endpoints.users.list(), { signal })
+  return response.data.data.map(mapUserToUsuario)
 }
 
 /**
@@ -134,7 +137,7 @@ export async function createUsuario(data: CreateUsuarioRequest): Promise<Usuario
  * @returns Promise com o usuário atualizado
  */
 export async function updateUsuario(id: string, data: UpdateUsuarioRequest): Promise<Usuario> {
-  const apiData: any = {}
+  const apiData: Record<string, unknown> = {}
   
   if (data.nome) {
     const nameParts = data.nome.split(' ')

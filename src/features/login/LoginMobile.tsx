@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useAuth } from '../../shared/contexts/AuthContext'
+import { useAuth } from '../../shared/contexts/auth/useAuth'
 import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa'
-import { getRoute, getAsset } from '../../shared/config/base-path'
+import { getAsset } from '../../shared/config/base-path'
+import AuthErrorModal from './AuthErrorModal'
 import './LoginMobile.sass'
 
 interface LoginMobileProps {
@@ -13,7 +14,11 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
+  const [showErrorModal, setShowErrorModal] = useState(false)
+  const [apiErrors, setApiErrors] = useState<string[] | null>(null)
   const { login, loading } = useAuth()
+  const registerPath = '/register'
+  const forgotPath = '/confirm-registration'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -26,8 +31,13 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
 
     try {
       await login(email, password)
+      onNavigate?.('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao fazer login. Tente novamente.')
+      const maybeResp = err as { response?: { data?: { error?: unknown } } }
+      const list = maybeResp?.response?.data?.error
+      setApiErrors(Array.isArray(list) ? list.filter((m): m is string => typeof m === 'string') : null)
+      setError('Email ou senha inválidos')
+      setShowErrorModal(true)
     }
   }
 
@@ -44,7 +54,30 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
           <form onSubmit={handleSubmit} className="login-mobile__form" noValidate autoComplete="off">
             {error && (
               <div className="login-mobile__error">
-                {error}
+                <div className="login-mobile__error-title">Email ou senha inválidos.</div>
+                <div className="login-mobile__error-actions">
+                  <span>Não possui cadastro?</span>
+                  <button
+                    type="button"
+                    className="login-mobile__error-link"
+                    onClick={() => {
+                      onNavigate?.(registerPath)
+                    }}
+                  >
+                    Criar conta
+                  </button>
+                  <span>•</span>
+                  <span>Esqueceu sua senha?</span>
+                  <button
+                    type="button"
+                    className="login-mobile__error-link"
+                    onClick={() => {
+                      onNavigate?.(forgotPath)
+                    }}
+                  >
+                    Alterar senha
+                  </button>
+                </div>
               </div>
             )}
 
@@ -102,6 +135,20 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
             </button>
           </form>
 
+          <AuthErrorModal
+            isOpen={showErrorModal}
+            errors={apiErrors || null}
+            onClose={() => setShowErrorModal(false)}
+            onCreateAccount={() => {
+              setShowErrorModal(false)
+              onNavigate?.(registerPath)
+            }}
+            onForgotPassword={() => {
+              setShowErrorModal(false)
+              onNavigate?.(forgotPath)
+            }}
+          />
+
           <div className="login-mobile__footer">
             <p className="login-mobile__register">
               Não tem uma conta?{' '}
@@ -109,11 +156,7 @@ function LoginMobile({ onNavigate }: LoginMobileProps = {}) {
                 type="button"
                 className="login-mobile__register-link"
                 onClick={() => {
-                  if (onNavigate) {
-                    onNavigate('/register')
-                  } else {
-                    window.location.href = getRoute('/register')
-                  }
+                  onNavigate?.('/register')
                 }}
               >
                 Criar conta

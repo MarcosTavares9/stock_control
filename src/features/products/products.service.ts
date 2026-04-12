@@ -9,8 +9,8 @@ import {
   BulkDeleteProductsRequest
 } from './products.types'
 
-export async function listProducts(): Promise<Product[]> {
-  const response = await api.get<{ data: Product[] }>(endpoints.products.list())
+export async function listProducts(signal?: AbortSignal): Promise<Product[]> {
+  const response = await api.get<{ data: Product[] }>(endpoints.products.list(), { signal })
   return response.data.data
 }
 

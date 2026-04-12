@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import './CreateLocalizacaoModal.sass'
 import { FaTimes, FaMapMarkerAlt } from 'react-icons/fa'
 import { createLocalizacao } from './location.service'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 
 interface CreateLocalizacaoModalProps {
   isOpen: boolean
@@ -57,9 +57,10 @@ export function CreateLocalizacaoModal({
       await onCreate()
       onClose()
       toast.success('Localização criada com sucesso!')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao criar localização:', error)
-      toast.error(error.message || 'Erro ao criar localização. Tente novamente.')
+      const message = error instanceof Error ? error.message : null
+      toast.error(message || 'Erro ao criar localização. Tente novamente.')
     } finally {
       setLoading(false)
     }

@@ -3,13 +3,15 @@
 
 .register-page
   min-height: 100vh
+  min-height: 100dvh
   display: flex
   align-items: center
   justify-content: center
   background: linear-gradient(135deg, $primary-50 0%, $primary-100 100%)
-  padding: $spacing-lg
+  padding: $spacing-md
   position: relative
-  overflow: hidden
+  overflow-x: hidden
+  overflow-y: auto
 
   &::before
     content: ''
@@ -18,7 +20,7 @@
     right: -50%
     width: 1000px
     height: 1000px
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, transparent 70%)
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.12) 0%, transparent 70%)
     border-radius: 50%
     pointer-events: none
 
@@ -29,55 +31,120 @@
     left: -50%
     width: 800px
     height: 800px
-    background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%)
+    background: radial-gradient(circle, rgba(20, 184, 166, 0.08) 0%, transparent 70%)
     border-radius: 50%
     pointer-events: none
 
 .register-container
   width: 100%
-  max-width: 600px
+  max-width: 1000px
   position: relative
   z-index: 1
 
 .register-card
+  display: grid
+  grid-template-columns: 320px 1fr
   background-color: $white
   border-radius: $radius-xl
-  padding: $spacing-2xl
   box-shadow: $shadow-xl
   border: 1px solid $gray-200
+  overflow: hidden
+  min-height: 580px
 
-.register-header
+// ── Painel esquerdo ──────────────────────────────────────
+.register-panel-left
+  background: linear-gradient(160deg, $primary-600 0%, $primary-800 100%)
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  padding: $spacing-xl $spacing-lg
   text-align: center
-  margin-bottom: $spacing-2xl
+  position: relative
+  overflow: hidden
+
+  &::before
+    content: ''
+    position: absolute
+    top: -60px
+    right: -60px
+    width: 200px
+    height: 200px
+    background: rgba(255, 255, 255, 0.06)
+    border-radius: 50%
+    pointer-events: none
+
+  &::after
+    content: ''
+    position: absolute
+    bottom: -40px
+    left: -40px
+    width: 160px
+    height: 160px
+    background: rgba(255, 255, 255, 0.05)
+    border-radius: 50%
+    pointer-events: none
+
+  &__footer
+    position: absolute
+    bottom: $spacing-lg
+    left: 0
+    right: 0
+    text-align: center
 
 .register-logo
-  max-width: 200px
-  height: auto
+  width: 130px
+  height: 130px
+  object-fit: contain
+  border-radius: $radius-lg
   margin-bottom: $spacing-lg
-  display: block
-  margin-left: auto
-  margin-right: auto
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2)
 
 .register-title
-  @include text-3xl
+  @include text-2xl
   font-weight: $font-weight-bold
-  color: $primary-700
-  margin: 0 0 $spacing-sm 0
+  color: $white
+  margin: 0 0 $spacing-xs 0
   letter-spacing: -0.02em
 
 .register-subtitle
   @include text-sm
-  color: $gray-600
+  color: rgba(255, 255, 255, 0.75)
   margin: 0
+  line-height: $line-height-relaxed
+
+.register-login
+  @include text-xs
+  color: rgba(255, 255, 255, 0.65)
+  margin: 0
+
+.register-login-link
+  background: none
+  border: none
+  color: $white
+  font-weight: $font-weight-semibold
+  cursor: pointer
+  padding: 0
+  text-decoration: underline
+  transition: opacity 0.15s
+  @include text-xs
+
+  &:hover
+    opacity: 0.8
+
+// ── Painel direito ───────────────────────────────────────
+.register-panel-right
+  padding: $spacing-xl $spacing-2xl $spacing-lg
 
 .register-form
   display: flex
   flex-direction: column
-  gap: $spacing-lg
+  gap: $spacing-md
+  height: 100%
 
 .register-error
-  padding: $spacing-md
-  background-color: rgba(239, 68, 68, 0.1)
+  padding: $spacing-sm $spacing-md
+  background-color: rgba(239, 68, 68, 0.08)
   border: 1px solid rgba(239, 68, 68, 0.3)
   border-radius: $radius-md
   color: $error
@@ -87,20 +154,17 @@
 .register-row
   display: grid
   grid-template-columns: 1fr 1fr
-  gap: $spacing-md
-
-  @media (max-width: 640px)
-    grid-template-columns: 1fr
+  gap: $spacing-sm
 
 .register-input-group
   display: flex
   flex-direction: column
-  gap: $spacing-xs
+  gap: 2px
 
 .register-label
   @include text-sm
   font-weight: $font-weight-medium
-  color: $gray-700
+  color: $gray-600
 
 .register-input-wrapper
   position: relative
@@ -109,18 +173,18 @@
 
 .register-input-icon
   position: absolute
-  left: $spacing-md
+  left: $spacing-sm
   color: $primary-500
   pointer-events: none
   z-index: 1
 
 .register-input
   width: 100%
-  padding: $spacing-md $spacing-lg
-  padding-left: $spacing-xl + $spacing-md
+  padding: 11px $spacing-md
+  padding-left: $spacing-xl
   border: 1px solid $gray-300
-  border-radius: $radius-lg
-  @include text-base
+  border-radius: $radius-md
+  @include text-sm
   color: $gray-900
   background-color: $gray-50
   outline: none
@@ -129,12 +193,12 @@
   &[type="text"][data-field="password"],
   &[type="password"],
   &[type="text"][data-field="confirmPassword"]
-    padding-right: $spacing-xl + $spacing-md
+    padding-right: $spacing-xl + $spacing-sm
 
   &:focus
     border-color: $primary-500
     background-color: $white
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
+    box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.12)
 
   &:disabled
     opacity: 0.6
@@ -142,7 +206,7 @@
 
   &--error
     border-color: $error
-    background-color: rgba(239, 68, 68, 0.05)
+    background-color: rgba(239, 68, 68, 0.04)
 
     &:focus
       border-color: $error
@@ -153,10 +217,10 @@
 
 .register-toggle-password
   position: absolute
-  right: $spacing-md
+  right: $spacing-sm
   background: none
   border: none
-  color: $gray-500
+  color: $gray-400
   cursor: pointer
   padding: $spacing-xs
   display: flex
@@ -167,18 +231,16 @@
   z-index: 2
 
   &:hover
-    color: $gray-700
-    background-color: $gray-100
+    color: $gray-600
 
 .register-error-text
   @include text-xs
   color: $error
-  margin-top: -$spacing-xs
 
 .register-checkbox-group
   display: flex
   flex-direction: column
-  gap: $spacing-xs
+  gap: 2px
 
 .register-checkbox
   display: flex
@@ -188,10 +250,11 @@
   user-select: none
 
   input[type="checkbox"]
-    width: 18px
-    height: 18px
+    width: 16px
+    height: 16px
     cursor: pointer
     accent-color: $primary-500
+    flex-shrink: 0
 
 .register-checkbox-label
   @include text-sm
@@ -203,21 +266,21 @@
 
 .register-button
   width: 100%
-  padding: $spacing-md $spacing-lg
+  padding: 10px $spacing-lg
   background: linear-gradient(135deg, $primary-500, $primary-600)
   color: $white
   border: none
-  border-radius: $radius-lg
-  @include text-base
+  border-radius: $radius-md
+  @include text-sm
   font-weight: $font-weight-semibold
   cursor: pointer
   transition: all $transition-base
-  margin-top: $spacing-md
-  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3)
+  margin-top: auto
+  box-shadow: 0 4px 14px rgba(20, 184, 166, 0.35)
 
   &:hover:not(:disabled)
-    transform: translateY(-2px)
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4)
+    transform: translateY(-1px)
+    box-shadow: 0 6px 18px rgba(20, 184, 166, 0.45)
 
   &:active:not(:disabled)
     transform: translateY(0)
@@ -226,30 +289,71 @@
     opacity: 0.7
     cursor: not-allowed
 
-.register-footer
-  margin-top: $spacing-xl
-  text-align: center
+// ── Responsivo ───────────────────────────────────────────
 
-.register-login
-  @include text-sm
-  color: $gray-600
-  margin: 0
+@media (max-width: 768px)
+  .register-page
+    padding: 0
+    align-items: stretch
+    height: 100dvh
+    overflow: hidden
 
-.register-login-link
-  background: none
-  border: none
-  color: $primary-600
-  font-weight: $font-weight-semibold
-  cursor: pointer
-  padding: 0
-  text-decoration: none
-  transition: all $transition-base
-  @include text-sm
+  .register-container
+    max-width: 100%
+    display: flex
+    height: 100%
 
-  &:hover
-    color: $primary-700
-    text-decoration: underline
+  .register-card
+    grid-template-columns: 1fr
+    grid-template-rows: auto 1fr
+    height: 100%
+    min-height: unset
+    border-radius: 0
+    box-shadow: none
+    border: none
+    flex: 1
 
-  &:active
-    color: $primary-800
+  // Painel esquerdo vira header compacto horizontal
+  .register-panel-left
+    padding: $spacing-md $spacing-lg
+    flex-direction: row
+    justify-content: flex-start
+    align-items: center
+    gap: $spacing-md
+    text-align: left
+    min-height: unset
 
+    &::before, &::after
+      display: none
+
+    &__footer
+      display: none
+
+  .register-logo
+    width: 48px
+    height: 48px
+    margin-bottom: 0
+    flex-shrink: 0
+
+  .register-title
+    @include text-base
+    margin: 0
+
+  .register-subtitle
+    display: none
+
+  .register-panel-right
+    padding: $spacing-lg $spacing-xl
+    display: flex
+    flex-direction: column
+
+  .register-form
+    flex: 1
+    display: flex
+    flex-direction: column
+
+  .register-button
+    margin-top: auto
+
+  .register-row
+    grid-template-columns: 1fr

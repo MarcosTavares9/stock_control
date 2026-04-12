@@ -22,8 +22,9 @@ import { listCategories } from '../categories/categories.service'
 import { listLocalizacoes } from '../location/location.service'
 import type { Product as ProductDomain } from './products.types'
 import type { Category } from '../categories/categories.types'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import './ProductsMobile.sass'
+import { isAbortError } from '../../shared/utils/isAbortError'
 
 interface Product {
   id: string
@@ -122,32 +123,40 @@ function ProductsMobile() {
   const [productsToEdit, setProductsToEdit] = useState<Product[]>([])
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     const loadData = async () => {
       try {
         setLoading(true)
         const [productsData, categoriesData, locationsData] = await Promise.all([
-          listProducts(),
-          listCategories(),
-          listLocalizacoes()
+          listProducts(signal),
+          listCategories(signal),
+          listLocalizacoes(undefined, signal)
         ])
         
-        setCategories(categoriesData)
-        const mappedLocations = locationsData.map(loc => ({ id: loc.id, nome: loc.nome }))
-        setLocations(mappedLocations)
+        if (!signal.aborted) {
+          setCategories(categoriesData)
+          const mappedLocations = locationsData.map(loc => ({ id: loc.id, nome: loc.nome }))
+          setLocations(mappedLocations)
+        }
         
         const mappedProducts = productsData.map(product => 
-          mapProductFromDomain(product, categoriesData, mappedLocations)
+          mapProductFromDomain(product, categoriesData, locationsData.map(loc => ({ id: loc.id, nome: loc.nome })))
         )
-        setProducts(mappedProducts)
+        if (!signal.aborted) setProducts(mappedProducts)
       } catch (error) {
+        if (isAbortError(error)) return
         console.error('Erro ao carregar produtos:', error)
+        toast.error('Erro ao carregar produtos. Tente novamente.')
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
 
     loadData()
-  }, [])
+    return () => controller.abort()
+  }, [toast])
 
   const categoriasUnicas = useMemo(() => {
     return Array.from(new Set(products.map(p => p.categoria))).sort()
@@ -236,8 +245,9 @@ function ProductsMobile() {
   const handleModalDelete = async (productId: string) => {
     try {
       await deleteProduct(productId)
-    } catch (error: any) {
-      if (error?.response?.status !== 404) {
+    } catch (error: unknown) {
+      const status = (error as { response?: { status?: number } } | null)?.response?.status
+      if (status !== 404) {
         toast.error('Erro ao deletar produto.')
         return
       }
@@ -452,7 +462,6 @@ function ProductsMobile() {
         onClose={() => setIsCreateModalOpen(false)}
         onCreate={handleCreateProductSubmit}
         onCreateMultiple={handleCreateMultipleProducts}
-        categorias={categoriasUnicas}
       />
     </div>
   )

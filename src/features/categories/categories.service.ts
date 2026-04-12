@@ -8,8 +8,8 @@ import { Category, CreateCategoryRequest, UpdateCategoryRequest } from './catego
  * Lista todas as categorias
  * @returns Promise com lista de categorias
  */
-export async function listCategories(): Promise<Category[]> {
-  const response = await api.get<{ data: Category[] }>(endpoints.categories.list())
+export async function listCategories(signal?: AbortSignal): Promise<Category[]> {
+  const response = await api.get<{ data: Category[] }>(endpoints.categories.list(), { signal })
   return response.data.data
 }
 

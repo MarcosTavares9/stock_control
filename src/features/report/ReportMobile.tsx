@@ -15,7 +15,8 @@ import { listCategories } from '../categories/categories.service'
 import type { Product as ProductDomain } from '../products/products.types'
 import type { History as HistoryDomain } from '../history/history.types'
 import type { Category } from '../categories/categories.types'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
+import { isAbortError } from '../../shared/utils/isAbortError'
 import './ReportMobile.sass'
 
 interface Product {
@@ -61,7 +62,7 @@ const mapHistoryFromDomain = (history: HistoryDomain, products: ProductDomain[],
   return {
     id: history.uuid,
     tipo,
-    produto: history.product.name,
+    produto: history.product?.name || product?.name || 'Produto removido',
     categoria: category?.name || 'Sem categoria',
     quantidade: history.quantity_changed,
     data: new Date(history.created_at)
@@ -89,29 +90,40 @@ function ReportMobile() {
   const exportMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     const loadData = async () => {
       try {
         setLoading(true)
         const [productsData, historyData, categoriesData] = await Promise.all([
-          listProducts(),
-          listHistory(),
-          listCategories()
+          listProducts(signal),
+          listHistory(undefined, signal),
+          listCategories(signal)
         ])
         
-        setCategories(categoriesData)
-        const mappedProducts = productsData.map(p => mapProductFromDomain(p, categoriesData))
-        setProducts(mappedProducts)
+        if (!signal.aborted) {
+          setCategories(categoriesData)
+          const mappedProducts = productsData.map(p => mapProductFromDomain(p, categoriesData))
+          setProducts(mappedProducts)
+        }
         
         const mappedHistory = historyData.map(h => mapHistoryFromDomain(h, productsData, categoriesData))
-        setHistoryEntries(mappedHistory.sort((a, b) => b.data.getTime() - a.data.getTime()))
+        if (!signal.aborted) {
+          setHistoryEntries(mappedHistory.sort((a, b) => b.data.getTime() - a.data.getTime()))
+        }
       } catch (error) {
+        if (isAbortError(error)) return
+        console.error('Erro ao carregar dados do relatório (mobile):', error)
+        toast.error('Erro ao carregar relatório. Tente novamente.')
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
 
     loadData()
-  }, [])
+    return () => controller.abort()
+  }, [toast])
 
   const categoriasUnicas = useMemo(() => {
     return Array.from(new Set(products.map(p => p.categoria))).sort()
@@ -145,8 +157,12 @@ function ReportMobile() {
       return matchDataInicio && matchDataFim && matchCategoria
     })
 
-    const entradas = historicoFiltrado.filter(e => e.tipo === 'entrada').reduce((sum, e) => sum + e.quantidade, 0)
-    const saidas = historicoFiltrado.filter(e => e.tipo === 'saida').reduce((sum, e) => sum + e.quantidade, 0)
+    const entradas = historicoFiltrado
+      .filter(e => e.tipo === 'entrada' || (e.tipo === 'ajuste' && e.quantidade > 0))
+      .reduce((sum, e) => sum + Math.abs(e.quantidade), 0)
+    const saidas = historicoFiltrado
+      .filter(e => e.tipo === 'saida' || (e.tipo === 'ajuste' && e.quantidade < 0))
+      .reduce((sum, e) => sum + Math.abs(e.quantidade), 0)
     const ajustes = historicoFiltrado.filter(e => e.tipo === 'ajuste').length
 
     return {
@@ -362,7 +378,7 @@ function ReportMobile() {
             </div>
             <div className="report-mobile-movement-card__content">
               <p className="report-mobile-movement-card__label">Saídas</p>
-              <p className="report-mobile-movement-card__value">-{movimentacoes.saidas}</p>
+              <p className="report-mobile-movement-card__value">{movimentacoes.saidas > 0 ? `-${movimentacoes.saidas}` : '0'}</p>
             </div>
           </div>
 

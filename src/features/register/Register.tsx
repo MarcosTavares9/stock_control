@@ -9,7 +9,7 @@ interface RegisterProps {
   onNavigate?: (path: string) => void
 }
 
-function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
+function Register({ onNavigate }: RegisterProps = {}) {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -74,10 +74,16 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
 
       // Redirecionar para página de confirmação (em produção, seria enviado por email)
       // Por enquanto, apenas redireciona para login com mensagem
-      window.location.href = getRoute('/login?registered=true')
+      if (onNavigate) {
+        onNavigate('/login?registered=true')
+      } else {
+        window.location.href = getRoute('/login?registered=true')
+      }
     } catch (error) {
-      console.error('Erro ao cadastrar:', error)
-      setErrors({ submit: 'Erro ao criar conta. Tente novamente.' })
+      const axiosErr = error as { response?: { data?: { error?: unknown; message?: unknown } } }
+      const raw = axiosErr?.response?.data?.error ?? axiosErr?.response?.data?.message
+      const msg = Array.isArray(raw) ? raw[0] : raw ? String(raw) : 'Erro ao criar conta. Tente novamente.'
+      setErrors({ submit: String(msg) })
     } finally {
       setLoading(false)
     }
@@ -87,12 +93,26 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
     <div className="register-page">
       <div className="register-container">
         <div className="register-card">
-          <div className="register-header">
+
+          <div className="register-panel-left">
             <img src={getAsset('/assets/logo.jpg')} alt="Logo" className="register-logo" />
             <h1 className="register-title">Criar Conta</h1>
-            <p className="register-subtitle">Preencha os dados abaixo para começar</p>
+            <p className="register-subtitle">Preencha os dados ao lado para começar</p>
+            <div className="register-panel-left__footer">
+              <p className="register-login">
+                Já tem uma conta?{' '}
+                <button
+                  type="button"
+                  className="register-login-link"
+                  onClick={() => onNavigate ? onNavigate('/login') : (window.location.href = getRoute('/login'))}
+                >
+                  Fazer login
+                </button>
+              </p>
+            </div>
           </div>
 
+          <div className="register-panel-right">
           <form onSubmit={handleSubmit} className="register-form" noValidate autoComplete="off">
             {errors.submit && (
               <div className="register-error">
@@ -158,14 +178,19 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
                   id="register-email"
                   name="registerEmail"
                   data-field="email"
-                  type="email"
+                  type="text"
+                  inputMode="email"
                   className={`register-input ${errors.email ? 'register-input--error' : ''}`}
                   placeholder="seu@email.com"
                   value={formData.email}
                   onChange={handleChange}
                   disabled={loading}
                   required
-                  autoComplete="new-password"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  aria-autocomplete="none"
                 />
               </div>
               {errors.email && <span className="register-error-text">{errors.email}</span>}
@@ -286,21 +311,8 @@ function Register({ onNavigate: _onNavigate }: RegisterProps = {}) {
               {loading ? 'Criando conta...' : 'Criar conta'}
             </button>
           </form>
-
-          <div className="register-footer">
-            <p className="register-login">
-              Já tem uma conta?{' '}
-              <button
-                type="button"
-                className="register-login-link"
-                onClick={() => {
-                  window.location.href = getRoute('/login')
-                }}
-              >
-                Fazer login
-              </button>
-            </p>
           </div>
+
         </div>
       </div>
     </div>

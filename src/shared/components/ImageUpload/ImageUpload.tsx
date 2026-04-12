@@ -41,8 +41,9 @@ export function ImageUpload({
       const downloadUrl = await uploadImage(file, folder)
       setPreviewUrl(downloadUrl)
       onImageUploaded(downloadUrl)
-    } catch (err: any) {
-      setError(err.message || 'Erro ao fazer upload da imagem')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erro ao fazer upload da imagem'
+      setError(message)
       setPreviewUrl(currentImageUrl || null)
     } finally {
       setUploading(false)

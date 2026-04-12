@@ -1,4 +1,15 @@
 import React from "react";
+import {
+  FaChartLine,
+  FaBox,
+  FaHistory,
+  FaFileAlt,
+  FaCog,
+  FaTags,
+  FaUser,
+  FaMapMarkerAlt
+} from 'react-icons/fa';
+import type { RouteComponentProps } from './routes.types';
 import Dashboard from "../../features/dashboard/Dashboard";
 import Products from "../../features/products/Products";
 import Categories from "../../features/categories/Categories";
@@ -13,17 +24,6 @@ import LocalizacaoMobile from "../../features/location/LocalizacaoMobile";
 import HistoryMobile from "../../features/history/HistoryMobile";
 import ReportMobile from "../../features/report/ReportMobile";
 import SettingsMobile from "../../features/settings/SettingsMobile";
-import { 
-  FaChartLine, 
-  FaBox, 
-  FaHistory, 
-  FaFileAlt, 
-  FaCog,
-  FaTags,
-  FaUser,
-  FaUsers,
-  FaMapMarkerAlt
-} from 'react-icons/fa';
 
 export interface RouteApplication {
   id: number | null;
@@ -35,8 +35,8 @@ export interface RouteItem {
   path: string;
   label?: string;
   icon?: React.ReactNode;
-  component?: React.ComponentType<any>; // Desktop component
-  mobileComponent?: React.ComponentType<any>; // Mobile component
+  component?: React.ComponentType<RouteComponentProps>; // Desktop component
+  mobileComponent?: React.ComponentType<RouteComponentProps>; // Mobile component
   company_restriction?: string | string[] | null;
   disableSidebar?: boolean;
   children?: RouteItem[];
@@ -162,20 +162,6 @@ export const ROUTES: RouteItem[] = [
         ],
         label: "Meu Perfil",
         icon: <FaUser size={18} />,
-        component: Settings,
-        mobileComponent: SettingsMobile,
-        company_restriction: null,
-        mobile: true,
-        desktop: true,
-        external: false,
-      },
-      {
-        path: "/settings/users",
-        applications: [
-          { id: null, roles: ["1", "6", "7"] },
-        ],
-        label: "Usuários",
-        icon: <FaUsers size={18} />,
         component: Settings,
         mobileComponent: SettingsMobile,
         company_restriction: null,

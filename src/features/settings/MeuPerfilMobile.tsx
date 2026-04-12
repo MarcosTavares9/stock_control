@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import './MeuPerfilMobile.sass'
-import { useAuth } from '../../shared/contexts/AuthContext'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useAuth } from '../../shared/contexts/auth/useAuth'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import { getUserProfile, updateUserProfile, updateProfilePicture } from './settings.service'
 import { uploadImage, IMAGE_ACCEPT } from '../../shared/services/image-upload.service'
 import { UserProfile } from './settings.types'
@@ -12,6 +12,7 @@ import {
   FaPhone,
   FaSpinner
 } from 'react-icons/fa'
+import { isAbortError } from '../../shared/utils/isAbortError'
 
 function MeuPerfilMobile() {
   const { user, updateUser } = useAuth()
@@ -34,12 +35,15 @@ function MeuPerfilMobile() {
   const [profilePicture, setProfilePicture] = useState<string>('')
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     const loadProfile = async () => {
       if (!user?.id) return
 
       try {
         setLoading(true)
-        const profile = await getUserProfile(user.id)
+        const profile = await getUserProfile(user.id, signal)
         setOriginalData(profile)
         setProfilePicture(profile.fotoPerfil || '')
         setFormData({
@@ -51,6 +55,7 @@ function MeuPerfilMobile() {
           cargo: profile.cargo || ''
         })
       } catch (error) {
+        if (isAbortError(error)) return
         console.error('Erro ao carregar perfil:', error)
         if (user) {
           setFormData({
@@ -63,11 +68,12 @@ function MeuPerfilMobile() {
           })
         }
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
 
     loadProfile()
+    return () => controller.abort()
   }, [user])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -159,9 +165,10 @@ function MeuPerfilMobile() {
       updateUser({ photo: downloadUrl })
       
       toast.success('Foto atualizada com sucesso!')
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Erro ao fazer upload:', error)
-      toast.error(error.message || 'Erro ao fazer upload da foto.')
+      const message = error instanceof Error ? error.message : null
+      toast.error(message || 'Erro ao fazer upload da foto.')
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) {

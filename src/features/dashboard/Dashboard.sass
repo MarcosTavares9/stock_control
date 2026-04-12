@@ -1,169 +1,346 @@
 @use '../../shared/styles/variables' as *
 @use '../../shared/styles/mixins' as *
 
-.dashboard
-  padding: $spacing-xl
-  margin: 0
+// ── Layout ────────────────────────────────────────────────
+.db
+  padding: $spacing-xl $spacing-xl $spacing-2xl
+  display: flex
+  flex-direction: column
+  gap: $spacing-xl
   min-height: 100%
-  background-color: transparent
+  background: $gray-50
 
   &__header
     display: flex
-    align-items: flex-start
-    gap: $spacing-xl
-    margin-bottom: $spacing-2xl
-
-  &__header-content
-    flex: 1
+    align-items: center
+    justify-content: space-between
 
   &__title
-    @include text-3xl
+    font-size: $font-size-2xl
     font-weight: $font-weight-bold
-    color: $black
+    color: $gray-900
     margin: 0
-    margin-bottom: $spacing-sm
-    text-align: left
 
-  &__description
-    @include text-base
-    color: $gray-600
-    line-height: $line-height-relaxed
-    margin: 0
-    text-align: left
-
-  &__stats-grid
-    display: grid
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))
-    gap: $spacing-lg
-    margin-bottom: $spacing-2xl
-
-
-  &__section-title
-    @include text-xl
-    font-weight: $font-weight-semibold
-    color: $gray-800
-    margin: 0
-    margin-bottom: $spacing-lg
-
-  &__chart-section
-    background-color: $white
-    border-radius: $radius-lg
-    border: 1px solid $gray-200
-    padding: $spacing-xl
-    margin-bottom: $spacing-2xl
-    box-shadow: $shadow-sm
-
-  &__tables
-    display: flex
-    flex-direction: column
-    gap: $spacing-2xl
-
-  &__table-section
-    background-color: $white
-    border-radius: $radius-lg
-    border: 1px solid $gray-300
-    padding: $spacing-xl
-    box-shadow: $shadow-sm
+  &__subtitle
+    font-size: $font-size-sm
+    color: $gray-500
+    margin: 4px 0 0
 
   &__empty
     padding: $spacing-xl
     text-align: center
-    color: $gray-500
-    @include text-base
+    color: $gray-400
+    font-size: $font-size-sm
 
-// Chart Styles
-.dashboard-chart
+// ── Skeleton ──────────────────────────────────────────────
+  &__skeleton
+    display: grid
+    grid-template-columns: repeat(3, 1fr)
+    gap: $spacing-lg
+
+  &__skeleton-card
+    height: 96px
+    background: $gray-200
+    border-radius: $radius-lg
+    animation: db-pulse 1.4s ease-in-out infinite
+
+@keyframes db-pulse
+  0%, 100%
+    opacity: 1
+  50%
+    opacity: 0.5
+
+// ── Stat Cards ────────────────────────────────────────────
+.db__cards
+  display: grid
+  grid-template-columns: repeat(3, 1fr)
+  gap: $spacing-lg
+
+.db-card
+  background: $white
+  border-radius: $radius-lg
+  padding: $spacing-lg $spacing-xl
+  display: flex
+  align-items: center
+  gap: $spacing-lg
+  box-shadow: $shadow-sm
+  border: 1px solid $gray-200
+  position: relative
+  overflow: hidden
+  transition: box-shadow 0.2s
+
+  &:hover
+    box-shadow: $shadow-md
+
+  &::before
+    content: ''
+    position: absolute
+    left: 0
+    top: 0
+    bottom: 0
+    width: 4px
+    border-radius: $radius-lg 0 0 $radius-lg
+
+  &--blue::before
+    background: $primary-500
+
+  &--orange::before
+    background: $warning
+
+  &--teal::before
+    background: $success
+
+  &__icon
+    width: 48px
+    height: 48px
+    border-radius: $radius-md
+    display: flex
+    align-items: center
+    justify-content: center
+    flex-shrink: 0
+
+  &--blue &__icon
+    background: rgba(20, 184, 166, 0.1)
+    color: $primary-500
+
+  &--orange &__icon
+    background: rgba(245, 158, 11, 0.1)
+    color: $warning
+
+  &--teal &__icon
+    background: rgba(16, 185, 129, 0.1)
+    color: $success
+
+  &__info
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+  &__label
+    font-size: $font-size-xs
+    font-weight: $font-weight-medium
+    color: $gray-500
+    text-transform: uppercase
+    letter-spacing: 0.05em
+
+  &__value
+    font-size: $font-size-2xl
+    font-weight: $font-weight-bold
+    color: $gray-900
+    line-height: 1
+
+// ── Middle grid ───────────────────────────────────────────
+.db__middle
+  display: grid
+  grid-template-columns: 1fr 1.4fr
+  gap: $spacing-xl
+
+// ── Panel ─────────────────────────────────────────────────
+.db-panel
+  background: $white
+  border-radius: $radius-lg
+  border: 1px solid $gray-200
+  padding: $spacing-xl
+  box-shadow: $shadow-sm
+
+  &__title
+    font-size: $font-size-base
+    font-weight: $font-weight-semibold
+    color: $gray-800
+    margin: 0 0 $spacing-lg
+
+// ── Donut ─────────────────────────────────────────────────
+.db-donut-row
+  display: flex
+  align-items: center
+  gap: $spacing-xl
+  margin-bottom: $spacing-xl
+
+.db-donut
+  width: 120px
+  height: 120px
+  flex-shrink: 0
+
+.db-donut-legend
   display: flex
   flex-direction: column
-  gap: $spacing-lg
+  gap: $spacing-sm
+  flex: 1
 
   &__item
     display: flex
-    flex-direction: column
-    gap: $spacing-xs
-
-  &__label-row
-    display: flex
-    justify-content: space-between
     align-items: center
-    margin-bottom: $spacing-xs
+    gap: $spacing-sm
 
-  &__label
-    @include text-base
-    font-weight: $font-weight-semibold
-    color: $gray-800
-
-  &__value
-    @include text-base
-    font-weight: $font-weight-bold
-    color: $gray-900
-
-  &__bar-wrapper
-    width: 100%
-    height: 32px
-    background-color: $gray-100
-    border-radius: $radius-md
-    overflow: hidden
-    position: relative
-
-  &__bar
-    height: 100%
-    border-radius: $radius-md
-    transition: width $transition-slow
-    min-width: 4px
+  &__dot
+    width: 10px
+    height: 10px
+    border-radius: $radius-full
+    flex-shrink: 0
 
     &--ok
-      background-color: $success
+      background: $success
 
     &--baixo
-      background-color: $warning
+      background: $warning
 
     &--vazio
-      background-color: $error
-
-// Stat Card Styles
-.dashboard-stat-card
-  padding: $spacing-lg
-  background-color: $white
-  border-radius: $radius-lg
-  border: 1px solid $gray-200
-  box-shadow: $shadow-sm
-
-  &__content
-    display: flex
-    flex-direction: column
+      background: $error
 
   &__label
-    @include text-sm
+    font-size: $font-size-sm
+    color: $gray-600
+    flex: 1
+
+  &__val
+    font-size: $font-size-sm
+    font-weight: $font-weight-semibold
+    color: $gray-900
+
+// ── Bars ──────────────────────────────────────────────────
+.db-bars
+  display: flex
+  flex-direction: column
+  gap: $spacing-md
+
+.db-bar
+  &__meta
+    display: flex
+    justify-content: space-between
+    margin-bottom: 4px
+
+  &__label
+    font-size: $font-size-xs
     font-weight: $font-weight-medium
     color: $gray-600
+
+  &__stats
+    font-size: $font-size-xs
+    color: $gray-500
+
+    small
+      color: $gray-400
+
+  &__track
+    height: 8px
+    background: $gray-100
+    border-radius: $radius-full
+    overflow: hidden
+
+  &__fill
+    height: 100%
+    border-radius: $radius-full
+    transition: width 0.6s ease
+
+    &--ok
+      background: $success
+
+    &--baixo
+      background: $warning
+
+    &--vazio
+      background: $error
+
+// ── Alert list ────────────────────────────────────────────
+.db-alert-empty
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  gap: $spacing-sm
+  padding: $spacing-xl
+  color: $success
+
+  span
+    font-size: 32px
+
+  p
+    font-size: $font-size-sm
+    color: $gray-500
     margin: 0
-    margin-bottom: $spacing-xs
 
-  &__value
-    @include text-2xl
-    font-weight: $font-weight-bold
-    color: $gray-900
-    margin: 0
+.db-alert-list
+  display: flex
+  flex-direction: column
+  gap: $spacing-sm
 
-
-// Status Badge Styles
-.dashboard-status
-  display: inline-block
-  padding: $spacing-xs $spacing-md
+.db-alert-item
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: $spacing-sm $spacing-md
   border-radius: $radius-md
-  @include text-sm
-  font-weight: $font-weight-medium
+  border-left: 3px solid
+
+  &--baixo
+    background: rgba(245, 158, 11, 0.05)
+    border-color: $warning
+
+  &--vazio
+    background: rgba(239, 68, 68, 0.05)
+    border-color: $error
+
+  &__info
+    display: flex
+    flex-direction: column
+    gap: 2px
+
+  &__name
+    font-size: $font-size-sm
+    font-weight: $font-weight-medium
+    color: $gray-800
+
+  &__cat
+    font-size: $font-size-xs
+    color: $gray-500
+
+  &__right
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+
+  &__qty
+    font-size: $font-size-sm
+    font-weight: $font-weight-semibold
+    color: $gray-700
+
+.db-alert-more
+  font-size: $font-size-xs
+  color: $gray-400
+  text-align: center
+  margin: $spacing-xs 0 0
+
+// ── Badges ────────────────────────────────────────────────
+.db-badge
+  display: inline-flex
+  align-items: center
+  gap: 4px
+  padding: 2px $spacing-sm
+  border-radius: $radius-full
+  font-size: $font-size-xs
+  font-weight: $font-weight-semibold
 
   &--ok
-    background-color: rgba(16, 185, 129, 0.1)
+    background: rgba(16, 185, 129, 0.1)
     color: $success
 
   &--baixo
-    background-color: rgba(245, 158, 11, 0.1)
+    background: rgba(245, 158, 11, 0.1)
     color: $warning
 
   &--vazio
-    background-color: rgba(239, 68, 68, 0.1)
+    background: rgba(239, 68, 68, 0.1)
     color: $error
 
+// ── Qty cell ──────────────────────────────────────────────
+.db-qty
+  font-weight: $font-weight-semibold
+
+  &--ok
+    color: $success
+
+  &--baixo
+    color: $warning
+
+  &--vazio
+    color: $error

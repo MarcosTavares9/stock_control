@@ -28,8 +28,10 @@ function mapLocationFromApi(data: LocationApiResponse): Localizacao {
 /**
  * Converte dados do domínio para formato da API
  */
-function mapLocationToApi(data: CreateLocalizacaoRequest | UpdateLocalizacaoRequest): any {
-  const result: any = {}
+function mapLocationToApi(
+  data: CreateLocalizacaoRequest | UpdateLocalizacaoRequest,
+): Record<string, string> {
+  const result: Record<string, string> = {}
   if ('nome' in data && data.nome) result.name = data.nome
   if ('descricao' in data && data.descricao !== undefined) result.description = data.descricao
   if ('ativo' in data && data.ativo !== undefined) {
@@ -44,9 +46,12 @@ function mapLocationToApi(data: CreateLocalizacaoRequest | UpdateLocalizacaoRequ
  * @param active Filtrar apenas localizações ativas (opcional)
  * @returns Promise com lista de localizações
  */
-export async function listLocalizacoes(active?: boolean): Promise<Localizacao[]> {
+export async function listLocalizacoes(active?: boolean, signal?: AbortSignal): Promise<Localizacao[]> {
   const params = active !== undefined ? { active: active.toString() } : {}
-  const response = await api.get<{ data: LocationApiResponse[] }>(endpoints.locations.list(), { params })
+  const response = await api.get<{ data: LocationApiResponse[] }>(
+    endpoints.locations.list(),
+    { params, signal },
+  )
   return response.data.data.map(mapLocationFromApi)
 }
 

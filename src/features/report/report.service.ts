@@ -10,7 +10,7 @@ import { ReportFilters, ReportFormat } from './report.types'
  * @returns Promise com o blob do arquivo CSV
  */
 export async function exportHistoryToCSV(filters?: ReportFilters): Promise<Blob> {
-  const params: any = {}
+  const params: Record<string, string> = {}
   
   if (filters?.type) params.type = filters.type
   if (filters?.product_id) params.product_id = filters.product_id
@@ -31,7 +31,7 @@ export async function exportHistoryToCSV(filters?: ReportFilters): Promise<Blob>
  * @returns Promise com o blob do arquivo Excel
  */
 export async function exportHistoryToExcel(filters?: ReportFilters): Promise<Blob> {
-  const params: any = {}
+  const params: Record<string, string> = {}
   
   if (filters?.type) params.type = filters.type
   if (filters?.product_id) params.product_id = filters.product_id
@@ -52,7 +52,7 @@ export async function exportHistoryToExcel(filters?: ReportFilters): Promise<Blo
  * @returns Promise com o blob do arquivo PDF
  */
 export async function exportHistoryToPDF(filters?: ReportFilters): Promise<Blob> {
-  const params: any = {}
+  const params: Record<string, string> = {}
   
   if (filters?.type) params.type = filters.type
   if (filters?.product_id) params.product_id = filters.product_id

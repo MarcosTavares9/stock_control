@@ -23,9 +23,10 @@ import { listLocalizacoes } from '../location/location.service'
 import type { Product as ProductDomain } from './products.types'
 import type { Category } from '../categories/categories.types'
 import { useIsMobile } from '../../shared/utils/useIsMobile'
-import { useToast } from '../../shared/contexts/ToastContext'
+import { useToast } from '../../shared/contexts/toast/useToast'
 import ProductsMobile from './ProductsMobile'
 import './Products.sass'
+import { isAbortError } from '../../shared/utils/isAbortError'
 
 interface Product {
   id: string
@@ -146,30 +147,41 @@ function ProductsDesktop() {
   const [productsToEdit, setProductsToEdit] = useState<Product[]>([])
 
   useEffect(() => {
+    const controller = new AbortController()
+    const { signal } = controller
+
     const loadData = async () => {
       try {
         setLoading(true)
         const [productsData, categoriesData, locationsData] = await Promise.all([
-          listProducts(),
-          listCategories(),
-          listLocalizacoes()
+          listProducts(signal),
+          listCategories(signal),
+          listLocalizacoes(undefined, signal)
         ])
         
-        setCategories(categoriesData)
-        setLocations(locationsData.map(loc => ({ id: loc.id, nome: loc.nome })))
+        if (!signal.aborted) {
+          setCategories(categoriesData)
+          setLocations(locationsData.map(loc => ({ id: loc.id, nome: loc.nome })))
+        }
         
         const mappedProducts = productsData.map(product => 
           mapProductFromDomain(product, categoriesData, locationsData.map(loc => ({ id: loc.id, nome: loc.nome })))
         )
-        setProducts(mappedProducts)
+        if (!signal.aborted) {
+          setProducts(mappedProducts)
+        }
       } catch (error) {
+        if (isAbortError(error)) return
+        console.error('Erro ao carregar dados de produtos:', error)
+        toast.error('Erro ao carregar produtos. Tente novamente.')
       } finally {
-        setLoading(false)
+        if (!signal.aborted) setLoading(false)
       }
     }
 
     loadData()
-  }, [])
+    return () => controller.abort()
+  }, [toast])
 
   const categoriasUnicas = useMemo(() => {
     return Array.from(new Set(products.map(p => p.categoria))).sort()
@@ -295,8 +307,9 @@ function ProductsDesktop() {
               minimum_stock: updatedProduct.estoqueMinimo,
               image: updatedProduct.imagem || null
             })
-          } catch (err: any) {
-            if (err?.response?.status === 404) {
+          } catch (err: unknown) {
+            const status = (err as { response?: { status?: number } } | null)?.response?.status
+            if (status === 404) {
               removedIds.push(updatedProduct.id)
             } else {
               throw err
@@ -335,9 +348,10 @@ function ProductsDesktop() {
   const handleModalDelete = async (productId: string) => {
     try {
       await deleteProduct(productId)
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Se 404, o produto já foi removido — continuar normalmente
-      if (error?.response?.status !== 404) {
+      const status = (error as { response?: { status?: number } } | null)?.response?.status
+      if (status !== 404) {
         toast.error('Erro ao deletar produto. Tente novamente.')
         return
       }
@@ -526,7 +540,13 @@ function ProductsDesktop() {
         data={produtosFiltrados}
         selectable={true}
         selectedItems={selectedProducts}
-        onSelectionChange={(selected) => setSelectedProducts(selected as Set<string>)}
+        onSelectionChange={(selected) => {
+          const next = new Set<string>()
+          selected.forEach((id) => {
+            if (typeof id === 'string') next.add(id)
+          })
+          setSelectedProducts(next)
+        }}
         getItemId={(item) => item.id}
       />
       
@@ -546,7 +566,6 @@ function ProductsDesktop() {
         onClose={() => setIsCreateModalOpen(false)}
         onCreate={handleCreateProductSubmit}
         onCreateMultiple={handleCreateMultipleProducts}
-        categorias={categoriasUnicas}
       />
     </div>
   )

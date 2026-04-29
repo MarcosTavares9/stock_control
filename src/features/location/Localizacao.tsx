@@ -29,8 +29,9 @@ function LocalizacaoDesktop() {
       setLoading(true)
       const data = await listLocalizacoes(undefined, signal)
       setLocalizacoes(data)
-    } catch (error: any) {
-      if (error?.name === 'AbortError' || error?.code === 'ERR_CANCELED') return
+    } catch (error: unknown) {
+      const err = error as { name?: string; code?: string }
+      if (err?.name === 'AbortError' || err?.code === 'ERR_CANCELED') return
       console.error('Erro ao carregar localizações:', error)
       toast.error('Erro ao carregar localizações')
     } finally {

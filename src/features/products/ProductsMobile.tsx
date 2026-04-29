@@ -1,85 +1,16 @@
 import { useState, useMemo, useEffect } from 'react'
-import { 
-  FaSearch, 
-  FaPlus,
-  FaLaptop,
-  FaMouse,
-  FaHeadphones,
-  FaHdd,
-  FaMemory,
-  FaChair,
-  FaPrint,
-  FaSprayCan,
-  FaUtensils,
-  FaTshirt,
-  FaBox,
-  FaMapMarkerAlt
-} from 'react-icons/fa'
+import { FaSearch, FaPlus, FaMapMarkerAlt } from 'react-icons/fa'
 import { EditProductModal } from './EditProductModal'
 import { CreateProductModal } from './CreateProductModal'
 import { listProducts, createProduct, updateProduct, deleteProduct } from './products.service'
 import { listCategories } from '../categories/categories.service'
 import { listLocalizacoes } from '../location/location.service'
-import type { Product as ProductDomain } from './products.types'
 import type { Category } from '../categories/categories.types'
 import { useToast } from '../../shared/contexts/toast/useToast'
-import './ProductsMobile.sass'
 import { isAbortError } from '../../shared/utils/isAbortError'
-
-interface Product {
-  id: string
-  nome: string
-  categoria: string
-  categoriaIcon?: string
-  quantidade: number
-  estoqueMinimo: number
-  localizacao: string
-  status: 'ok' | 'baixo' | 'vazio'
-  imagem?: string
-}
-
-const mapProductFromDomain = (product: ProductDomain, categories: Category[], locations: Array<{ id: string; nome: string }>): Product => {
-  const category = categories.find(c => c.uuid === product.category_id)
-  const location = locations.find(l => l.id === product.location_id)
-  
-  return {
-    id: product.uuid,
-    nome: product.name,
-    categoria: category?.name || 'Sem categoria',
-    categoriaIcon: category?.icon_name || undefined,
-    quantidade: product.quantity,
-    estoqueMinimo: product.minimum_stock,
-    localizacao: location?.nome || 'Sem localização',
-    status: product.stock_status === 'empty' ? 'vazio' : product.stock_status === 'low' ? 'baixo' : 'ok',
-    imagem: product.image || undefined
-  }
-}
-
-const getCategoryIcon = (iconName?: string) => {
-  if (!iconName) return <FaBox size={28} />
-  
-  const iconMap: Record<string, React.ReactNode> = {
-    'laptop': <FaLaptop size={28} />,
-    'mouse': <FaMouse size={28} />,
-    'headphones': <FaHeadphones size={28} />,
-    'hdd': <FaHdd size={28} />,
-    'memory': <FaMemory size={28} />,
-    'chair': <FaChair size={28} />,
-    'print': <FaPrint size={28} />,
-    'spray': <FaSprayCan size={28} />,
-    'spraycan': <FaSprayCan size={28} />,
-    'utensils': <FaUtensils size={28} />,
-    'tshirt': <FaTshirt size={28} />,
-    'box': <FaBox size={28} />,
-    'electronics': <FaLaptop size={28} />,
-    'computer': <FaLaptop size={28} />,
-    'furniture': <FaChair size={28} />,
-    'office': <FaPrint size={28} />,
-    'cleaning': <FaSprayCan size={28} />
-  }
-  
-  return iconMap[iconName.toLowerCase()] || <FaBox size={28} />
-}
+import { getCategoryIcon } from '../../shared/utils/getCategoryIcon'
+import { mapProductFromDomain, type Product } from './products.utils'
+import './ProductsMobile.sass'
 
 const ProductImage = ({ product }: { product: Product }) => {
   const [imageError, setImageError] = useState(false)
@@ -101,7 +32,7 @@ const ProductImage = ({ product }: { product: Product }) => {
   return (
     <div className="products-mobile__image">
       <div className="products-mobile__image-icon">
-        {getCategoryIcon(product.categoriaIcon)}
+        {getCategoryIcon(product.categoriaIcon, 28)}
       </div>
     </div>
   )

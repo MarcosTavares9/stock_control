@@ -1,24 +1,12 @@
 import { useState, useEffect } from 'react'
-import { 
-  FaPlus,
-  FaLaptop,
-  FaMouse,
-  FaHeadphones,
-  FaHdd,
-  FaMemory,
-  FaChair,
-  FaPrint,
-  FaSprayCan,
-  FaUtensils,
-  FaTshirt,
-  FaBox
-} from 'react-icons/fa'
+import { FaPlus, FaBox } from 'react-icons/fa'
 import { CreateCategoryModal } from './CreateCategoryModal'
 import { EditCategoryModal } from './EditCategoryModal'
 import { listCategories, createCategory, updateCategory, deleteCategory } from './categories.service'
 import type { Category as CategoryDomain } from './categories.types'
 import { useToast } from '../../shared/contexts/toast/useToast'
 import { isAbortError } from '../../shared/utils/isAbortError'
+import { getCategoryIcon } from '../../shared/utils/getCategoryIcon'
 import './CategoriesMobile.sass'
 
 interface Category {
@@ -32,24 +20,6 @@ const mapCategoryFromDomain = (category: CategoryDomain): Category => ({
   nome: category.name,
   iconName: category.icon_name
 })
-
-const getCategoryIcon = (iconName: string) => {
-  const iconMap: Record<string, React.ReactNode> = {
-    'laptop': <FaLaptop size={32} />,
-    'mouse': <FaMouse size={32} />,
-    'headphones': <FaHeadphones size={32} />,
-    'hdd': <FaHdd size={32} />,
-    'memory': <FaMemory size={32} />,
-    'chair': <FaChair size={32} />,
-    'print': <FaPrint size={32} />,
-    'spray': <FaSprayCan size={32} />,
-    'utensils': <FaUtensils size={32} />,
-    'tshirt': <FaTshirt size={32} />,
-    'box': <FaBox size={32} />
-  }
-  
-  return iconMap[iconName] || <FaBox size={32} />
-}
 
 function CategoriesMobile() {
   const toast = useToast()

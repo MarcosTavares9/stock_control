@@ -1,18 +1,5 @@
 import { useState, useEffect } from 'react'
-import { 
-  FaPlus,
-  FaLaptop,
-  FaMouse,
-  FaHeadphones,
-  FaHdd,
-  FaMemory,
-  FaChair,
-  FaPrint,
-  FaSprayCan,
-  FaUtensils,
-  FaTshirt,
-  FaBox
-} from 'react-icons/fa'
+import { FaPlus, FaBox } from 'react-icons/fa'
 import { CreateCategoryModal } from './CreateCategoryModal'
 import { EditCategoryModal } from './EditCategoryModal'
 import { listCategories, createCategory, updateCategory, deleteCategory } from './categories.service'
@@ -20,6 +7,7 @@ import type { Category as CategoryDomain } from './categories.types'
 import { useIsMobile } from '../../shared/utils/useIsMobile'
 import { useToast } from '../../shared/contexts/toast/useToast'
 import { isAbortError } from '../../shared/utils/isAbortError'
+import { getCategoryIcon } from '../../shared/utils/getCategoryIcon'
 import CategoriesMobile from './CategoriesMobile'
 import './Categories.sass'
 
@@ -27,27 +15,6 @@ interface Category {
   id: string
   nome: string
   iconName: string
-}
-
-/**
- * Retorna o ícone apropriado para cada categoria
- */
-const getCategoryIcon = (iconName: string) => {
-  const iconMap: Record<string, React.ReactNode> = {
-    'laptop': <FaLaptop size={40} />,
-    'mouse': <FaMouse size={40} />,
-    'headphones': <FaHeadphones size={40} />,
-    'hdd': <FaHdd size={40} />,
-    'memory': <FaMemory size={40} />,
-    'chair': <FaChair size={40} />,
-    'print': <FaPrint size={40} />,
-    'spray': <FaSprayCan size={40} />,
-    'utensils': <FaUtensils size={40} />,
-    'tshirt': <FaTshirt size={40} />,
-    'box': <FaBox size={40} />
-  }
-  
-  return iconMap[iconName] || <FaBox size={40} />
 }
 
 const mapCategoryFromDomain = (category: CategoryDomain): Category => ({
@@ -205,7 +172,7 @@ function CategoriesDesktop() {
             >
               <div className="category-card__icon-wrapper">
                 <div className="category-card__icon">
-                  {getCategoryIcon(category.iconName)}
+                  {getCategoryIcon(category.iconName, 40)}
                 </div>
               </div>
               <div className="category-card__content">

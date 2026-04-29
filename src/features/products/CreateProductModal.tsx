@@ -34,18 +34,27 @@ export function CreateProductModal({
   onCreateMultiple,
 }: CreateProductModalProps) {
   const toast = useToast()
+
+  // Modo de criação: produto único ou importação em lote
   const [mode, setMode] = useState<'single' | 'bulk'>('single')
+
+  // Campos do formulário de produto único
   const [nome, setNome] = useState('')
   const [categoria, setCategoria] = useState('')
   const [localizacao, setLocalizacao] = useState('')
   const [quantidadeInput, setQuantidadeInput] = useState<string>('')
   const [estoqueMinimoInput, setEstoqueMinimoInput] = useState<string>('')
   const [imagem, setImagem] = useState<string | undefined>(undefined)
+
+  // Campos do modo bulk
   const [listaManual, setListaManual] = useState('')
   const [arquivoExcel, setArquivoExcel] = useState<File | null>(null)
+
+  // Dados carregados da API
   const [categories, setCategories] = useState<Category[]>([])
   const [locations, setLocations] = useState<Localizacao[]>([])
 
+  // Carrega categorias e localizações sempre que o modal for aberto
   useEffect(() => {
     if (isOpen) {
       const controller = new AbortController()
@@ -72,6 +81,7 @@ export function CreateProductModal({
     }
   }, [isOpen])
 
+  // Converte texto livre (lista manual) em array de produtos
   const parseManualList = (text: string): Omit<Product, 'id' | 'status'>[] => {
     const lines = text.split('\n').filter(line => line.trim())
     const products: Omit<Product, 'id' | 'status'>[] = []
@@ -95,6 +105,7 @@ export function CreateProductModal({
     return products
   }
 
+  // Lê e converte arquivo Excel (.xlsx/.xls) ou CSV em array de produtos
   const parseExcelFile = (file: File): Promise<Omit<Product, 'id' | 'status'>[]> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -121,6 +132,7 @@ export function CreateProductModal({
             const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
             const jsonData = XLSX.utils.sheet_to_json(firstSheet) as Record<string, unknown>[]
 
+            // Helpers para extrair valores das células com tipo seguro
             const getCell = (row: Record<string, unknown>, key: string) => row[key]
             const asString = (value: unknown) => (typeof value === 'string' ? value : '')
             const asNumber = (value: unknown) => {
@@ -157,6 +169,7 @@ export function CreateProductModal({
     })
   }
 
+  // Converte string CSV em array de produtos, suportando vírgula e ponto e vírgula
   const parseCSV = (csvText: string): Omit<Product, 'id' | 'status'>[] => {
     const lines = csvText.split('\n').filter(line => line.trim())
     if (lines.length === 0) return []
@@ -187,6 +200,7 @@ export function CreateProductModal({
     return products.filter(p => p.nome)
   }
 
+  // Submete o formulário no modo single ou bulk conforme selecionado
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -240,6 +254,7 @@ export function CreateProductModal({
     }
   }
 
+  // Valida e registra o arquivo selecionado (apenas xlsx, xls ou csv)
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -293,6 +308,7 @@ export function CreateProductModal({
     onClose()
   }
 
+  // Não renderiza nada enquanto o modal estiver fechado
   if (!isOpen) return null
 
   return (

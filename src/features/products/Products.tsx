@@ -1,94 +1,19 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Table, TableColumn } from '../../shared/components/Table'
-import { 
-  FaSearch, 
-  FaPlus,
-  FaLaptop,
-  FaMouse,
-  FaHeadphones,
-  FaHdd,
-  FaMemory,
-  FaChair,
-  FaPrint,
-  FaSprayCan,
-  FaUtensils,
-  FaTshirt,
-  FaBox
-} from 'react-icons/fa'
+import { FaSearch, FaPlus } from 'react-icons/fa'
 import { EditProductModal } from './EditProductModal'
 import { CreateProductModal } from './CreateProductModal'
 import { listProducts, createProduct, updateProduct, deleteProduct } from './products.service'
 import { listCategories } from '../categories/categories.service'
 import { listLocalizacoes } from '../location/location.service'
-import type { Product as ProductDomain } from './products.types'
 import type { Category } from '../categories/categories.types'
 import { useIsMobile } from '../../shared/utils/useIsMobile'
 import { useToast } from '../../shared/contexts/toast/useToast'
+import { isAbortError } from '../../shared/utils/isAbortError'
+import { getCategoryIcon } from '../../shared/utils/getCategoryIcon'
+import { mapProductFromDomain, type Product } from './products.utils'
 import ProductsMobile from './ProductsMobile'
 import './Products.sass'
-import { isAbortError } from '../../shared/utils/isAbortError'
-
-interface Product {
-  id: string
-  nome: string
-  categoria: string
-  categoriaIcon?: string // icon_name da categoria
-  quantidade: number
-  estoqueMinimo: number
-  localizacao: string
-  status: 'ok' | 'baixo' | 'vazio'
-  imagem?: string
-}
-
-const mapProductFromDomain = (product: ProductDomain, categories: Category[], locations: Array<{ id: string; nome: string }>): Product => {
-  const category = categories.find(c => c.uuid === product.category_id)
-  const location = locations.find(l => l.id === product.location_id)
-  
-  return {
-    id: product.uuid,
-    nome: product.name,
-    categoria: category?.name || 'Sem categoria',
-    categoriaIcon: category?.icon_name || undefined,
-    quantidade: product.quantity,
-    estoqueMinimo: product.minimum_stock,
-    localizacao: location?.nome || 'Sem localização',
-    status: product.stock_status === 'empty' ? 'vazio' : product.stock_status === 'low' ? 'baixo' : 'ok',
-    imagem: product.image || undefined
-  }
-}
-
-/**
- * Retorna o ícone apropriado baseado no icon_name da categoria
- */
-const getCategoryIcon = (iconName?: string) => {
-  if (!iconName) {
-    return <FaBox size={32} />
-  }
-  
-  const iconNameLower = iconName.toLowerCase()
-  
-  const iconMap: Record<string, React.ReactNode> = {
-    'laptop': <FaLaptop size={32} />,
-    'mouse': <FaMouse size={32} />,
-    'headphones': <FaHeadphones size={32} />,
-    'hdd': <FaHdd size={32} />,
-    'memory': <FaMemory size={32} />,
-    'chair': <FaChair size={32} />,
-    'print': <FaPrint size={32} />,
-    'spray': <FaSprayCan size={32} />,
-    'spraycan': <FaSprayCan size={32} />,
-    'utensils': <FaUtensils size={32} />,
-    'tshirt': <FaTshirt size={32} />,
-    'box': <FaBox size={32} />,
-    'electronics': <FaLaptop size={32} />,
-    'computer': <FaLaptop size={32} />,
-    'furniture': <FaChair size={32} />,
-    'office': <FaPrint size={32} />,
-    'cleaning': <FaSprayCan size={32} />
-  }
-  
-  return iconMap[iconNameLower] || <FaBox size={32} />
-}
 
 /**
  * Componente para exibir imagem do produto ou ícone da categoria

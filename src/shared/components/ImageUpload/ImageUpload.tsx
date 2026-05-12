@@ -10,7 +10,7 @@ interface ImageUploadProps {
   onImageUploaded: (url: string) => void
   /** Callback quando a imagem for removida */
   onImageRemoved: () => void
-  /** Pasta no Firebase Storage */
+  /** Pasta no Cloudinary */
   folder?: string
   /** Se está desabilitado */
   disabled?: boolean

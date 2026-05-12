@@ -121,6 +121,14 @@ export const reportsEndpoints = {
 } as const;
 
 /**
+ * Endpoints de Uploads
+ * Requerem autenticação
+ */
+export const uploadsEndpoints = {
+  image: () => '/uploads/image',
+} as const;
+
+/**
  * Objeto centralizado com todos os endpoints
  */
 export const endpoints = {
@@ -132,4 +140,5 @@ export const endpoints = {
   history: historyEndpoints,
   dashboard: dashboardEndpoints,
   reports: reportsEndpoints,
+  uploads: uploadsEndpoints,
 } as const;

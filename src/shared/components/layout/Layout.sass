@@ -1,14 +1,17 @@
 @use '../../styles/variables' as *
 
 .layout
-  min-height: 100vh
+  height: 100vh
+  overflow: hidden
   background-color: $primary-50
 
   &__main
     margin-left: $sidebar-width-collapsed
     margin-top: $header-height
     padding: 0
-    min-height: calc(100vh - #{$header-height})
+    height: calc(100vh - #{$header-height})
+    overflow-y: auto
+    overflow-x: hidden
     background-color: $primary-50
     transition: margin-left $transition-slow
 

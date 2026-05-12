@@ -24,8 +24,8 @@
   border-radius: $radius-xl
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3)
   width: 100%
-  max-width: 600px
-  max-height: 90vh
+  max-width: 520px
+  max-height: 92vh
   display: flex
   flex-direction: column
   overflow: hidden
@@ -39,7 +39,7 @@
     display: flex
     align-items: center
     justify-content: space-between
-    padding: $spacing-xl
+    padding: $spacing-xl $spacing-xl $spacing-lg
     border-bottom: 1px solid $gray-200
     background: linear-gradient(135deg, $gray-50 0%, $white 100%)
     flex-shrink: 0
@@ -75,7 +75,7 @@
   &__form
     display: flex
     flex-direction: column
-    height: 100%
+    flex: 1
     min-height: 0
 
   &__content
@@ -83,17 +83,16 @@
     overflow-y: auto
     flex: 1
     min-height: 0
+    display: flex
+    flex-direction: column
+    gap: $spacing-lg
 
     @include modal-content-mobile
 
   &__form-group
     display: flex
     flex-direction: column
-    gap: $spacing-md
-    margin-bottom: $spacing-lg
-
-    &:last-child
-      margin-bottom: 0
+    gap: $spacing-sm
 
     @include modal-form-group-mobile
 
@@ -124,85 +123,106 @@
 
     @include modal-input-mobile
 
+  // ── Group select ─────────────────────────────────────────────────────────────
+
+  &__group-select
+    width: 100%
+    padding: $spacing-md $spacing-lg
+    border: 1px solid $gray-300
+    border-radius: $radius-lg
+    @include text-base
+    color: $gray-900
+    background-color: $white
+    outline: none
+    cursor: pointer
+    transition: all $transition-base
+    appearance: auto
+
+    &:focus
+      border-color: $primary-500
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1)
+
+    &:hover
+      border-color: $primary-400
+
+  // ── Icon grid ────────────────────────────────────────────────────────────────
+
   &__icon-grid
     display: grid
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr))
-    gap: $spacing-md
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr))
+    gap: $spacing-sm
 
     @media (max-width: 767px)
       grid-template-columns: repeat(4, 1fr)
-      gap: $spacing-sm
 
-  &__icon-option
+  &__icon-item
     display: flex
     flex-direction: column
     align-items: center
-    gap: $spacing-xs
-    padding: $spacing-md
-    border: 2px solid $gray-200
+    gap: 6px
+    padding: $spacing-sm $spacing-xs
+    border: 1.5px solid $gray-200
     border-radius: $radius-lg
     background-color: $white
     cursor: pointer
     transition: all $transition-base
-    min-height: 44px
-
-    @media (max-width: 767px)
-      padding: $spacing-sm
-      min-height: 64px
+    color: $gray-600
 
     &:hover
       border-color: $primary-400
       background-color: $primary-50
-      transform: translateY(-2px)
-      box-shadow: $shadow-md
-
-    &:active
-      transform: translateY(0)
+      color: $primary-600
+      transform: translateY(-1px)
+      box-shadow: $shadow-sm
 
     &--selected
       border-color: $primary-500
       background-color: $primary-100
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15), 0 4px 12px rgba(37, 99, 235, 0.2)
+      color: $primary-700
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15)
 
-      .create-category-modal__icon-wrapper
-        color: $primary-700
-
-  &__icon-wrapper
+  &__icon-item-icon
     display: flex
     align-items: center
     justify-content: center
-    width: 48px
-    height: 48px
-    border-radius: $radius-md
-    background-color: $gray-50
-    color: $gray-600
-    transition: all $transition-base
 
-    @media (max-width: 767px)
-      width: 36px
-      height: 36px
-
-    .create-category-modal__icon-option--selected &,
-    .create-category-modal__icon-option:hover &
-      background-color: $primary-50
-      color: $primary-600
-
-  &__icon-label
+  &__icon-item-label
     @include text-xs
     font-weight: $font-weight-medium
-    color: $gray-700
     text-align: center
+    line-height: 1.2
+    color: inherit
 
-    .create-category-modal__icon-option--selected &
-      color: $primary-700
-      font-weight: $font-weight-semibold
+  // ── Selected preview ─────────────────────────────────────────────────────────
+
+  &__icon-preview
+    display: flex
+    align-items: center
+    gap: $spacing-sm
+    padding: $spacing-sm $spacing-md
+    background-color: $primary-50
+    border: 1px solid $primary-200
+    border-radius: $radius-lg
+    color: $primary-700
+
+  &__icon-preview-icon
+    display: flex
+    align-items: center
+    justify-content: center
+    flex-shrink: 0
+
+  &__icon-preview-text
+    @include text-sm
+    font-weight: $font-weight-medium
+
+  // ── Footer ───────────────────────────────────────────────────────────────────
 
   &__footer
     display: flex
     align-items: center
     justify-content: flex-end
     gap: $spacing-md
-    padding: $spacing-xl
+    padding: $spacing-lg $spacing-xl
     border-top: 1px solid $gray-200
     background-color: $gray-50
     flex-shrink: 0

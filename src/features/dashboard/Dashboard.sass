@@ -1,18 +1,18 @@
 @use '../../shared/styles/variables' as *
 @use '../../shared/styles/mixins' as *
 
-// ── Layout ────────────────────────────────────────────────
+// ── Layout ────────────────────────────────────────────────────────────────────
 .db
-  padding: $spacing-xl $spacing-xl $spacing-2xl
+  padding: $spacing-md $spacing-xl $spacing-lg
   display: flex
   flex-direction: column
-  gap: $spacing-xl
+  gap: $spacing-md
   min-height: 100%
   background: $gray-50
 
   &__header
     display: flex
-    align-items: center
+    align-items: flex-start
     justify-content: space-between
 
   &__title
@@ -26,20 +26,38 @@
     color: $gray-500
     margin: 4px 0 0
 
+  &__date
+    font-size: $font-size-sm
+    color: $gray-400
+    font-weight: $font-weight-medium
+    background: $white
+    border: 1px solid $gray-200
+    padding: $spacing-xs $spacing-md
+    border-radius: $radius-full
+    white-space: nowrap
+    margin-top: 4px
+
   &__empty
     padding: $spacing-xl
     text-align: center
     color: $gray-400
     font-size: $font-size-sm
+    display: flex
+    flex-direction: column
+    align-items: center
+    gap: $spacing-sm
 
-// ── Skeleton ──────────────────────────────────────────────
+    svg
+      opacity: 0.3
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
   &__skeleton
     display: grid
-    grid-template-columns: repeat(3, 1fr)
+    grid-template-columns: repeat(4, 1fr)
     gap: $spacing-lg
 
   &__skeleton-card
-    height: 96px
+    height: 100px
     background: $gray-200
     border-radius: $radius-lg
     animation: db-pulse 1.4s ease-in-out infinite
@@ -48,80 +66,51 @@
   0%, 100%
     opacity: 1
   50%
-    opacity: 0.5
+    opacity: 0.4
 
-// ── Stat Cards ────────────────────────────────────────────
+// ── Stat Cards ────────────────────────────────────────────────────────────────
 .db__cards
   display: grid
-  grid-template-columns: repeat(3, 1fr)
-  gap: $spacing-lg
+  grid-template-columns: repeat(4, 1fr)
+  gap: $spacing-md
+
+  @media (max-width: 1100px)
+    grid-template-columns: repeat(2, 1fr)
 
 .db-card
   background: $white
-  border-radius: $radius-lg
-  padding: $spacing-lg $spacing-xl
+  border-radius: $radius-xl
+  padding: $spacing-sm $spacing-lg
   display: flex
   align-items: center
-  gap: $spacing-lg
+  gap: $spacing-md
   box-shadow: $shadow-sm
   border: 1px solid $gray-200
   position: relative
   overflow: hidden
-  transition: box-shadow 0.2s
+  transition: box-shadow $transition-base, transform $transition-base
 
   &:hover
     box-shadow: $shadow-md
-
-  &::before
-    content: ''
-    position: absolute
-    left: 0
-    top: 0
-    bottom: 0
-    width: 4px
-    border-radius: $radius-lg 0 0 $radius-lg
-
-  &--blue::before
-    background: $primary-500
-
-  &--orange::before
-    background: $warning
-
-  &--teal::before
-    background: $success
+    transform: translateY(-2px)
 
   &__icon
     width: 48px
     height: 48px
-    border-radius: $radius-md
+    border-radius: $radius-lg
     display: flex
     align-items: center
     justify-content: center
     flex-shrink: 0
+    position: relative
+    z-index: 1
 
-  &--blue &__icon
-    background: rgba(20, 184, 166, 0.1)
-    color: $primary-500
-
-  &--orange &__icon
-    background: rgba(245, 158, 11, 0.1)
-    color: $warning
-
-  &--teal &__icon
-    background: rgba(16, 185, 129, 0.1)
-    color: $success
-
-  &__info
+  &__body
     display: flex
     flex-direction: column
     gap: 2px
-
-  &__label
-    font-size: $font-size-xs
-    font-weight: $font-weight-medium
-    color: $gray-500
-    text-transform: uppercase
-    letter-spacing: 0.05em
+    position: relative
+    z-index: 1
 
   &__value
     font-size: $font-size-2xl
@@ -129,108 +118,183 @@
     color: $gray-900
     line-height: 1
 
-// ── Middle grid ───────────────────────────────────────────
+  &__label
+    font-size: $font-size-xs
+    color: $gray-500
+    font-weight: $font-weight-medium
+
+  &__ghost
+    position: absolute
+    right: -8px
+    bottom: -8px
+    opacity: 0.06
+    font-size: 72px
+    line-height: 1
+    display: flex
+    align-items: center
+    justify-content: center
+
+    svg
+      width: 72px
+      height: 72px
+
+  // Variantes
+  &--blue
+    border-top: 3px solid $primary-500
+
+    .db-card__icon
+      background: rgba(20, 184, 166, 0.12)
+      color: $primary-500
+
+    .db-card__ghost
+      color: $primary-500
+
+  &--orange
+    border-top: 3px solid $warning
+
+    .db-card__icon
+      background: rgba(245, 158, 11, 0.12)
+      color: $warning
+
+    .db-card__ghost
+      color: $warning
+
+  &--purple
+    border-top: 3px solid $secondary-500
+
+    .db-card__icon
+      background: rgba(99, 102, 241, 0.12)
+      color: $secondary-500
+
+    .db-card__ghost
+      color: $secondary-500
+
+  &--teal
+    border-top: 3px solid $success
+
+    .db-card__icon
+      background: rgba(16, 185, 129, 0.12)
+      color: $success
+
+    .db-card__ghost
+      color: $success
+
+// ── Middle grid ───────────────────────────────────────────────────────────────
 .db__middle
   display: grid
-  grid-template-columns: 1fr 1.4fr
-  gap: $spacing-xl
+  grid-template-columns: 1fr 1.5fr
+  gap: $spacing-md
 
-// ── Panel ─────────────────────────────────────────────────
+  @media (max-width: 1100px)
+    grid-template-columns: 1fr
+
+// ── Panel ─────────────────────────────────────────────────────────────────────
 .db-panel
   background: $white
-  border-radius: $radius-lg
+  border-radius: $radius-xl
   border: 1px solid $gray-200
-  padding: $spacing-xl
+  padding: $spacing-md $spacing-xl
   box-shadow: $shadow-sm
+
+  &__header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-bottom: $spacing-md
+    gap: $spacing-md
 
   &__title
     font-size: $font-size-base
     font-weight: $font-weight-semibold
     color: $gray-800
-    margin: 0 0 $spacing-lg
+    margin: 0
 
-// ── Donut ─────────────────────────────────────────────────
-.db-donut-row
+  &__subtitle
+    font-size: $font-size-xs
+    color: $gray-400
+    font-weight: $font-weight-medium
+
+  &__count
+    font-size: $font-size-xs
+    font-weight: $font-weight-semibold
+    color: $gray-500
+    background: $gray-100
+    padding: 2px $spacing-sm
+    border-radius: $radius-full
+
+// ── Health card ───────────────────────────────────────────────────────────────
+.db-health
   display: flex
   align-items: center
   gap: $spacing-xl
-  margin-bottom: $spacing-xl
 
-.db-donut
-  width: 120px
-  height: 120px
-  flex-shrink: 0
-
-.db-donut-legend
-  display: flex
-  flex-direction: column
-  gap: $spacing-sm
-  flex: 1
-
-  &__item
-    display: flex
-    align-items: center
-    gap: $spacing-sm
-
-  &__dot
-    width: 10px
-    height: 10px
-    border-radius: $radius-full
+  &__donut-wrap
     flex-shrink: 0
+    width: 110px
+    height: 110px
+
+  &__donut
+    width: 100%
+    height: 100%
+
+  &__rows
+    flex: 1
+    display: flex
+    flex-direction: column
+    gap: 6px
+
+  &__row
+    padding: $spacing-sm $spacing-md
+    border-radius: $radius-lg
+    border-left: 3px solid transparent
 
     &--ok
-      background: $success
+      border-left-color: $success
+      background: rgba(16, 185, 129, 0.05)
 
     &--baixo
-      background: $warning
+      border-left-color: $warning
+      background: rgba(245, 158, 11, 0.05)
 
     &--vazio
-      background: $error
+      border-left-color: $error
+      background: rgba(239, 68, 68, 0.05)
 
-  &__label
-    font-size: $font-size-sm
-    color: $gray-600
-    flex: 1
-
-  &__val
-    font-size: $font-size-sm
-    font-weight: $font-weight-semibold
-    color: $gray-900
-
-// ── Bars ──────────────────────────────────────────────────
-.db-bars
-  display: flex
-  flex-direction: column
-  gap: $spacing-md
-
-.db-bar
-  &__meta
+  &__row-top
     display: flex
+    align-items: baseline
     justify-content: space-between
-    margin-bottom: 4px
+    margin-bottom: 6px
 
-  &__label
+  &__row-label
     font-size: $font-size-xs
     font-weight: $font-weight-medium
     color: $gray-600
 
-  &__stats
+  &__row-right
+    display: flex
+    align-items: baseline
+    gap: $spacing-xs
+
+  &__row-count
+    font-size: $font-size-base
+    font-weight: $font-weight-bold
+    color: $gray-900
+
+  &__row-pct
     font-size: $font-size-xs
-    color: $gray-500
+    color: $gray-400
 
-    small
-      color: $gray-400
-
-  &__track
-    height: 8px
-    background: $gray-100
+  &__row-track
+    height: 5px
+    background: rgba(0, 0, 0, 0.07)
     border-radius: $radius-full
     overflow: hidden
 
-  &__fill
+  &__row-fill
     height: 100%
     border-radius: $radius-full
-    transition: width 0.6s ease
+    transition: width 0.7s ease
 
     &--ok
       background: $success
@@ -241,18 +305,31 @@
     &--vazio
       background: $error
 
-// ── Alert list ────────────────────────────────────────────
+// ── Alert panel ───────────────────────────────────────────────────────────────
+.db-alert-badge
+  display: inline-flex
+  align-items: center
+  justify-content: center
+  min-width: 22px
+  height: 22px
+  padding: 0 6px
+  background: $error
+  color: $white
+  font-size: $font-size-xs
+  font-weight: $font-weight-bold
+  border-radius: $radius-full
+
 .db-alert-empty
   display: flex
   flex-direction: column
   align-items: center
   justify-content: center
   gap: $spacing-sm
-  padding: $spacing-xl
+  padding: $spacing-xl 0
   color: $success
 
-  span
-    font-size: 32px
+  svg
+    opacity: 0.5
 
   p
     font-size: $font-size-sm
@@ -262,60 +339,93 @@
 .db-alert-list
   display: flex
   flex-direction: column
-  gap: $spacing-sm
+  gap: 4px
 
 .db-alert-item
   display: flex
   align-items: center
-  justify-content: space-between
+  gap: $spacing-sm
   padding: $spacing-sm $spacing-md
-  border-radius: $radius-md
+  border-radius: $radius-lg
   border-left: 3px solid
+  transition: background $transition-fast
 
   &--baixo
-    background: rgba(245, 158, 11, 0.05)
+    background: rgba(245, 158, 11, 0.04)
     border-color: $warning
 
+    &:hover
+      background: rgba(245, 158, 11, 0.08)
+
   &--vazio
-    background: rgba(239, 68, 68, 0.05)
+    background: rgba(239, 68, 68, 0.04)
     border-color: $error
 
+    &:hover
+      background: rgba(239, 68, 68, 0.08)
+
+  &__avatar
+    width: 32px
+    height: 32px
+    border-radius: $radius-md
+    display: flex
+    align-items: center
+    justify-content: center
+    font-size: $font-size-sm
+    font-weight: $font-weight-bold
+    flex-shrink: 0
+
+    &--baixo
+      background: rgba(245, 158, 11, 0.15)
+      color: darken(#F59E0B, 10%)
+
+    &--vazio
+      background: rgba(239, 68, 68, 0.12)
+      color: darken(#EF4444, 10%)
+
   &__info
+    flex: 1
     display: flex
     flex-direction: column
-    gap: 2px
+    gap: 1px
+    min-width: 0
 
   &__name
     font-size: $font-size-sm
     font-weight: $font-weight-medium
     color: $gray-800
+    white-space: nowrap
+    overflow: hidden
+    text-overflow: ellipsis
 
   &__cat
     font-size: $font-size-xs
-    color: $gray-500
+    color: $gray-400
 
   &__right
     display: flex
     align-items: center
     gap: $spacing-sm
+    flex-shrink: 0
 
   &__qty
     font-size: $font-size-sm
     font-weight: $font-weight-semibold
-    color: $gray-700
+    color: $gray-600
 
 .db-alert-more
   font-size: $font-size-xs
   color: $gray-400
   text-align: center
   margin: $spacing-xs 0 0
+  font-style: italic
 
-// ── Badges ────────────────────────────────────────────────
+// ── Badges ────────────────────────────────────────────────────────────────────
 .db-badge
   display: inline-flex
   align-items: center
   gap: 4px
-  padding: 2px $spacing-sm
+  padding: 3px $spacing-sm
   border-radius: $radius-full
   font-size: $font-size-xs
   font-weight: $font-weight-semibold
@@ -325,22 +435,10 @@
     color: $success
 
   &--baixo
-    background: rgba(245, 158, 11, 0.1)
-    color: $warning
+    background: rgba(245, 158, 11, 0.12)
+    color: #d97706
 
   &--vazio
     background: rgba(239, 68, 68, 0.1)
     color: $error
 
-// ── Qty cell ──────────────────────────────────────────────
-.db-qty
-  font-weight: $font-weight-semibold
-
-  &--ok
-    color: $success
-
-  &--baixo
-    color: $warning
-
-  &--vazio
-    color: $error

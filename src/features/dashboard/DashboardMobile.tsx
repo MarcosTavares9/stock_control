@@ -3,7 +3,7 @@ import { getDashboardStats, getLowStockProducts } from './dashboard.service'
 import { listCategories } from '../categories/categories.service'
 import type { LowStockProduct } from './dashboard.types'
 import type { Category } from '../categories/categories.types'
-import { FaBox, FaExclamationTriangle, FaCubes } from 'react-icons/fa'
+import { FaBox, FaExclamationTriangle, FaLayerGroup, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa'
 import './DashboardMobile.sass'
 
 interface ProductDisplay {
@@ -21,7 +21,7 @@ function DashboardMobile() {
     totalCategories: 0,
     totalLocations: 0,
     lowStockProducts: 0,
-    emptyStockProducts: 0
+    emptyStockProducts: 0,
   })
   const [lowStockProducts, setLowStockProducts] = useState<LowStockProduct[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -34,180 +34,163 @@ function DashboardMobile() {
         const [statsData, lowStockData, categoriesData] = await Promise.all([
           getDashboardStats(),
           getLowStockProducts(),
-          listCategories()
+          listCategories(),
         ])
-        
         setStats(statsData)
         setLowStockProducts(Array.isArray(lowStockData) ? lowStockData : [])
         setCategories(categoriesData)
-      } catch (error) {
+      } catch {
         setLowStockProducts([])
         setCategories([])
       } finally {
         setLoading(false)
       }
     }
-
     loadData()
   }, [])
 
   const products: ProductDisplay[] = useMemo(() => {
     if (!Array.isArray(lowStockProducts) || lowStockProducts.length === 0) return []
-    
     const categoryMap = new Map(categories.map(c => [c.uuid, c.name]))
-    
-    return lowStockProducts.map(product => ({
-      id: product.uuid,
-      nome: product.name,
-      categoria: categoryMap.get(product.category_id) || 'Sem categoria',
-      quantidade: product.quantity,
-      estoqueMinimo: product.minimum_stock,
-      status: product.stock_status === 'empty' ? 'vazio' as const : product.stock_status === 'low' ? 'baixo' as const : 'ok' as const
+    return lowStockProducts.map(p => ({
+      id: p.uuid,
+      nome: p.name,
+      categoria: categoryMap.get(p.category_id) || 'Sem categoria',
+      quantidade: p.quantity,
+      estoqueMinimo: p.minimum_stock,
+      status: p.stock_status === 'empty' ? 'vazio' : p.stock_status === 'low' ? 'baixo' : 'ok',
     }))
   }, [lowStockProducts, categories])
 
-  const estatisticas = useMemo(() => {
-    const totalEstoque = products.reduce((sum, p) => sum + p.quantidade, 0)
+  const statusData = useMemo(() => {
+    const ok = Math.max(0, stats.totalProducts - stats.lowStockProducts - stats.emptyStockProducts)
+    const total = stats.totalProducts || 1
     return {
-      totalProdutos: stats.totalProducts,
-      produtosBaixoEstoque: stats.lowStockProducts + stats.emptyStockProducts,
-      totalEstoque
+      ok,
+      baixo: stats.lowStockProducts,
+      vazio: stats.emptyStockProducts,
+      total: stats.totalProducts,
+      pctOk: Math.round((ok / total) * 100),
+      pctBaixo: Math.round((stats.lowStockProducts / total) * 100),
+      pctVazio: Math.round((stats.emptyStockProducts / total) * 100),
     }
-  }, [stats, products])
-
-  const estatisticasPorStatus = useMemo(() => {
-    const ok = stats.totalProducts - stats.lowStockProducts - stats.emptyStockProducts
-    const baixo = stats.lowStockProducts
-    const vazio = stats.emptyStockProducts
-    return { ok, baixo, vazio, total: stats.totalProducts }
   }, [stats])
 
-  const produtosBaixoEVazio = useMemo(() => {
-    return [...products].sort((a, b) => {
+  const alertas = useMemo(() =>
+    [...products].sort((a, b) => {
       if (a.status === 'vazio' && b.status !== 'vazio') return -1
       if (a.status !== 'vazio' && b.status === 'vazio') return 1
       return a.quantidade - b.quantidade
-    })
-  }, [products])
-
-  const statusLabels: Record<string, string> = { ok: 'Ok', baixo: 'Baixo', vazio: 'Vazio' }
+    }),
+    [products]
+  )
 
   if (loading) {
     return (
-      <div className="dashboard-mobile">
-        <div className="dashboard-mobile__loading">
-          <p>Carregando dados...</p>
+      <div className="dbm">
+        <div className="dbm__skeleton">
+          {[...Array(4)].map((_, i) => <div key={i} className="dbm__skeleton-card" />)}
         </div>
       </div>
     )
   }
 
   return (
-    <div className="dashboard-mobile">
-      {/* Cards de Estatísticas */}
-      <div className="dashboard-mobile__stats">
-        <div className="dashboard-mobile__stat-card">
-          <div className="dashboard-mobile__stat-icon dashboard-mobile__stat-icon--primary">
-            <FaBox size={18} />
-          </div>
-          <div className="dashboard-mobile__stat-info">
-            <span className="dashboard-mobile__stat-label">Total Produtos</span>
-            <span className="dashboard-mobile__stat-value">{estatisticas.totalProdutos}</span>
-          </div>
-        </div>
+    <div className="dbm">
 
-        <div className="dashboard-mobile__stat-card">
-          <div className="dashboard-mobile__stat-icon dashboard-mobile__stat-icon--warning">
-            <FaExclamationTriangle size={18} />
-          </div>
-          <div className="dashboard-mobile__stat-info">
-            <span className="dashboard-mobile__stat-label">Estoque Baixo</span>
-            <span className="dashboard-mobile__stat-value">{estatisticas.produtosBaixoEstoque}</span>
-          </div>
+      {/* 4 Stat cards in 2×2 grid */}
+      <div className="dbm__cards">
+        <div className="dbm__card dbm__card--blue">
+          <div className="dbm__card-icon"><FaBox size={16} /></div>
+          <span className="dbm__card-value">{stats.totalProducts}</span>
+          <span className="dbm__card-label">Produtos</span>
         </div>
-
-        <div className="dashboard-mobile__stat-card">
-          <div className="dashboard-mobile__stat-icon dashboard-mobile__stat-icon--success">
-            <FaCubes size={18} />
-          </div>
-          <div className="dashboard-mobile__stat-info">
-            <span className="dashboard-mobile__stat-label">Total Estoque</span>
-            <span className="dashboard-mobile__stat-value">{estatisticas.totalEstoque.toLocaleString('pt-BR')}</span>
-          </div>
+        <div className="dbm__card dbm__card--orange">
+          <div className="dbm__card-icon"><FaExclamationTriangle size={16} /></div>
+          <span className="dbm__card-value">{stats.lowStockProducts + stats.emptyStockProducts}</span>
+          <span className="dbm__card-label">Atenção</span>
+        </div>
+        <div className="dbm__card dbm__card--purple">
+          <div className="dbm__card-icon"><FaLayerGroup size={16} /></div>
+          <span className="dbm__card-value">{stats.totalCategories}</span>
+          <span className="dbm__card-label">Categorias</span>
+        </div>
+        <div className="dbm__card dbm__card--teal">
+          <div className="dbm__card-icon"><FaMapMarkerAlt size={16} /></div>
+          <span className="dbm__card-value">{stats.totalLocations}</span>
+          <span className="dbm__card-label">Locais</span>
         </div>
       </div>
 
-      {/* Gráfico por Status */}
-      <div className="dashboard-mobile__chart-card">
-        <h2 className="dashboard-mobile__section-title">Produtos por Status</h2>
-        <div className="dashboard-mobile__chart">
-          <div className="dashboard-mobile__chart-item">
-            <div className="dashboard-mobile__chart-row">
-              <span className="dashboard-mobile__chart-label">Estoque Ok</span>
-              <span className="dashboard-mobile__chart-value">{estatisticasPorStatus.ok}</span>
-            </div>
-            <div className="dashboard-mobile__bar-bg">
-              <div 
-                className="dashboard-mobile__bar dashboard-mobile__bar--ok"
-                style={{ width: `${estatisticasPorStatus.total > 0 ? (estatisticasPorStatus.ok / estatisticasPorStatus.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-          <div className="dashboard-mobile__chart-item">
-            <div className="dashboard-mobile__chart-row">
-              <span className="dashboard-mobile__chart-label">Estoque Baixo</span>
-              <span className="dashboard-mobile__chart-value">{estatisticasPorStatus.baixo}</span>
-            </div>
-            <div className="dashboard-mobile__bar-bg">
-              <div 
-                className="dashboard-mobile__bar dashboard-mobile__bar--baixo"
-                style={{ width: `${estatisticasPorStatus.total > 0 ? (estatisticasPorStatus.baixo / estatisticasPorStatus.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-          <div className="dashboard-mobile__chart-item">
-            <div className="dashboard-mobile__chart-row">
-              <span className="dashboard-mobile__chart-label">Estoque Vazio</span>
-              <span className="dashboard-mobile__chart-value">{estatisticasPorStatus.vazio}</span>
-            </div>
-            <div className="dashboard-mobile__bar-bg">
-              <div 
-                className="dashboard-mobile__bar dashboard-mobile__bar--vazio"
-                style={{ width: `${estatisticasPorStatus.total > 0 ? (estatisticasPorStatus.vazio / estatisticasPorStatus.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
+      {/* Saúde do Estoque */}
+      <div className="dbm__panel">
+        <div className="dbm__panel-header">
+          <h2 className="dbm__panel-title">Saúde do Estoque</h2>
+          <span className="dbm__panel-sub">{statusData.total} produtos</span>
         </div>
-      </div>
 
-      {/* Lista de Produtos com Estoque Baixo */}
-      <div className="dashboard-mobile__list-section">
-        <h2 className="dashboard-mobile__section-title">Estoque Baixo e Vazio</h2>
-        {produtosBaixoEVazio.length > 0 ? (
-          <div className="dashboard-mobile__product-list">
-            {produtosBaixoEVazio.map(product => (
-              <div key={product.id} className="dashboard-mobile__product-card">
-                <div className="dashboard-mobile__product-info">
-                  <span className="dashboard-mobile__product-name">{product.nome}</span>
-                  <span className="dashboard-mobile__product-category">{product.categoria}</span>
+        <div className="dbm__health-rows">
+          {([
+            { label: 'Em estoque',    value: statusData.ok,    pct: statusData.pctOk,    v: 'ok'    },
+            { label: 'Estoque baixo', value: statusData.baixo, pct: statusData.pctBaixo, v: 'baixo' },
+            { label: 'Estoque vazio', value: statusData.vazio, pct: statusData.pctVazio, v: 'vazio' },
+          ] as const).map(item => (
+            <div key={item.v} className={`dbm__health-row dbm__health-row--${item.v}`}>
+              <div className="dbm__health-top">
+                <span className="dbm__health-label">{item.label}</span>
+                <div className="dbm__health-right">
+                  <span className="dbm__health-count">{item.value}</span>
+                  <span className="dbm__health-pct">{item.pct}%</span>
                 </div>
-                <div className="dashboard-mobile__product-stock">
-                  <span className="dashboard-mobile__product-qty">
-                    {product.quantidade}/{product.estoqueMinimo}
-                  </span>
-                  <span className={`dashboard-mobile__product-status dashboard-mobile__product-status--${product.status}`}>
-                    {statusLabels[product.status]}
+              </div>
+              <div className="dbm__health-track">
+                <div
+                  className={`dbm__health-fill dbm__health-fill--${item.v}`}
+                  style={{ width: `${item.pct > 0 ? Math.max(item.pct, 4) : 0}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Alertas */}
+      <div className="dbm__panel">
+        <div className="dbm__panel-header">
+          <h2 className="dbm__panel-title">Alertas</h2>
+          {alertas.length > 0 && (
+            <span className="dbm__alert-badge">{alertas.length}</span>
+          )}
+        </div>
+
+        {alertas.length === 0 ? (
+          <div className="dbm__empty">
+            <FaCheckCircle size={24} />
+            <p>Todos os produtos estão em dia</p>
+          </div>
+        ) : (
+          <div className="dbm__alert-list">
+            {alertas.map(p => (
+              <div key={p.id} className={`dbm__alert-item dbm__alert-item--${p.status}`}>
+                <div className={`dbm__alert-avatar dbm__alert-avatar--${p.status}`}>
+                  {p.nome.charAt(0).toUpperCase()}
+                </div>
+                <div className="dbm__alert-info">
+                  <span className="dbm__alert-name">{p.nome}</span>
+                  <span className="dbm__alert-cat">{p.categoria}</span>
+                </div>
+                <div className="dbm__alert-right">
+                  <span className="dbm__alert-qty">{p.quantidade} un</span>
+                  <span className={`dbm__badge dbm__badge--${p.status}`}>
+                    {p.status === 'vazio' ? 'Vazio' : 'Baixo'}
                   </span>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="dashboard-mobile__empty">
-            <p>Nenhum produto com estoque baixo</p>
-          </div>
         )}
       </div>
+
     </div>
   )
 }
